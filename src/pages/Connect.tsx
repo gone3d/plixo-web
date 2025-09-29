@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Button, Input, Icon, BackgroundSlideshow } from '../components/atoms'
+import { Button, Input, Icon } from '../components/atoms'
+import { BackgroundSlideshow } from '../components/molecules'
 
 const backgroundImages = [
   { filename: 'astronomyBG1.jpg' },
@@ -40,7 +41,6 @@ const Connect = () => {
       <BackgroundSlideshow
         images={backgroundImages}
         transitionTime={16000}
-        showOverlay={true}
         displayMode="slide"
       />
       <div className="relative z-10 max-w-4xl mx-auto py-20 px-4">
