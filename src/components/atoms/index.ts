@@ -11,4 +11,4 @@ export type { IconProps, IconName } from './Icon'
 export { default as LoadingSpinner, PulsingDots, Skeleton } from './LoadingSpinner'
 export type { LoadingSpinnerProps } from './LoadingSpinner'
 
-export { default as BackgroundSlideshow } from './BackgroundSlideshow'
+export { default as UIImage } from './UIImage'

@@ -1,4 +1,4 @@
-// Global Portfolio Context - Centralized state management
+// Global Context Provider - Centralized state management
 // Phase 2: Data tracking and state management
 
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
@@ -13,10 +13,10 @@ import type {
 import { tempConfig } from '../config/temp-data'
 
 /**
- * Portfolio State Interface
- * Centralized state for all portfolio data
+ * Global State Interface
+ * Centralized state for all application data
  */
-export interface PortfolioState {
+export interface GlobalState {
   // Data Loading States
   loading: {
     portfolio: boolean
@@ -76,13 +76,18 @@ export interface PortfolioState {
     downloadResume: boolean
     socialLinks: boolean
   }
+
+  // Development Configuration
+  development: {
+    dataSource: 'config' | 'api'
+  }
 }
 
 /**
- * Portfolio Actions
+ * Global Actions
  * All possible state mutations
  */
-export type PortfolioAction =
+export type GlobalAction =
   // Data Loading Actions
   | { type: 'LOAD_PORTFOLIO_START' }
   | { type: 'LOAD_PORTFOLIO_SUCCESS'; payload: PortfolioOverview }
@@ -109,7 +114,7 @@ export type PortfolioAction =
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_CURRENT_PAGE'; payload: string }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
-  | { type: 'SET_FILTERS'; payload: Partial<PortfolioState['ui']['filters']> }
+  | { type: 'SET_FILTERS'; payload: Partial<GlobalState['ui']['filters']> }
 
   // Analytics Actions
   | { type: 'ANALYTICS_SESSION_START'; payload: { sessionId: string; startTime: number } }
@@ -117,7 +122,10 @@ export type PortfolioAction =
   | { type: 'ANALYTICS_INTERACTION'; payload: { type: string; element?: string } }
 
   // Feature Flag Actions
-  | { type: 'UPDATE_FEATURES'; payload: Partial<PortfolioState['features']> }
+  | { type: 'UPDATE_FEATURES'; payload: Partial<GlobalState['features']> }
+
+  // Development Actions
+  | { type: 'SET_DATA_SOURCE'; payload: 'config' | 'api' }
 
   // Bulk Actions
   | { type: 'INITIALIZE_FROM_CONFIG'; payload: typeof tempConfig }
@@ -126,7 +134,7 @@ export type PortfolioAction =
 /**
  * Initial State
  */
-const initialState: PortfolioState = {
+const initialState: GlobalState = {
   loading: {
     portfolio: false,
     projects: false,
@@ -166,14 +174,18 @@ const initialState: PortfolioState = {
     contactForm: true,
     downloadResume: true,
     socialLinks: true
+  },
+
+  development: {
+    dataSource: 'config' // Default to config for development
   }
 }
 
 /**
- * Portfolio Reducer
+ * Global Reducer
  * Handles all state mutations
  */
-function portfolioReducer(state: PortfolioState, action: PortfolioAction): PortfolioState {
+function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
   switch (action.type) {
     // Portfolio Overview Actions
     case 'LOAD_PORTFOLIO_START':
@@ -370,6 +382,13 @@ function portfolioReducer(state: PortfolioState, action: PortfolioAction): Portf
         features: { ...state.features, ...action.payload }
       }
 
+    // Development Actions
+    case 'SET_DATA_SOURCE':
+      return {
+        ...state,
+        development: { ...state.development, dataSource: action.payload }
+      }
+
     // Bulk Actions
     case 'INITIALIZE_FROM_CONFIG':
       return {
@@ -401,11 +420,11 @@ function portfolioReducer(state: PortfolioState, action: PortfolioAction): Portf
 }
 
 /**
- * Portfolio Context
+ * Global Context
  */
-export interface PortfolioContextType {
-  state: PortfolioState
-  dispatch: React.Dispatch<PortfolioAction>
+export interface GlobalContextType {
+  state: GlobalState
+  dispatch: React.Dispatch<GlobalAction>
 
   // Convenience action creators
   actions: {
@@ -417,6 +436,7 @@ export interface PortfolioContextType {
     setTheme: (theme: 'light' | 'dark' | 'system') => void
     setCurrentPage: (page: string) => void
     trackInteraction: (type: string, element?: string) => void
+    setDataSource: (dataSource: 'config' | 'api') => void
     initializeFromTempConfig: () => void
   }
 
@@ -431,17 +451,17 @@ export interface PortfolioContextType {
   }
 }
 
-const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined)
+const GlobalContext = createContext<GlobalContextType | undefined>(undefined)
 
 /**
- * Portfolio Provider Component
+ * Global Provider Component
  */
-interface PortfolioProviderProps {
+interface GlobalProviderProps {
   children: ReactNode
 }
 
-export function PortfolioProvider({ children }: PortfolioProviderProps) {
-  const [state, dispatch] = useReducer(portfolioReducer, initialState)
+export function GlobalProvider({ children }: GlobalProviderProps) {
+  const [state, dispatch] = useReducer(globalReducer, initialState)
 
   // Action creators
   const actions = {
@@ -503,6 +523,10 @@ export function PortfolioProvider({ children }: PortfolioProviderProps) {
       dispatch({ type: 'ANALYTICS_INTERACTION', payload: { type, element } })
     },
 
+    setDataSource: (dataSource: 'config' | 'api') => {
+      dispatch({ type: 'SET_DATA_SOURCE', payload: dataSource })
+    },
+
     initializeFromTempConfig: () => {
       dispatch({ type: 'INITIALIZE_FROM_CONFIG', payload: tempConfig })
     }
@@ -552,7 +576,7 @@ export function PortfolioProvider({ children }: PortfolioProviderProps) {
     }
   }, [state.features.realTimeAnalytics])
 
-  const contextValue: PortfolioContextType = {
+  const contextValue: GlobalContextType = {
     state,
     dispatch,
     actions,
@@ -560,19 +584,19 @@ export function PortfolioProvider({ children }: PortfolioProviderProps) {
   }
 
   return (
-    <PortfolioContext.Provider value={contextValue}>
+    <GlobalContext.Provider value={contextValue}>
       {children}
-    </PortfolioContext.Provider>
+    </GlobalContext.Provider>
   )
 }
 
 /**
- * Custom hook to use Portfolio context
+ * Custom hook to use Global context
  */
-export function usePortfolio() {
-  const context = useContext(PortfolioContext)
+export function useGlobal() {
+  const context = useContext(GlobalContext)
   if (context === undefined) {
-    throw new Error('usePortfolio must be used within a PortfolioProvider')
+    throw new Error('useGlobal must be used within a GlobalProvider')
   }
   return context
 }
@@ -581,7 +605,7 @@ export function usePortfolio() {
  * Custom hooks for specific data slices
  */
 export function useProjects() {
-  const { state, selectors } = usePortfolio()
+  const { state, selectors } = useGlobal()
   return {
     projects: state.data.projects,
     featuredProjects: selectors.getFeaturedProjects(),
@@ -592,7 +616,7 @@ export function useProjects() {
 }
 
 export function useExperiences() {
-  const { state, selectors } = usePortfolio()
+  const { state, selectors } = useGlobal()
   return {
     experiences: state.data.experiences,
     currentExperience: selectors.getCurrentExperience(),
@@ -602,7 +626,7 @@ export function useExperiences() {
 }
 
 export function useSkills() {
-  const { state, selectors } = usePortfolio()
+  const { state, selectors } = useGlobal()
   return {
     skills: state.data.skills,
     loading: state.loading.skills,
@@ -612,7 +636,7 @@ export function useSkills() {
 }
 
 export function useAnalytics() {
-  const { state, actions } = usePortfolio()
+  const { state, actions } = useGlobal()
   return {
     analytics: state.analytics,
     trackInteraction: actions.trackInteraction,
@@ -621,9 +645,94 @@ export function useAnalytics() {
 }
 
 export function useTheme() {
-  const { state, actions } = usePortfolio()
+  const { state, actions } = useGlobal()
   return {
     theme: state.ui.theme,
     setTheme: actions.setTheme
+  }
+}
+
+export function useDevelopment() {
+  const { state, actions } = useGlobal()
+  return {
+    dataSource: state.development.dataSource,
+    setDataSource: actions.setDataSource,
+    isUsingConfig: state.development.dataSource === 'config',
+    isUsingAPI: state.development.dataSource === 'api'
+  }
+}
+
+export function useAppSettings() {
+  const { state, dispatch, actions } = useGlobal()
+  return {
+    // App configuration
+    appConfig: state.data.appConfig,
+
+    // Feature flags
+    features: state.features,
+    updateFeatures: (features: Partial<typeof state.features>) => {
+      dispatch({ type: 'UPDATE_FEATURES', payload: features })
+    },
+
+    // Theme settings
+    theme: state.ui.theme,
+    setTheme: actions.setTheme,
+
+    // Development settings
+    development: state.development,
+    setDataSource: actions.setDataSource,
+
+    // Background slideshow settings (from features)
+    backgroundSlideshow: {
+      enabled: state.features.backgroundSlideshow,
+      toggle: () => {
+        dispatch({
+          type: 'UPDATE_FEATURES',
+          payload: { backgroundSlideshow: !state.features.backgroundSlideshow }
+        })
+      }
+    },
+
+    // Analytics settings
+    analytics: {
+      enabled: state.features.realTimeAnalytics,
+      toggle: () => {
+        dispatch({
+          type: 'UPDATE_FEATURES',
+          payload: { realTimeAnalytics: !state.features.realTimeAnalytics }
+        })
+      }
+    },
+
+    // Other feature toggles
+    contact: {
+      enabled: state.features.contactForm,
+      toggle: () => {
+        dispatch({
+          type: 'UPDATE_FEATURES',
+          payload: { contactForm: !state.features.contactForm }
+        })
+      }
+    },
+
+    socialLinks: {
+      enabled: state.features.socialLinks,
+      toggle: () => {
+        dispatch({
+          type: 'UPDATE_FEATURES',
+          payload: { socialLinks: !state.features.socialLinks }
+        })
+      }
+    },
+
+    downloadResume: {
+      enabled: state.features.downloadResume,
+      toggle: () => {
+        dispatch({
+          type: 'UPDATE_FEATURES',
+          payload: { downloadResume: !state.features.downloadResume }
+        })
+      }
+    }
   }
 }

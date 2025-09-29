@@ -1,4 +1,4 @@
-import { BackgroundSlideshow } from "../components/atoms";
+import { BackgroundSlideshow } from "../components/molecules";
 
 const backgroundImages = [
   { filename: "astronomyBG1.jpg" },
@@ -11,7 +11,6 @@ const Landing = () => {
       <BackgroundSlideshow
         images={backgroundImages}
         transitionTime={15000}
-        showOverlay={false}
         displayMode="slide"
       />
       {/* Hero Section */}
