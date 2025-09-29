@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Navigation } from "./components/molecules";
 import { Landing, Work, About, Insights, Connect } from "./pages";
-import { PortfolioProvider } from "./contexts/PortfolioContext";
+import { GlobalProvider } from "./contexts/GlobalContext";
 import "./App.css";
 
 function App() {
   return (
-    <PortfolioProvider>
+    <GlobalProvider>
       <Router>
         <div className="h-screen w-screen overflow-hidden bg-black/20" style={{ margin: 0, padding: 0 }}>
           <Navigation />
@@ -44,7 +44,7 @@ function App() {
           </main>
         </div>
       </Router>
-    </PortfolioProvider>
+    </GlobalProvider>
   );
 }
 

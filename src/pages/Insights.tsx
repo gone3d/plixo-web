@@ -1,4 +1,5 @@
-import { Icon, Skeleton, BackgroundSlideshow } from '../components/atoms'
+import { Icon, Skeleton } from '../components/atoms'
+import { BackgroundSlideshow } from '../components/molecules'
 
 const backgroundImages = [
   { filename: 'astronomyBG1.jpg' },
@@ -35,7 +36,6 @@ const Insights = () => {
       <BackgroundSlideshow
         images={backgroundImages}
         transitionTime={22000}
-        showOverlay={true}
         displayMode="slide"
       />
       <div className="relative z-10 max-w-6xl mx-auto py-20 px-4">
