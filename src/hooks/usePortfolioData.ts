@@ -2,14 +2,14 @@
 // Phase 2: Data management and API integration preparation
 
 import { useMemo } from 'react'
-import { usePortfolio, useProjects, useExperiences, useSkills } from '../contexts/PortfolioContext'
+import { useGlobal, useProjects, useExperiences, useSkills } from '../contexts/GlobalContext'
 import type { Project, Skill, TechnologyCategory } from '../types/portfolio'
 
 /**
  * Hook for comprehensive portfolio statistics
  */
 export function usePortfolioStats() {
-  const { state } = usePortfolio()
+  const { state } = useGlobal()
   const { projects } = useProjects()
   const { experiences } = useExperiences()
   const { skills } = useSkills()
@@ -60,7 +60,7 @@ export function usePortfolioStats() {
  */
 export function useProjectsFiltered() {
   const { projects } = useProjects()
-  const { state } = usePortfolio()
+  const { state } = useGlobal()
 
   return useMemo(() => {
     let filtered = [...projects]
@@ -102,7 +102,7 @@ export function useProjectsFiltered() {
  */
 export function useSkillsAnalysis() {
   const { skills } = useSkills()
-  const { state } = usePortfolio()
+  const { state } = useGlobal()
 
   return useMemo(() => {
     // Group skills by category
@@ -316,7 +316,7 @@ export function useProjectTechnologies() {
  * Hook for search and filtering functionality
  */
 export function useSearch() {
-  const { state, dispatch } = usePortfolio()
+  const { state, dispatch } = useGlobal()
 
   const setSearchQuery = (query: string) => {
     dispatch({ type: 'SET_SEARCH_QUERY', payload: query })
