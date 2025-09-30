@@ -12,3 +12,6 @@ export { default as LoadingSpinner, PulsingDots, Skeleton } from './LoadingSpinn
 export type { LoadingSpinnerProps } from './LoadingSpinner'
 
 export { default as UIImage } from './UIImage'
+
+export { default as SlideInImage } from './SlideInImage'
+export type { SlideInImageProps } from './SlideInImage'
