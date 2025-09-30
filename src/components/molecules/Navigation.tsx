@@ -1,26 +1,26 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Button, Icon } from '../atoms'
-import { cn } from '../../utils/cn'
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Button, Icon } from "../atoms";
+import { cn } from "../../utils/cn";
 
 const Navigation = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const location = useLocation()
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const navItems = [
-    { path: '/', label: 'Home', icon: 'home' as const },
-    { path: '/work', label: 'Work', icon: 'work' as const },
-    { path: '/about', label: 'About', icon: 'user' as const },
-    { path: '/insights', label: 'Insights', icon: 'chart' as const },
-    { path: '/connect', label: 'Connect', icon: 'contact' as const }
-  ]
+    { path: "/", label: "Home", icon: "home" as const },
+    { path: "/work", label: "Work", icon: "work" as const },
+    { path: "/about", label: "About", icon: "user" as const },
+    { path: "/insights", label: "Insights", icon: "chart" as const },
+    { path: "/connect", label: "Connect", icon: "contact" as const },
+  ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/'
+    if (path === "/") {
+      return location.pathname === "/";
     }
-    return location.pathname.startsWith(path)
-  }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/10 backdrop-blur-md border-b border-black/20">
@@ -28,7 +28,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="text-xl font-bold text-white">
-            Don
+            plixo.com
           </Link>
 
           {/* Desktop Navigation */}
@@ -38,10 +38,10 @@ const Navigation = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200',
+                  "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200",
                   isActive(item.path)
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800"
                 )}
               >
                 <Icon name={item.icon} size="sm" />
@@ -57,7 +57,7 @@ const Navigation = () => {
             className="md:hidden"
             onClick={() => setIsOpen(!isOpen)}
           >
-            <Icon name={isOpen ? 'close' : 'menu'} />
+            <Icon name={isOpen ? "close" : "menu"} />
           </Button>
         </div>
 
@@ -71,10 +71,10 @@ const Navigation = () => {
                   to={item.path}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200',
+                    "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200",
                     isActive(item.path)
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800"
                   )}
                 >
                   <Icon name={item.icon} size="sm" />
@@ -86,7 +86,7 @@ const Navigation = () => {
         )}
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navigation
+export default Navigation;
