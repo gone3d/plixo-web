@@ -9,7 +9,7 @@ function App() {
   return (
     <GlobalProvider>
       <Router>
-        <div className="h-screen w-screen overflow-hidden bg-black/20" style={{ margin: 0, padding: 0 }}>
+        <div className="min-h-screen w-screen overflow-x-hidden bg-black/20" style={{ margin: 0, padding: 0 }}>
           {/* Global Background Slideshow */}
           <BackgroundSlideshow
             images={backgroundImages}
@@ -20,7 +20,7 @@ function App() {
           <Navigation />
 
           {/* Main content - full height minus nav */}
-          <main className="h-full w-full" style={{ height: 'calc(100vh - 4rem)', margin: 0, padding: 0 }}>
+          <main className="w-full" style={{ minHeight: 'calc(100vh - 4rem)', paddingTop: '4rem', margin: 0, padding: 0 }}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/work" element={<Work />} />

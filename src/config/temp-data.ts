@@ -47,9 +47,10 @@ export const portfolioOverview: PortfolioOverview = {
     nextAvailableDate: "2025-01-01"
   },
 
-  featuredProjects: ["capital-one-developer-portal", "bae-haarp-control", "state-dept-training", "cig-ai-platform"],
+  featuredProjects: ["plixo-portfolio-website", "capital-one-developer-portal", "bae-haarp-control", "state-dept-training", "cig-ai-platform"],
   coreSkills: ["react", "typescript", "node", "python", "aws", "architecture"],
   recentAchievements: [
+    "Developing cutting-edge portfolio with 60fps animations and privacy-first analytics",
     "Led successful migration of legacy government training systems to modern web architecture",
     "Architected AWS-based microservices platform serving 100K+ users",
     "Implemented AI integrations using Ollama and Hugging Face LLMs"
@@ -63,6 +64,74 @@ export const portfolioOverview: PortfolioOverview = {
  * Featured Projects - Real project data based on resume
  */
 export const projects: Project[] = [
+  {
+    id: "plixo-portfolio-website",
+    title: "Plixo Portfolio Website",
+    description: "Modern React portfolio showcasing technical leadership with real-time analytics, seamless animations, and encrypted API integration",
+    longDescription: "Currently developing a cutting-edge portfolio website that positions technical leadership expertise through innovative web technologies. Built with React 19.1.1, TypeScript strict mode, and Tailwind CSS v4, featuring a seamless background slideshow system, atomic design components, and real-time visitor analytics. Architected with privacy-first analytics, encrypted API endpoints, and GDPR compliance. Demonstrates senior-level engineering patterns including custom animation controllers, mathematical timing coordination, and production-ready data schemas.",
+
+    technologies: [
+      { name: "React", category: "frontend", proficiency: 5, primary: true },
+      { name: "TypeScript", category: "frontend", proficiency: 5, primary: true },
+      { name: "Tailwind CSS", category: "frontend", proficiency: 5, primary: true },
+      { name: "Vite", category: "tools", proficiency: 4, primary: true },
+      { name: "Node.js", category: "backend", proficiency: 5, primary: false },
+      { name: "PostgreSQL", category: "database", proficiency: 4, primary: false },
+      { name: "AES-256 Encryption", category: "specialized", proficiency: 4, primary: false },
+      { name: "GDPR Compliance", category: "specialized", proficiency: 4, primary: false }
+    ],
+
+    category: "personal",
+    status: "In Development",
+
+    metrics: {
+      performance: "60fps animations with <700ms build times",
+      technical: "TypeScript strict mode, zero compilation errors",
+      impact: "Seamless slideshow with 9 astronomy backgrounds",
+      growth: "Fisher-Yates shuffle for dynamic image sequencing"
+    },
+
+    urls: {
+      live: "https://plixo.com",
+      github: "https://github.com/gone3d/plixo-web",
+      demo: "/work"
+    },
+
+    images: {
+      thumbnail: "/assets/WorkThumbPlixo.jpg",
+      screenshots: [
+        "/projects/plixo-portfolio-1.jpg",
+        "/projects/plixo-portfolio-2.jpg"
+      ]
+    },
+
+    featured: true,
+    priority: 0, // First priority
+    dateCreated: "2025-09-28",
+    lastUpdated: "2025-09-29",
+
+    teamSize: 1,
+    role: "Full-Stack Developer & Technical Architect",
+    duration: "3 weeks (ongoing)",
+
+    businessImpact: "Showcasing technical leadership capabilities through modern web technologies, demonstrating both hands-on engineering skills and architectural decision-making for Staff/Principal Engineer positioning",
+
+    technicalChallenges: [
+      "Implementing seamless background slideshow system across multiple pages without reset",
+      "Mathematical timing coordination between fade transitions and image panning animations",
+      "TypeScript strict mode compliance across atomic design component architecture",
+      "Privacy-first analytics design with GDPR compliance and anonymous visitor tracking",
+      "Performance optimization maintaining 60fps animations with sub-700ms build times"
+    ],
+
+    learningsAndGrowth: [
+      "Advanced React 19.1.1 patterns with TypeScript strict mode in production applications",
+      "Custom animation controllers using requestAnimationFrame for precise timing coordination",
+      "Privacy-compliant analytics architecture design with encryption and anonymization",
+      "Modern build pipeline optimization with Vite and performance budget management",
+      "Atomic design pattern implementation for scalable component architecture"
+    ]
+  },
   {
     id: "capital-one-developer-portal",
     title: "Capital One Developer Portal Transformation",
