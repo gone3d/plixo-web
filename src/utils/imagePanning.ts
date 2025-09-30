@@ -45,13 +45,32 @@ export const DEFAULT_PAN_CONFIG: PanConfig = {
 export function calculatePanDirection(
   viewportDimensions: Dimensions,
   imageDimensions: Dimensions
-): 'horizontal' | 'vertical' {
+): 'horizontal' | 'vertical' | 'none' {
   const viewportRatio = viewportDimensions.width / viewportDimensions.height
   const imageRatio = imageDimensions.width / imageDimensions.height
 
-  // If viewport is wider than image, pan vertically
-  // If viewport is taller than image, pan horizontally
-  return viewportRatio > imageRatio ? 'vertical' : 'horizontal'
+  // Allow for small tolerance to avoid unnecessary panning on near-equal ratios
+  const tolerance = 0.05
+  const ratioDifference = viewportRatio - imageRatio
+
+  // Check if ratios are approximately equal first
+  if (Math.abs(ratioDifference) < tolerance) {
+    return 'none'
+  }
+
+  switch (true) {
+    case ratioDifference < 0:
+      // Window is narrower than image - fit image vertically, scroll horizontally
+      return 'horizontal'
+
+    case ratioDifference > 0:
+      // Window is wider than image - fit image horizontally, scroll vertically
+      return 'vertical'
+
+    default:
+      // This should never be reached since we handle equality above
+      return 'none'
+  }
 }
 
 /**
@@ -59,22 +78,32 @@ export function calculatePanDirection(
  */
 export function getBackgroundStyles(
   progress: number, // 0-1
-  direction: 'horizontal' | 'vertical',
-  _viewportDimensions: Dimensions,
-  _imageDimensions?: Dimensions
+  direction: 'horizontal' | 'vertical' | 'none'
 ): BackgroundPosition {
   const position = progress * 100 // Convert to percentage
 
-  if (direction === 'vertical') {
-    return {
-      backgroundPosition: `center ${position}%`,
-      backgroundSize: '100% auto'
-    }
-  } else {
-    return {
-      backgroundPosition: `${position}% center`,
-      backgroundSize: 'auto 100%'
-    }
+  switch (direction) {
+    case 'vertical':
+      // Window is wider than image - make image full width, auto height to maintain aspect ratio
+      // Use position directly so we start at top (0%) and move to bottom (100%) - image moves up
+      return {
+        backgroundPosition: `center ${position}%`,
+        backgroundSize: '100% auto'
+      }
+
+    case 'horizontal':
+      // Window is narrower than image - make image full height, scroll left to right
+      return {
+        backgroundPosition: `${position}% center`,
+        backgroundSize: 'auto 100%'
+      }
+
+    default:
+      // No scrolling - center the image
+      return {
+        backgroundPosition: 'center center',
+        backgroundSize: 'cover'
+      }
   }
 }
 
@@ -83,25 +112,34 @@ export function getBackgroundStyles(
  */
 export function getKenBurnsStyles(
   progress: number, // 0-1
-  direction: 'horizontal' | 'vertical',
-  _viewportDimensions: Dimensions,
+  direction: 'horizontal' | 'vertical' | 'none',
   zoom: { start: number; end: number } = { start: 1, end: 1.1 }
 ): BackgroundPosition {
   const position = progress * 100
   const currentZoom = zoom.start + (zoom.end - zoom.start) * progress
-
   const zoomPercentage = currentZoom * 100
 
-  if (direction === 'vertical') {
-    return {
-      backgroundPosition: `center ${position}%`,
-      backgroundSize: `${zoomPercentage}% auto`
-    }
-  } else {
-    return {
-      backgroundPosition: `${position}% center`,
-      backgroundSize: `auto ${zoomPercentage}%`
-    }
+  switch (direction) {
+    case 'vertical':
+      // Window is wider than image - make image full width, auto height to maintain aspect ratio
+      return {
+        backgroundPosition: `center ${position}%`,
+        backgroundSize: `100% auto`
+      }
+
+    case 'horizontal':
+      // Window is narrower than image - fit vertically, scroll horizontally (left to right)
+      return {
+        backgroundPosition: `${position}% center`,
+        backgroundSize: `auto ${zoomPercentage}%`
+      }
+
+    default:
+      // No scrolling - just zoom from center
+      return {
+        backgroundPosition: 'center center',
+        backgroundSize: `${zoomPercentage}% ${zoomPercentage}%`
+      }
   }
 }
 
