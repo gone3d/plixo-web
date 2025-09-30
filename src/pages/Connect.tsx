@@ -31,7 +31,7 @@ const Connect = () => {
   }
 
   return (
-    <div className="relative h-full text-white overflow-y-auto">
+    <div className="relative min-h-full text-white overflow-y-auto">
       <div className="relative z-10 max-w-4xl mx-auto py-20 px-4">
         {/* Header */}
         <div className="text-center mb-16">

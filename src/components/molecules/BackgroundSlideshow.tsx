@@ -270,7 +270,7 @@ const BackgroundSlideshow = ({
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.6) 80%, rgba(0,0,0,0.9) 100%)`,
+          background: `radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.9) 100%)`,
           zIndex: 1,
         }}
       />
