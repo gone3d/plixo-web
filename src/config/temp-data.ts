@@ -869,25 +869,55 @@ export const backgroundImages: BackgroundImage[] = [
     filename: "astronomyBG1.jpg",
     title: "Nebula Field",
     description: "Deep space nebula with stellar formation",
-    contexts: ["all-pages"],
-    dimensions: { width: 1920, height: 1080 },
-    fileSize: 2500000, // ~2.5MB
-    format: "jpg",
-    optimized: false,
-    dateAdded: "2025-09-29",
     tags: ["space", "nebula", "astronomy", "deep-field"]
   },
   {
     filename: "astronomyBG2.jpg",
     title: "Galaxy Cluster",
     description: "Distant galaxy cluster with gravitational lensing",
-    contexts: ["all-pages"],
-    dimensions: { width: 1920, height: 1080 },
-    fileSize: 2800000, // ~2.8MB
-    format: "jpg",
-    optimized: false,
-    dateAdded: "2025-09-29",
     tags: ["space", "galaxy", "astronomy", "deep-field"]
+  },
+  {
+    filename: "astronomyBG3.jpg",
+    title: "Cosmic Web",
+    description: "Large-scale structure of the universe",
+    tags: ["space", "cosmic-web", "astronomy", "structure"]
+  },
+  {
+    filename: "astronomyBG4.jpg",
+    title: "Star Formation Region",
+    description: "Active stellar nursery with young hot stars",
+    tags: ["space", "star-formation", "astronomy", "stellar"]
+  },
+  {
+    filename: "astronomyBG5.jpg",
+    title: "Spiral Galaxy",
+    description: "Barred spiral galaxy with prominent arms",
+    tags: ["space", "spiral-galaxy", "astronomy", "galactic"]
+  },
+  {
+    filename: "astronomyBG6.jpg",
+    title: "Planetary Nebula",
+    description: "Dying star's expelled outer layers",
+    tags: ["space", "planetary-nebula", "astronomy", "stellar-death"]
+  },
+  {
+    filename: "astronomyBG7.jpg",
+    title: "Galaxy Collision",
+    description: "Interacting galaxies in gravitational dance",
+    tags: ["space", "galaxy-collision", "astronomy", "interaction"]
+  },
+  {
+    filename: "astronomyBG8.jpg",
+    title: "Globular Cluster",
+    description: "Dense collection of ancient stars",
+    tags: ["space", "globular-cluster", "astronomy", "stellar-cluster"]
+  },
+  {
+    filename: "astronomyBG9.jpg",
+    title: "Dark Nebula",
+    description: "Dense cloud of dust blocking starlight",
+    tags: ["space", "dark-nebula", "astronomy", "dust-cloud"]
   }
 ]
 

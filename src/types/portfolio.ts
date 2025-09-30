@@ -237,34 +237,8 @@ export interface BackgroundImage {
   description?: string
   photographer?: string
   location?: string
-
-  // Usage Context
-  contexts: ImageContext[]
-
-  // Technical Details
-  dimensions: {
-    width: number
-    height: number
-  }
-  fileSize: number // bytes
-  format: 'jpg' | 'png' | 'webp'
-
-  // Optimization
-  optimized: boolean
-  alternativeFormats?: string[] // Alternative file formats available
-
-  // Metadata
-  dateAdded: string // ISO date string
-  tags: string[]
+  tags?: string[]
 }
-
-export type ImageContext =
-  | 'landing'
-  | 'work'
-  | 'about'
-  | 'insights'
-  | 'connect'
-  | 'all-pages'
 
 /**
  * Application Configuration Schema
