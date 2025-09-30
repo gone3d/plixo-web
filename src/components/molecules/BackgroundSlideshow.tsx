@@ -38,7 +38,7 @@ const BackgroundSlideshow = ({
   const [fadeOpacity, setFadeOpacity] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [slideProgress, setSlideProgress] = useState(0);
-  const [panDirection, setPanDirection] = useState<"horizontal" | "vertical">(
+  const [panDirection, setPanDirection] = useState<"horizontal" | "vertical" | "none">(
     "horizontal"
   );
 
@@ -70,10 +70,9 @@ const BackgroundSlideshow = ({
     const updatePanDirection = () => {
       const viewport = getViewportDimensions();
       // Assume 16:9 aspect ratio for astronomy images
-      const imageAspectRatio = 16 / 9;
       const direction = calculatePanDirection(viewport, {
-        width: viewport.width * imageAspectRatio,
-        height: viewport.height,
+        width: 1600,  // 16:9 image dimensions
+        height: 900,
       });
       setPanDirection(direction);
     };
@@ -104,7 +103,7 @@ const BackgroundSlideshow = ({
         setCurrentIndex(nextIndex);
 
         // Reset and start panning for new image
-        if (displayMode === "slide" && panningControllerRef.current) {
+        if (displayMode === "slide" && panDirection !== "none" && panningControllerRef.current) {
           // Panning uses full transition time
           panningControllerRef.current.updateConfig({
             duration: transitionTime,
@@ -116,7 +115,7 @@ const BackgroundSlideshow = ({
     } else {
       // Immediate transition without fade
       setCurrentIndex(nextIndex);
-      if (displayMode === "slide" && panningControllerRef.current) {
+      if (displayMode === "slide" && panDirection !== "none" && panningControllerRef.current) {
         // Update panning duration to use full transition time when no fade
         panningControllerRef.current.updateConfig({
           duration: transitionTime,
@@ -125,7 +124,7 @@ const BackgroundSlideshow = ({
         panningControllerRef.current.start();
       }
     }
-  }, [currentIndex, images.length, isPaused, fadeTransition, displayMode]);
+  }, [currentIndex, images.length, isPaused, fadeTransition, displayMode, panDirection, transitionTime]);
 
   // Auto-cycle through images
   useEffect(() => {
@@ -162,24 +161,25 @@ const BackgroundSlideshow = ({
   useEffect(() => {
     if (
       displayMode === "slide" &&
+      panDirection !== "none" &&
       !isPaused &&
       panningControllerRef.current &&
       images.length > 0
     ) {
       panningControllerRef.current.start();
     }
-  }, [currentIndex, displayMode, isPaused, images.length]);
+  }, [currentIndex, displayMode, panDirection, isPaused, images.length]);
 
   // Handle pause/resume
   useEffect(() => {
     if (panningControllerRef.current) {
       if (isPaused) {
         panningControllerRef.current.pause();
-      } else if (displayMode === "slide") {
+      } else if (displayMode === "slide" && panDirection !== "none") {
         panningControllerRef.current.resume();
       }
     }
-  }, [isPaused, displayMode]);
+  }, [isPaused, displayMode, panDirection]);
 
   // Preload next images
   useEffect(() => {
@@ -228,8 +228,6 @@ const BackgroundSlideshow = ({
 
   // Get background styles based on display mode
   const getBackgroundStylesForMode = () => {
-    const viewport = getViewportDimensions();
-
     if (displayMode === "cover") {
       return {
         backgroundImage: `url('${backgroundImageUrl}')`,
@@ -242,7 +240,7 @@ const BackgroundSlideshow = ({
     }
 
     // Slide mode with panning
-    const bgStyles = getBackgroundStyles(slideProgress, panDirection, viewport);
+    const bgStyles = getBackgroundStyles(slideProgress, panDirection);
 
     return {
       backgroundImage: `url('${backgroundImageUrl}')`,
