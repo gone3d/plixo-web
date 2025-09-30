@@ -1,18 +1,7 @@
-import { BackgroundSlideshow } from "../components/molecules";
-
-const backgroundImages = [
-  { filename: "astronomyBG1.jpg" },
-  { filename: "astronomyBG2.jpg" },
-];
 
 const Landing = () => {
   return (
     <div className="relative h-full overflow-hidden text-white">
-      <BackgroundSlideshow
-        images={backgroundImages}
-        transitionTime={15000}
-        displayMode="slide"
-      />
       {/* Hero Section */}
       <section className="flex items-center justify-center h-full px-4">
         <div className="text-center space-y-8 max-w-4xl">

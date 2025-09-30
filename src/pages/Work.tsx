@@ -1,10 +1,4 @@
 import { Icon } from '../components/atoms'
-import { BackgroundSlideshow } from '../components/molecules'
-
-const backgroundImages = [
-  { filename: 'astronomyBG1.jpg' },
-  { filename: 'astronomyBG2.jpg' }
-]
 
 const Work = () => {
   const projects = [
@@ -40,11 +34,6 @@ const Work = () => {
 
   return (
     <div className="relative h-full text-white overflow-y-auto">
-      <BackgroundSlideshow
-        images={backgroundImages}
-        transitionTime={18000}
-        displayMode="slide"
-      />
       <div className="relative z-10 max-w-6xl mx-auto py-20 px-4">
         {/* Header */}
         <div className="text-center mb-16">
