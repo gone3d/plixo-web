@@ -107,7 +107,7 @@ const BackgroundSlideshow = ({
         if (displayMode === "slide" && panningControllerRef.current) {
           // Panning uses full transition time
           panningControllerRef.current.updateConfig({
-            duration: transitionTime
+            duration: transitionTime,
           });
           panningControllerRef.current.stop();
           panningControllerRef.current.start();
@@ -119,7 +119,7 @@ const BackgroundSlideshow = ({
       if (displayMode === "slide" && panningControllerRef.current) {
         // Update panning duration to use full transition time when no fade
         panningControllerRef.current.updateConfig({
-          duration: transitionTime
+          duration: transitionTime,
         });
         panningControllerRef.current.stop();
         panningControllerRef.current.start();
@@ -266,9 +266,14 @@ const BackgroundSlideshow = ({
       {/* Background Image */}
       <div className="absolute inset-0" style={getBackgroundStylesForMode()} />
 
-      {/* Subtle overlay for content readability */}
-
-      <div className="absolute inset-0 bg-black/25" style={{ zIndex: 1 }} />
+      {/* Vignette overlay for content readability */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.9) 100%)`,
+          zIndex: 1,
+        }}
+      />
 
       {/* Fade transition overlay */}
       {fadeTransition && (

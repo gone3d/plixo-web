@@ -1,18 +1,26 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Navigation } from "./components/molecules";
+import { Navigation, BackgroundSlideshow } from "./components/molecules";
 import { Landing, Work, About, Insights, Connect } from "./pages";
 import { GlobalProvider } from "./contexts/GlobalContext";
+import { backgroundImages } from "./config/temp-data";
 import "./App.css";
 
 function App() {
   return (
     <GlobalProvider>
       <Router>
-        <div className="h-screen w-screen overflow-hidden bg-black/20" style={{ margin: 0, padding: 0 }}>
+        <div className="min-h-screen w-screen overflow-x-hidden bg-black/20" style={{ margin: 0, padding: 0 }}>
+          {/* Global Background Slideshow */}
+          <BackgroundSlideshow
+            images={backgroundImages}
+            transitionTime={18000}
+            displayMode="slide"
+          />
+
           <Navigation />
 
           {/* Main content - full height minus nav */}
-          <main className="h-full w-full" style={{ height: 'calc(100vh - 4rem)', margin: 0, padding: 0 }}>
+          <main className="w-full" style={{ minHeight: 'calc(100vh - 4rem)', paddingTop: '4rem', margin: 0, padding: 0 }}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/work" element={<Work />} />

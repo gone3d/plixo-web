@@ -1,11 +1,5 @@
 import { useState } from 'react'
 import { Button, Input, Icon } from '../components/atoms'
-import { BackgroundSlideshow } from '../components/molecules'
-
-const backgroundImages = [
-  { filename: 'astronomyBG1.jpg' },
-  { filename: 'astronomyBG2.jpg' }
-]
 
 const Connect = () => {
   const [formData, setFormData] = useState({
@@ -37,12 +31,7 @@ const Connect = () => {
   }
 
   return (
-    <div className="relative h-full text-white overflow-y-auto">
-      <BackgroundSlideshow
-        images={backgroundImages}
-        transitionTime={16000}
-        displayMode="slide"
-      />
+    <div className="relative min-h-full text-white overflow-y-auto">
       <div className="relative z-10 max-w-4xl mx-auto py-20 px-4">
         {/* Header */}
         <div className="text-center mb-16">
