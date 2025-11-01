@@ -1,34 +1,7 @@
-import { useState } from 'react'
-import { Button, Input, Icon } from '../components/atoms'
+import { Icon } from '../components/atoms'
+import packageJson from '../../package.json'
 
 const Connect = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    company: '',
-    message: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    setIsSubmitting(false)
-    // Reset form or show success message
-    alert('Message sent! I\'ll get back to you soon.')
-    setFormData({ name: '', email: '', company: '', message: '' })
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
 
   return (
     <div className="relative min-h-full text-white overflow-y-auto">
@@ -45,74 +18,51 @@ const Connect = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div className="bg-slate-800/30 rounded-xl p-8">
-            <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-              <Icon name="contact" className="text-blue-400" />
-              Send a Message
-            </h2>
+          {/* Messaging Status */}
+          <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+            <div className="text-center py-12">
+              <Icon name="loading" size="xl" className="text-blue-400/50 mx-auto mb-6 animate-pulse" />
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <Input
-                label="Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Your name"
-                required
-              />
+              <h2 className="text-2xl font-semibold text-white mb-4">
+                Messaging Offline
+              </h2>
 
-              <Input
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="your.email@company.com"
-                required
-              />
-
-              <Input
-                label="Company (Optional)"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Your company or organization"
-              />
-
-              <div>
-                <label className="block text-sm font-medium text-slate-200 mb-2">
-                  Message
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Tell me about your project, team, or opportunity..."
-                  rows={5}
-                  required
-                  className="block w-full bg-slate-800 border border-slate-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 focus:border-blue-500 placeholder:text-slate-400"
-                />
+              <div className="space-y-3 text-slate-300 mb-8">
+                <p className="text-base">
+                  Contact form will be available once{' '}
+                  <span className="text-white font-mono">api.plixo.com</span> is connected.
+                </p>
+                <p className="text-sm text-slate-400">
+                  Version {packageJson.version}
+                </p>
               </div>
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                isLoading={isSubmitting}
-                className="w-full"
-              >
-                {isSubmitting ? 'Sending...' : 'Send Message'}
-              </Button>
-            </form>
-
-            <div className="mt-6 p-4 bg-slate-800/50 rounded-lg">
-              <div className="flex items-start gap-2">
-                <Icon name="warning" size="sm" className="text-yellow-400 mt-0.5" />
-                <p className="text-sm text-slate-400">
-                  <strong>Note:</strong> Please only include information suitable for unclassified discussion.
-                  I'll respond within 24-48 hours during business days.
+              <div className="pt-6 border-t border-slate-700/40">
+                <p className="text-sm text-slate-400 mb-4">
+                  In the meantime, reach out via:
                 </p>
+                <div className="flex flex-col gap-3">
+                  <a
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 p-3 rounded-lg bg-slate-800/70 hover:bg-slate-800 transition-colors"
+                  >
+                    <Icon name="linkedin" className="text-blue-400" />
+                    <span>LinkedIn</span>
+                    <Icon name="external" size="sm" className="text-slate-400 ml-auto" />
+                  </a>
+                  <a
+                    href="https://github.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 p-3 rounded-lg bg-slate-800/70 hover:bg-slate-800 transition-colors"
+                  >
+                    <Icon name="github" className="text-slate-300" />
+                    <span>GitHub</span>
+                    <Icon name="external" size="sm" className="text-slate-400 ml-auto" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -152,6 +102,16 @@ const Connect = () => {
               <h3 className="text-xl font-semibold mb-4">Find Me Online</h3>
               <div className="space-y-3">
                 <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors"
+                >
+                  <Icon name="linkedin" className="text-blue-400" />
+                  <span>LinkedIn</span>
+                  <Icon name="external" size="sm" className="text-slate-400 ml-auto" />
+                </a>
+                <a
                   href="https://github.com"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -159,16 +119,6 @@ const Connect = () => {
                 >
                   <Icon name="github" className="text-slate-300" />
                   <span>GitHub</span>
-                  <Icon name="external" size="sm" className="text-slate-400 ml-auto" />
-                </a>
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors"
-                >
-                  <Icon name="linkedin" className="text-slate-300" />
-                  <span>LinkedIn</span>
                   <Icon name="external" size="sm" className="text-slate-400 ml-auto" />
                 </a>
               </div>
