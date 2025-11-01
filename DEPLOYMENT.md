@@ -42,56 +42,63 @@ Deploy the Plixo Portfolio frontend to CloudFlare Pages using Wrangler CLI, foll
 
 ---
 
-## Connect GitHub Repository to Existing CloudFlare Pages Project
+## Create New CloudFlare Pages Project with Git Integration
 
-### Step 1: Access CloudFlare Pages Settings
+**Note**: If your existing `plixo-landing` project was created via Direct Upload (manual file upload), it cannot be converted to Git integration. You'll need to create a new project.
+
+### Step 1: Create New Pages Project with Git
 
 1. Login to CloudFlare dashboard: https://dash.cloudflare.com
 2. Navigate to **Workers & Pages** → **Overview**
-3. Click on your **plixo-landing** project
-4. Go to **Settings** tab
-5. Scroll to **Build & deployments** section
+3. Click **"Create application"** button
+4. Select **"Pages"** tab
+5. Click **"Connect to Git"**
 
-### Step 2: Connect to Git
+### Step 2: Authorize GitHub Access
 
-1. Look for **"Connect to Git"** or **"Source"** section
-2. Click **"Connect to Git"** button
-3. Select **GitHub** as your Git provider
-4. Click **"Connect GitHub"**
-
-### Step 3: Authorize GitHub Access
-
-1. CloudFlare will open GitHub authorization page
-2. Choose **"gone3d"** GitHub account (your account)
-3. Select repository access:
+1. CloudFlare will prompt you to connect a Git provider
+2. Select **GitHub**
+3. Click **"Connect GitHub"**
+4. Authorize CloudFlare Pages in the popup window
+5. Choose **"gone3d"** GitHub account
+6. Select repository access:
    - **Option A**: Grant access to all repositories
    - **Option B**: Select only `plixo-web` repository (recommended)
-4. Click **"Install & Authorize"**
+7. Click **"Install & Authorize"**
 
-### Step 4: Select Repository and Configure Build
+### Step 3: Select Repository and Configure Build
 
-**Repository Selection:**
-- **GitHub account**: `gone3d`
-- **Repository**: `plixo-web`
-- **Production branch**: `main`
+After authorization, you'll be back in CloudFlare:
 
-**Build Configuration:**
-```
-Build command: npm run build
-Build output directory: dist
-Root directory: / (leave blank)
-Node.js version: 18 (or latest)
-```
+1. **Select your repository**:
+   - Account: `gone3d`
+   - Repository: `plixo-web`
 
-**Environment Variables** (leave empty for now):
-- No environment variables needed yet
-- Will add `VITE_API_URL` later when plixo-api is ready
+2. **Set up builds and deployments**:
+   - **Production branch**: `main`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+   - **Root directory**: `/` (leave blank/default)
 
-### Step 5: Save and Deploy
+3. **Framework preset**: Select **"None"** or **"Vite"** if available
 
-1. Click **"Save and Deploy"**
-2. CloudFlare will immediately trigger first build from GitHub
-3. Watch the build logs in real-time
+4. **Environment variables**: Leave empty for now (will add later for API)
+
+### Step 4: Name Your Project and Deploy
+
+1. **Project name**: Choose a new name (suggestions):
+   - `plixo-portfolio` (recommended)
+   - `plixo-web`
+   - `plixo-app`
+   - Or keep `plixo-landing` (will replace old project later)
+
+2. Click **"Save and Deploy"**
+
+### Step 5: Monitor First Deployment
+
+1. CloudFlare will immediately trigger first build from GitHub
+2. Watch the build logs in real-time
+3. Wait for build to complete (2-3 minutes)
 
 **Expected build output:**
 ```
@@ -103,7 +110,61 @@ Deploying to CloudFlare Pages...
 ✅ Deployment successful!
 ```
 
-### Step 6: Verify Automatic Deployment Works
+**You'll get a deployment URL like:**
+```
+https://abc123.plixo-portfolio.pages.dev
+```
+
+Test this URL to verify your site works before transferring the domain.
+
+---
+
+## Transfer Custom Domain from Old Project
+
+Now that your new Git-connected project is working, transfer plixo.com:
+
+### Step 1: Add Custom Domain to New Project
+
+1. Go to your **new project** (e.g., `plixo-portfolio`)
+2. Click **Custom domains** tab
+3. Click **"Set up a custom domain"**
+4. Enter: `plixo.com`
+5. CloudFlare will show a warning that domain is already in use
+6. Click **"Continue"** or **"Remove from other project"**
+7. CloudFlare automatically removes it from `plixo-landing` and adds it to new project
+8. SSL certificate will be reused (no downtime)
+9. Wait 1-2 minutes for DNS propagation
+
+### Step 2: Verify Domain Transfer
+
+```bash
+# Test the domain
+curl -I https://plixo.com
+
+# Visit in browser
+open https://plixo.com
+```
+
+**Verify:**
+- ✅ Site loads from new Git-connected project
+- ✅ All pages work correctly
+- ✅ HTTPS/SSL working
+
+### Step 3: Delete Old Direct Upload Project (Optional)
+
+Once you've verified plixo.com works with the new project:
+
+1. Go to **Workers & Pages** → `plixo-landing` (old project)
+2. Click **Settings** tab
+3. Scroll to bottom → **"Permanently delete this Pages project"**
+4. Type project name to confirm
+5. Click **"Delete"**
+
+**Note**: Only delete after confirming the domain works with new project!
+
+---
+
+## Verify Automatic Deployment Works
 
 **Test the automatic deployment:**
 
