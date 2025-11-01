@@ -15,27 +15,29 @@ const About = () => {
         <div className="bg-black/40 p-4 backdrop-blur-sm rounded-lg">
           <div className="space-y-8 text-slate-300 leading-relaxed ">
             <p>
-              I didn't know what I wanted to be when I grew up and I'm still
-              trying to find out. Studied Computer Science with a focus on 3D
-              Animation, did satellite image processing at NASA/JPL, spent some
-              time at BAE Systems Advanced Power Technologies doing weird
-              science building everything from HAARP antenna control systems,
-              hyperspectral imagery tools and power beaming.
+              My career has spanned research laboratories, defense contractors,
+              and enterprise technology leadership. With a Computer Science
+              foundation in 3D animation and visualization, I started with
+              satellite image processing at NASA's Jet Propulsion Laboratory,
+              then advanced to BAE Systems where I architected everything from
+              HAARP antenna control systems to hyperspectral imaging tools and
+              directed energy platforms.
             </p>
             <p>
-              Moved into interactive media when Flash was king, helped Echo360
-              build educational video platforms, led teams at Capital One
-              migrating from legacy systems to modern cloud architectures.
-              Currently architecting AI-integrated applications and exploring
-              how LLMs can augment development workflows.
+              The transition to enterprise software brought leadership roles in
+              interactive media and streaming video platforms, culminating in
+              engineering management at Capital One where I led teams through
+              complex migrations from legacy systems to modern cloud
+              architectures. Today, I architect AI-integrated applications and
+              develop frameworks for LLM-augmented development workflows.
             </p>
             <p>
-              Consider myself a Diginaut - exploring all things digital. Whether
-              it's migrating government training from Flash to VR, building
-              streaming video players, or deploying custom AI models, the
-              curiosity remains constant. Most technical problems are variations
-              on themes, but finding elegant implementations that teams can
-              actually maintain - that's the interesting part.
+              Throughout this progression, the pattern has remained consistent:
+              identify emerging technologies, extract practical value, and build
+              solutions that engineering teams can maintain and extend. Whether
+              migrating government training systems from Flash to VR, deploying
+              custom AI models, or architecting streaming platforms, the focus
+              stays on sustainable, scalable implementations.
             </p>
             <p>
               These days I focus on building systems that scale gracefully and
