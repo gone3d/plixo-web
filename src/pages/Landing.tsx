@@ -1,3 +1,5 @@
+import packageJson from '../../package.json'
+
 const Landing = () => {
   return (
     <div className="relative min-h-full overflow-hidden text-white">
@@ -14,6 +16,16 @@ const Landing = () => {
             <h2 className="text-lg md:text-xl text-white/90 font-light">
               Staff Engineer/Engineering Manager/Diginaut
             </h2>
+          </div>
+
+          {/* Work in Progress Notice */}
+          <div className="mt-8">
+            <p className="text-white/60 text-sm italic">
+              Work in Progress - Continuously Evolving
+            </p>
+            <p className="text-white/40 text-xs mt-1">
+              v{packageJson.version}
+            </p>
           </div>
 
           {/* Subtle CTA */}
