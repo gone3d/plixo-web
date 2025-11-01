@@ -1,4 +1,4 @@
-import packageJson from '../../package.json'
+import packageJson from "../../package.json";
 
 const Landing = () => {
   return (
@@ -21,11 +21,9 @@ const Landing = () => {
           {/* Work in Progress Notice */}
           <div className="mt-8">
             <p className="text-white/60 text-sm italic">
-              Work in Progress - Continuously Evolving
+              A Continuously Evolving Work in Progress
             </p>
-            <p className="text-white/40 text-xs mt-1">
-              v{packageJson.version}
-            </p>
+            <p className="text-white/40 text-xs mt-1">v{packageJson.version}</p>
           </div>
 
           {/* Subtle CTA */}
