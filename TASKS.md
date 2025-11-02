@@ -1,573 +1,320 @@
 # Development Roadmap - Plixo Portfolio Website
 
-## 🎯 **CURRENT PRIORITY: Phase 0 - Production Deployment** (Week 3) - **Effort: Low**
-
-### **IMMEDIATE ACTION: Deploy plixo-web to CloudFlare Pages** 🚀
-
-**Status**: Frontend 100% complete, ready for production deployment
-**Target**: Deploy to plixo.com via CloudFlare Pages
-**Reference**: ../tenebraeV2 CloudFlare Pages deployment (proven workflow)
-
-#### **DEPLOYMENT TASKS** - **Timeline: 30-60 minutes** (Simplified!)
-
-- [x] **Create Deployment Documentation** 📄 *Complexity: Low* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ Complete DEPLOYMENT.md with step-by-step CloudFlare Pages guide
-  - **Dependencies**: ✅ None - referenced tenebraeV2 deployment docs
-  - **Completed Tasks**:
-    - ✅ Created DEPLOYMENT.md based on tenebraeV2/CLOUDFLARE_PAGES_DEPLOYMENT.md
-    - ✅ Documented Wrangler CLI workflow for plixo-web
-    - ✅ Documented reusing existing `plixo-landing` Pages project
-    - ✅ Added redeployment procedures and troubleshooting
-    - ✅ Documented environment variable configuration for future API
-
-- [ ] **Connect GitHub Repository to CloudFlare Pages** 🌐 *Complexity: Low* - **READY TO EXECUTE**
-  - **Acceptance Criteria**: GitHub repo connected to plixo-landing with automatic deployments on merge to main
-  - **Dependencies**: ✅ DEPLOYMENT.md complete, ✅ plixo-landing project exists, ✅ GitHub repo: gone3d/plixo-web
-  - **Workflow** (via CloudFlare Dashboard):
-    1. Login to CloudFlare dashboard → Workers & Pages → plixo-landing
-    2. Go to **Settings** → **Build & deployments**
-    3. Click **"Connect to Git"**
-    4. Authorize GitHub access (select gone3d account)
-    5. Choose repository: **gone3d/plixo-web**
-    6. Configure build settings:
-       - **Production branch**: `main`
-       - **Build command**: `npm run build`
-       - **Build output**: `dist`
-    7. Click **"Save and Deploy"**
-    8. Watch first build deploy automatically from GitHub
-  - **What This Enables**:
-    - ✅ Automatic deployments when merging to `main` branch
-    - ✅ Preview deployments for pull requests (test before merging)
-    - ✅ No manual wrangler commands needed
-    - ✅ Full git history visible in CloudFlare dashboard
-    - ✅ Keeps existing plixo.com domain and SSL certificate
-
-- [x] **Custom Domain Configuration** 🔗 *Complexity: Low* - **ALREADY COMPLETE**
-  - **Status**: ✅ plixo.com already configured on plixo-landing project
-  - **SSL Certificate**: ✅ Already provisioned and active
-  - **DNS Records**: ✅ Already configured
-  - **Action Required**: None - will work immediately after deployment
-
-- [ ] **Production Verification & Testing** ✅ *Complexity: Low*
-  - **Acceptance Criteria**: All features working correctly in production
-  - **Dependencies**: Custom domain configured
-  - **Tasks**:
-    - Test all 5 pages: Landing, Work, About, Insights, Connect
-    - Verify responsive design on mobile/tablet/desktop
-    - Test background slideshow performance
-    - Verify interactive project cards and SlideInImage component
-    - Check navigation and routing
-    - Run Lighthouse performance audit
-    - Verify Core Web Vitals metrics
-
-### **Phase 0 Success Criteria** ✨
-- ✅ GitHub repo connected to CloudFlare Pages (plixo-landing)
-- ✅ Automatic deployment working on merge to `main` branch
-- ✅ Live portfolio accessible at https://plixo.com
-- ✅ All 5 pages functioning correctly in production
-- ✅ Responsive design working across all devices
-- ✅ Lighthouse score > 90 for performance
-- ✅ Background slideshow and interactive features working
-- ✅ Preview deployments available for pull requests
-- ✅ Professional presentation ready for portfolio sharing
-
-### **Phase 0 Dependencies**
-```
-Build Verification → Deployment Docs → Connect GitHub → Automatic Deploy → Production Testing → LIVE! 🎉
-                                            ↓
-                                   Merge to main = Auto-deploy forever!
-```
-
-### **Post-Deployment Workflow** (After GitHub Connection)
-```
-1. Create feature branch: git checkout -b feature/new-updates
-2. Make changes and commit: git commit -m "Update portfolio content"
-3. Push and create PR: git push origin feature/new-updates
-4. CloudFlare creates preview deployment for PR
-5. Test preview: https://abc123.plixo-landing.pages.dev
-6. Merge PR to main → Automatic production deployment to plixo.com
-7. Wait 2-3 minutes → New version live!
-```
+> **Project Status**: Phase 0 - Production Deployment
+> **Last Updated**: 2025-11-01
+> **Version**: 1.0.3
 
 ---
 
-## 🚀 Phase 1: Foundation (Week 1-2) - **Effort: Medium** ✅ **COMPLETED**
+## 📋 Quick Navigation
 
-### **COMPLETED FOUNDATION TASKS** ✅
-
-- [x] **Setup React Project Structure** 📱 *Complexity: Low* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ Vite + React 19.1.1 + TypeScript project initialized with strict config
-  - **Dependencies**: None
-  - **Completed Tasks**:
-    - ✅ Initialized Vite project with React-TypeScript template
-    - ✅ Configured TypeScript 5.8.3 strict mode and ESLint rules
-    - ✅ Set up atomic design folder structure (`src/components/{atoms,molecules,organisms}`, `src/pages`, `src/hooks`, etc.)
-    - ✅ Verified build system working (188KB bundle, 59KB gzipped)
-
-- [x] **Configure Tailwind CSS Design System** 🎨 *Complexity: Low* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ Tailwind v4 configured with portfolio design system foundation
-  - **Dependencies**: React project structure
-  - **Completed Tasks**:
-    - ✅ Installed Tailwind CSS v4.1.13 using `npm install -D tailwindcss postcss autoprefixer`
-    - ✅ Configured PostCSS with `@tailwindcss/postcss` plugin
-    - ✅ Created dark-mode-first design system with glassmorphism and neon accent classes
-    - ✅ Set up custom component classes (btn-primary, text-gradient, card styles)
-    - ⚠️ **Note**: Tailwind v4 syntax differences encountered - working foundation established
-
-- [x] **Create Base Component Library** 🧩 *Complexity: Medium* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ Atomic design system with reusable UI components
-  - **Dependencies**: ✅ Tailwind CSS configured
-  - **Completed Tasks**:
-    - ✅ Built atoms: Button, Input, Icon, LoadingSpinner, SlideInImage, UIImage
-    - ✅ Built molecules: Navigation, MetricCard, ProjectCard, BackgroundSlideshow
-    - ✅ Implemented accessibility features (ARIA labels, keyboard navigation)
-    - ✅ Created comprehensive component library with TypeScript strict mode
-    - ✅ All components production-ready with proper prop interfaces
-
-- [x] **Setup Routing Infrastructure** 🗺️ *Complexity: Low* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ React Router v7 configured with all five main routes
-  - **Dependencies**: ✅ Base components complete
-  - **Completed Tasks**:
-    - ✅ Installed React Router v7: `react-router-dom@7.9.5`
-    - ✅ Configured React Router with SPA routing
-    - ✅ Created route definitions for all five pages (Landing, Work, About, Insights, Connect)
-    - ✅ Implemented Navigation component with mobile responsive menu
-    - ✅ All pages complete with professional content and responsive design
-
-### Foundation Phase Status: ✅ **100% COMPLETE**
-```
-✅ React Setup → ✅ Tailwind Config → ✅ Component Library → ✅ Routing → ✅ Ready for Deployment!
-```
+- **Current Milestone**: [Milestone 0 - Production Deployment](./tasks/Milestone0.md)
+- **Completed**: [Milestone 1 - Foundation](./tasks/Milestone1.md)
+- **Upcoming**: [Milestone 2 - API Integration](./tasks/Milestone2.md)
 
 ---
 
-## 🏗️ Phase 2: API/Backend Foundation (Week 4-7) - **Effort: High** - **POSTPONED UNTIL AFTER DEPLOYMENT**
+## 🎯 Current Priority: Production Deployment
 
-### **Strategic Priority: Data Architecture Before Advanced Features** 🎯
+**Status**: Ready to deploy
+**Estimated Time**: 1-2 hours
+**Next Action**: Connect GitHub repository to CloudFlare Pages
 
-**Status**: Frontend data structures complete, API development postponed until after plixo-web deployment
-**Repository**: ../plixo-api (empty, ready for development)
-**Reference**: ../tenebrae-api-cloudflare (CloudFlare Pages Functions + D1 database architecture)
-
-**Philosophy**: Build temp config → API endpoints → Database → Insights tracking
-- Secure, encrypted data architecture
-- Privacy-compliant analytics foundation
-- Scalable API structure for real-time features
-- Development-friendly progression (no frontend downtime)
-- CloudFlare Pages Functions + D1 database (following Tenebrae pattern)
-
-#### **PRIORITY 1: Data Structure Design** ✅ *Complexity: Medium* - **Week 3 - COMPLETED**
-
-- [x] **Portfolio Content Schema** *Timeline: 3 days* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ TypeScript interfaces for all portfolio data
-  - **Dependencies**: ✅ Current component requirements analysis
-  - **Completed Tasks**:
-    - ✅ Project data structure (metrics, status, URLs, tech stacks)
-    - ✅ Experience/career timeline data schema
-    - ✅ Skills proficiency and learning status tracking
-    - ✅ Background images metadata and usage contexts
-    - ✅ Configuration schema (themes, feature flags, settings)
-  - **Deliverables**: `src/types/portfolio.ts` with comprehensive interfaces
-
-- [x] **Analytics Data Schema** *Timeline: 2 days* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ Privacy-compliant visitor tracking design
-  - **Dependencies**: ✅ GDPR compliance research
-  - **Completed Tasks**:
-    - ✅ Anonymous visitor session tracking structure
-    - ✅ Page view and engagement metrics schema
-    - ✅ GitHub integration data caching structure
-    - ✅ Performance metrics collection (Core Web Vitals)
-    - ✅ Geographic data (country-level only for privacy)
-  - **Deliverables**: `src/types/analytics.ts` with GDPR-compliant schemas
-
-- [x] **Temp Config Implementation** *Timeline: 1 day* - **COMPLETED**
-  - **Acceptance Criteria**: ✅ Comprehensive seed data based on actual resume
-  - **Dependencies**: ✅ TypeScript interfaces complete
-  - **Completed Tasks**:
-    - ✅ Real project data from resume analysis (NASA/JPL, BAE, Capital One, etc.)
-    - ✅ Authentic experience timeline with security clearance context
-    - ✅ Skills proficiency mapping with learning status
-    - ✅ Configuration management with feature flags
-  - **Deliverables**: `src/config/temp-data.ts` with production-ready seed data
-
-#### **PRIORITY 2: Local API Service Setup** ⚙️ *Complexity: Medium* - **Week 4**
-
-- [ ] **Express.js API Server** *Timeline: 3 days*
-  - **Acceptance Criteria**: RESTful API with all portfolio endpoints
-  - **Dependencies**: Data schema design complete
-  - **Tasks**:
-    - Set up Express.js with TypeScript and security middleware
-    - Implement all API endpoints (/portfolio, /projects, /analytics, etc.)
-    - Add JWT authentication for admin operations
-    - Configure CORS, rate limiting, and input validation
-    - Create Swagger API documentation
-
-- [ ] **Mock Data Service** *Timeline: 2 days*
-  - **Acceptance Criteria**: JSON file-based data store for development
-  - **Dependencies**: API endpoints implemented
-  - **Tasks**:
-    - Create comprehensive JSON config files with real data
-    - Implement hot reload for config changes during development
-    - Add data validation layer ensuring schema compliance
-    - Create seed data scripts for consistent development environment
-
-#### **PRIORITY 3: Database Schema & Security** 🔐 *Complexity: High* - **Week 5**
-
-- [ ] **PostgreSQL Database Design** *Timeline: 2 days*
-  - **Acceptance Criteria**: Encrypted, secure database with migration scripts
-  - **Dependencies**: API service operational with mock data
-  - **Tasks**:
-    - Design PostgreSQL schema with encryption for sensitive data
-    - Create database migration scripts and seed data procedures
-    - Implement database connection pooling and optimization
-    - Set up backup and recovery procedures
-
-- [ ] **Security Implementation** *Timeline: 3 days*
-  - **Acceptance Criteria**: Production-ready security with privacy compliance
-  - **Dependencies**: Database schema implemented
-  - **Tasks**:
-    - Implement AES-256 encryption for data at rest
-    - Add JWT token authentication and authorization
-    - Configure rate limiting and DDoS protection
-    - GDPR-compliant analytics with anonymous tracking only
-    - Security audit and penetration testing
-
-#### **PRIORITY 4: Frontend Integration & Insights Dashboard** 📊 *Complexity: High* - **Week 6**
-
-- [ ] **React Query API Integration** *Timeline: 2 days*
-  - **Acceptance Criteria**: Frontend consuming API with caching and error handling
-  - **Dependencies**: API service and database operational
-  - **Tasks**:
-    - Set up React Query for API data fetching and caching
-    - Implement error boundaries and fallback strategies
-    - Add loading states and optimistic updates
-    - Configure environment-based API endpoints
-
-- [ ] **Insights Dashboard Implementation** *Timeline: 3 days*
-  - **Acceptance Criteria**: Real-time analytics dashboard with privacy compliance
-  - **Dependencies**: Analytics data schema and API endpoints
-  - **Tasks**:
-    - Build visitor analytics dashboard with geographic visualization
-    - Implement GitHub activity integration with live commit graphs
-    - Add performance metrics tracking (Core Web Vitals)
-    - Create privacy-compliant visitor session tracking
-    - Design responsive dashboard layout for mobile/desktop
-
-### Phase 2 Dependencies & Success Criteria
-```
-Data Schema → API Service → Database/Security → Frontend Integration
-     ↓              ↓               ↓                    ↓
-Temp Config → Mock Service → Production DB → Insights Dashboard
-```
-
-**Timeline**: 4 weeks total (Weeks 3-6)
-**Success Criteria**:
-- All portfolio content served via secure, encrypted API
-- Real-time insights dashboard tracking visitor behavior
-- Privacy-compliant analytics (GDPR-ready)
-- Sub-500ms API response times
-- Foundation ready for Phase 3 advanced features
-
-**Current Session Status**: ✅ Interactive Project Card Enhancement Complete
-**Next Action**: Begin Priority 2 - Local API Service Setup (Week 4 milestone)
-
-### **PRIORITY 1 COMPLETION SUMMARY** ✅
-**Delivered**:
-- Comprehensive TypeScript interfaces for all portfolio data types
-- Privacy-compliant analytics schema with GDPR compliance
-- Production-ready seed data based on actual resume and career history
-- Configuration management system with feature flags
-
-**Impact**:
-- Foundation established for all API development
-- Type safety enforced across entire data layer
-- Authentic content ready for immediate use
-- Privacy-first analytics design ensures compliance
-  - **Tasks**:
-    - Create case study template with Problem → Solution → Impact structure
-    - Implement syntax-highlighted code snippets
-    - Add interactive architecture diagrams
-    - Include external app integration stories
-
-### Core Features Dependencies
-```
-Landing Hero → Skills Constellation → Live Metrics
-     ↓              ↓                    ↓
-Work Gallery → Featured Apps → Case Studies → Ready for Advanced Features
-```
+**Quick Start**:
+1. Review [Milestone 0 tasks](./tasks/Milestone0.md)
+2. Complete pre-deployment verification
+3. Connect GitHub to CloudFlare
+4. Transfer domains (plixo.com, www.plixo.com)
+5. Verify production deployment
 
 ---
 
-## 🎨 Phase 3: Advanced Features (Week 5-6) - **Effort: High**
+## 📊 Milestone Overview
 
-#### About/Journey Page (`/about`) - *Complexity: Medium*
-
-- [ ] **Interactive Career Timeline** 📅 *Complexity: Medium*
-  - **Acceptance Criteria**: Scrollable timeline with technology evolution visualization
-  - **Dependencies**: Timeline data structure, animation system
-  - **Tasks**:
-    - Design career milestone data structure
-    - Implement horizontal/vertical timeline with GSAP
-    - Add technology evolution markers
-    - Create smooth scroll navigation between milestones
-
-- [ ] **Gaming Heritage Integration** 🕹️ *Complexity: Medium*
-  - **Acceptance Criteria**: "From Nethack to Full Stack" narrative with easter eggs
-  - **Dependencies**: Gaming asset creation, Konami code implementation
-  - **Tasks**:
-    - Write gaming heritage narrative content
-    - Implement Konami code unlock system
-    - Create retro loading animations
-    - Add achievement badge system for section exploration
-
-#### Analytics Dashboard (`/insights`) - *Complexity: High*
-
-- [ ] **Real-time Visitor Analytics** 🌍 *Complexity: High*
-  - **Acceptance Criteria**: Geographic visitor map with anonymized real-time data
-  - **Dependencies**: WebSocket setup, mapping library, privacy compliance
-  - **Tasks**:
-    - Implement WebSocket connection for real-time metrics
-    - Create geographic visualization with privacy anonymization
-    - Add visitor flow and engagement heat maps
-    - Build device/browser distribution charts
-
-- [ ] **GitHub Activity Visualization** 📈 *Complexity: Medium*
-  - **Acceptance Criteria**: Live commit activity with language usage breakdown
-  - **Dependencies**: GitHub API integration, chart library setup
-  - **Tasks**:
-    - Implement GitHub API data fetching with caching
-    - Create commit activity timeline visualization
-    - Add language usage pie charts with D3.js
-    - Build contribution pattern analysis
-
-#### Contact/Connect Page (`/connect`) - *Complexity: Medium*
-
-- [ ] **Smart Contact Form** ✉️ *Complexity: Medium*
-  - **Acceptance Criteria**: Dynamic form fields with calendar integration
-  - **Dependencies**: Form validation library, calendar API
-  - **Tasks**:
-    - Implement React Hook Form with validation
-    - Add dynamic field visibility based on visitor behavior
-    - Integrate calendar scheduling widget
-    - Create auto-response system with relevant portfolio pieces
-
-### Advanced Features Dependencies
-```
-Timeline → Gaming Heritage → About Page Complete
-     ↓              ↓              ↓
-Analytics Dashboard → Contact Form → Ready for Polish
-```
+| Milestone | Status | Duration | Priority | Details |
+|-----------|--------|----------|----------|---------|
+| **M0: Production Deployment** | 🚧 In Progress | 1-2 hours | CRITICAL | [View Details](./tasks/Milestone0.md) |
+| **M1: Foundation** | ✅ Complete | 2 weeks | CRITICAL | [View Details](./tasks/Milestone1.md) |
+| **M2: API Integration** | ⏳ Pending | 4-6 weeks | HIGH | [View Details](./tasks/Milestone2.md) |
+| **M3: Advanced Features** | ⏳ Pending | 3-4 weeks | MEDIUM | [View Details](./tasks/Milestone3.md) |
+| **M4: Polish & Performance** | ⏳ Pending | 2-3 weeks | HIGH | [View Details](./tasks/Milestone4.md) |
 
 ---
 
-## ✨ Phase 4: Polish & Performance (Week 7-8) - **Effort: Medium**
+## ✅ Milestone 1: Foundation - COMPLETE
 
-#### Performance Optimization - *Complexity: High*
+**Completed**: 2025-09-29
+**Duration**: 2 weeks
 
-- [ ] **3D Performance Tuning** ⚡ *Complexity: High*
-  - **Acceptance Criteria**: Consistent 60fps on mid-range devices, graceful degradation
-  - **Dependencies**: All 3D elements implemented
-  - **Tasks**:
-    - Implement device capability detection
-    - Add adaptive quality settings for Spline scenes
-    - Optimize Three.js rendering with LOD systems
-    - Create 2D fallbacks for low-end devices
+### Achievements
+- ✅ React 19.1.1 + Vite + TypeScript strict mode setup
+- ✅ Tailwind CSS v4 design system configured
+- ✅ Complete atomic component library (8 atoms, 3 molecules)
+- ✅ All 5 pages with professional content
+- ✅ React Router v7 navigation
+- ✅ Universal background slideshow system
+- ✅ Interactive project showcase
+- ✅ Mobile responsive design
+- ✅ Build optimized (100.64KB gzipped)
 
-- [ ] **Bundle Optimization** 📦 *Complexity: Medium*
-  - **Acceptance Criteria**: Bundle size under 1MB total, sub-3-second load times
-  - **Dependencies**: All features implemented
-  - **Tasks**:
-    - Analyze bundle size with webpack-bundle-analyzer
-    - Implement tree shaking for unused code removal
-    - Optimize image assets with WebP conversion
-    - Configure Vite build optimizations
+**Bundle Performance**:
+- Initial: 59KB gzipped
+- Final: 100.64KB gzipped (includes Router + Components)
+- Build time: ~700ms
 
-#### Accessibility & Testing - *Complexity: Medium*
+**Key Components**:
+- Atoms: Button, Input, Icon, LoadingSpinner, SlideInImage, UIImage
+- Molecules: Navigation, ProjectCard, BackgroundSlideshow
+- Pages: Landing, Work, About, Insights, Connect
 
-- [ ] **WCAG 2.1 AA Compliance** ♿ *Complexity: Medium*
-  - **Acceptance Criteria**: Full accessibility audit passing with screen reader compatibility
-  - **Dependencies**: All UI components completed
-  - **Tasks**:
-    - Audit all components with axe-core
-    - Implement proper ARIA labels and roles
-    - Add keyboard navigation support
-    - Test with screen readers (NVDA, JAWS)
-
-- [ ] **Cross-browser Testing** 🌐 *Complexity: Medium*
-  - **Acceptance Criteria**: Consistent experience across Chrome, Firefox, Safari, Edge
-  - **Dependencies**: All features implemented
-  - **Tasks**:
-    - Test 3D elements across different browsers
-    - Verify WebSocket functionality cross-browser
-    - Check animation performance on various devices
-    - Fix any browser-specific compatibility issues
-
-#### SEO & Meta Optimization - *Complexity: Low*
-
-- [ ] **SEO Implementation** 🔍 *Complexity: Low*
-  - **Acceptance Criteria**: Optimized meta tags, structured data, sitemap
-  - **Dependencies**: All pages completed
-  - **Tasks**:
-    - Implement dynamic meta tags for each route
-    - Add structured data markup for portfolio content
-    - Create XML sitemap and robots.txt
-    - Optimize Open Graph and Twitter Card previews
-
-### Polish Phase Dependencies
-```
-3D Performance → Bundle Optimization → Performance Complete
-     ↓                    ↓                    ↓
-A11y Testing → Cross-browser Testing → SEO Implementation → Launch Ready
-```
+[View Full Milestone 1 Details →](./tasks/Milestone1.md)
 
 ---
 
-## 🔄 Ongoing Tasks Throughout Development
+## 🚧 Milestone 0: Production Deployment - IN PROGRESS
 
-### Code Quality & Standards
-- [ ] **Maintain TypeScript Strict Mode** - Ongoing
-- [ ] **Component Testing with RTL** - Per component
-- [ ] **Performance Budget Monitoring** - Weekly
-- [ ] **Git Commit Message Standards** - Per commit
+**Target Completion**: Today
+**Estimated Time**: 1-2 hours
 
-### Documentation & Architecture
-- [ ] **Update DECISIONS.md** - Per major architectural choice
-- [ ] **Component Documentation** - Per reusable component
-- [ ] **API Integration Documentation** - Per external service
-- [ ] **Performance Report Updates** - Weekly
+### Tasks Summary
+1. **Pre-Deployment Verification** (15-30 min)
+   - Test all 5 pages locally
+   - Verify build succeeds
+   - Check critical files present
+
+2. **CloudFlare Pages Setup** (30-45 min)
+   - Connect GitHub repository (gone3d/plixo-web)
+   - Configure build settings
+   - Deploy first version
+
+3. **Domain Configuration** (15-30 min)
+   - Transfer plixo.com from old project
+   - Transfer www.plixo.com from old project
+   - Verify SSL certificates
+
+4. **Production Testing** (30-45 min)
+   - Test all features live
+   - Run Lighthouse audit
+   - Cross-browser verification
+
+5. **Cleanup & Documentation** (15 min)
+   - Commit final changes
+   - Delete old plixo-landing project
+   - Update deployment docs
+
+### Success Criteria
+- ✅ Live at https://plixo.com
+- ✅ Automatic deployments on push to main
+- ✅ All pages functional in production
+- ✅ Lighthouse score > 90
+
+[View Full Milestone 0 Details →](./tasks/Milestone0.md)
 
 ---
 
-## 📊 Effort Estimation Summary
+## ⏳ Milestone 2: API Integration - PENDING
 
-| Phase | Duration | Complexity | Priority | Dependencies |
-|-------|----------|------------|----------|--------------|
-| **Foundation** | 2 weeks | Low-Medium | Critical | None |
-| **Core Features** | 2 weeks | High | Critical | Foundation |
-| **Advanced Features** | 2 weeks | High | High | Core Features |
-| **Polish & Performance** | 2 weeks | Medium-High | Medium | Advanced Features |
+**Dependencies**: Milestone 0 complete, plixo-api deployed
+**Estimated Duration**: 4-6 weeks (API development + frontend integration)
 
-**Total Estimated Timeline**: 8 weeks
-**Critical Path**: Foundation → Landing Page → Work Showcase → Performance Optimization
+### Overview
+Integrate plixo-web with plixo-api backend for dynamic content, contact form, analytics, and GitHub stats.
 
----
-
-## 🎯 Priority Matrix
-
-### Must Have (MVP)
-- Landing page with 3D hero
-- Work showcase with project gallery
-- Basic contact form
-- Mobile responsive design
-
-### Should Have (Enhanced)
+### Key Features
+- Portfolio content served from database
+- Contact form with bot protection
 - Real-time analytics dashboard
-- Interactive career timeline
-- GitHub integration
-- Advanced 3D elements
+- GitHub repository statistics
+- Admin authentication and protected routes
 
-### Could Have (Future)
-- Gaming heritage easter eggs
-- A/B testing system
-- Advanced performance monitoring
-- Cross-app analytics integration
+### Major Tasks
+1. API Service Layer Setup (4-6 hours)
+2. Portfolio Content Integration (8-12 hours)
+3. GitHub Integration (4-6 hours)
+4. Contact Form Integration (6-8 hours)
+5. Analytics Integration (10-14 hours)
+6. Authentication & Protected Routes (6-8 hours)
+7. Error Handling & Loading States (4-6 hours)
 
-### Success Criteria Checkpoints - UPDATED TIMELINE
-- **Week 1-2**: ✅ FOUNDATION COMPLETE
-  - ✅ React 19.1.1 + Vite + TypeScript project structure
-  - ✅ Tailwind CSS v4 design system foundation
-  - ✅ Complete atomic component library (atoms + molecules)
-  - ✅ Full routing infrastructure with 5 pages
-  - ✅ Universal background slideshow system
-  - ✅ Professional content with authentic technical narrative
-- **Week 3**: 🎯 CURRENT TARGET - Data structure design and temp config
-- **Week 4**: Local API service with mock data
-- **Week 5**: Database schema and security implementation
-- **Week 6**: Frontend integration and insights dashboard
-- **Week 7-10**: Phase 3 - Advanced features and 3D integration
+**Total Estimated Time**: 42-60 hours (1-1.5 weeks full-time frontend work)
 
-### **SESSION UPDATE - BACKGROUND SLIDESHOW ENHANCEMENT COMPLETE** (2025-09-29)
+**Note**: Requires plixo-api backend complete (4-6 weeks parallel development)
 
-#### **✅ MAJOR ACCOMPLISHMENTS THIS SESSION**
+[View Full Milestone 2 Details →](./tasks/Milestone2.md)
 
-**1. Global Background Architecture Refactor** - ✅ COMPLETE
-- **Issue Resolved**: Background slideshow was resetting on every page navigation
-- **Solution Implemented**: Moved BackgroundSlideshow from individual pages to App.tsx
-- **Impact**: Seamless user experience with continuous background animation
-- **Code Quality**: Eliminated duplicate code across all 5 pages
+---
 
-**2. Complete Background Image Integration** - ✅ COMPLETE
-- **Discovery**: Found 9 astronomy images in public/assets folder
-- **Interface Enhancement**: Simplified BackgroundImage interface (removed filesize, format, etc.)
-- **Configuration Update**: Added all 9 images to temp-data.ts with descriptive metadata
-- **Visual Improvement**: Rich variety replaces limited 2-image rotation
+## ⏳ Milestone 3: Advanced Features - PENDING
 
-**3. Animation System Enhancement** - ✅ COMPLETE
-- **Timing Coordination**: Fixed fade/pan timing to eliminate visual jerking
-- **Mathematical Precision**: Fade starts at `transitionTime - fadeOutDuration`
-- **Performance**: JavaScript-based animation controllers for 60fps smoothness
-- **Visual Polish**: Added vignette overlay effect for better text readability
+**Dependencies**: Milestone 2 complete
+**Estimated Duration**: 3-4 weeks
 
-**4. Utility Function Development** - ✅ COMPLETE
-- **shuffleOrder Function**: Fisher-Yates shuffle algorithm for image sequence variation
-- **Future-Ready**: Enables randomized slideshow cycles for visual variety
-- **Clean Implementation**: Simple, focused utility meeting exact requirements
+### Overview
+Implement cutting-edge features including 3D elements, interactive timeline, real-time analytics, and gaming heritage easter eggs.
 
-#### **TECHNICAL ACHIEVEMENTS**
-```typescript
-// Animation Architecture
-- FadeTransition Class: Promise-based API with configurable timing
-- PanningController Class: Smooth image movement with pause/resume
-- Perfect Timing: Mathematical coordination for seamless transitions
+### Key Features
+- 3D landing page hero with Spline
+- Interactive career timeline (GSAP/Framer Motion)
+- Real-time analytics dashboard (WebSocket)
+- Gaming heritage easter eggs (Konami code)
+- Three.js skill visualization
+- Enhanced project showcase
+- Smart contact form enhancements
 
-// Background System Evolution
-Before: 5 pages × BackgroundSlideshow = 5 instances + reset on navigation
-After: 1 App.tsx BackgroundSlideshow = continuous seamless experience
+### Major Tasks
+1. 3D Landing Page Hero (12-16 hours)
+2. Interactive Career Timeline (10-12 hours)
+3. Real-Time Analytics Dashboard (14-18 hours)
+4. Gaming Heritage Integration (8-10 hours)
+5. Three.js Skill Visualization (10-12 hours)
+6. Enhanced Project Showcase (6-8 hours)
+7. Smart Contact Form Enhancements (4-6 hours)
 
-// Image Collection
-astronomyBG1-9.jpg: Complete set with titles, descriptions, and tags
+**Total Estimated Time**: 64-82 hours (2-3 weeks full-time)
+
+[View Full Milestone 3 Details →](./tasks/Milestone3.md)
+
+---
+
+## ⏳ Milestone 4: Polish & Performance - PENDING
+
+**Dependencies**: Milestone 3 complete
+**Estimated Duration**: 2-3 weeks
+
+### Overview
+Optimize performance, ensure accessibility compliance, achieve cross-browser compatibility, and deliver production-ready polish.
+
+### Key Objectives
+- Lighthouse score > 90 across all metrics
+- WCAG 2.1 AA compliance
+- Cross-browser compatibility
+- Bundle optimization (< 500KB total)
+- SEO optimization
+- Comprehensive testing
+- Performance monitoring
+
+### Major Tasks
+1. 3D Performance Optimization (8-12 hours)
+2. Bundle Size Optimization (10-14 hours)
+3. Accessibility Compliance (12-16 hours)
+4. Cross-Browser Testing (8-10 hours)
+5. SEO Optimization (6-8 hours)
+6. Performance Monitoring (4-6 hours)
+7. Testing & Quality Assurance (12-16 hours)
+8. Documentation & Maintenance (4-6 hours)
+
+**Total Estimated Time**: 64-88 hours (2-3 weeks full-time)
+
+[View Full Milestone 4 Details →](./tasks/Milestone4.md)
+
+---
+
+## 📈 Progress Tracking
+
+### Overall Timeline
+
+```
+Week 1-2:  ✅ Milestone 1 - Foundation (COMPLETE)
+Week 3:    🚧 Milestone 0 - Production Deployment (IN PROGRESS)
+Week 4-9:  ⏳ Milestone 2 - API Integration (plixo-api development + frontend)
+Week 10-13: ⏳ Milestone 3 - Advanced Features
+Week 14-16: ⏳ Milestone 4 - Polish & Performance
+Week 17:   🎉 LAUNCH - Full Portfolio Live
 ```
 
-#### **USER EXPERIENCE IMPROVEMENTS**
-- **Seamless Navigation**: No background resets when changing pages
-- **Visual Variety**: 9 professional astronomy images instead of 2
-- **Professional Polish**: Vignette overlay and backdrop blur for content legibility
-- **Smooth Animations**: 60fps performance with precise timing coordination
+### Current Session Status
 
-#### **PERFORMANCE METRICS**
-- **Build Times**: Consistent ~700ms builds throughout development
-- **Bundle Size**: Maintained optimal size despite enhanced functionality
-- **Type Safety**: 100% TypeScript compliance with zero compilation errors
-- **Animation Quality**: RequestAnimationFrame-based for 60fps performance
+**Last Updated**: 2025-11-01
+**Current Version**: 1.0.3
+**Current Branch**: main
 
-#### **BLOCKERS RESOLVED**
-1. **Background Reset Issue** → App-level slideshow implementation
-2. **Animation Timing Problems** → Mathematical coordination system
-3. **Limited Image Variety** → Integration of 9 existing astronomy images
-4. **Code Duplication** → Centralized slideshow management
+**Recent Work**:
+- ✅ Updated favicon to new logo (g3dlogo.svg)
+- ✅ Bumped version to 1.0.3
+- ✅ Rebuilt application
+- ✅ Cache-busting added to favicon
+- ✅ Created comprehensive PRD for plixo-api
+- ✅ Migrated all phases to milestone structure
 
-### Current Session Progress Summary (2025-09-29)
-**Foundation Phase**: ✅ 100% COMPLETE - Professional-grade frontend with seamless UX
-- ✅ **Technical Excellence**: React 19.1.1, TypeScript strict mode, optimized build pipeline
-- ✅ **Component Architecture**: Complete atomic design system with clean separation
-- ✅ **Animation System**: Production-ready slideshow with 60fps performance
-- ✅ **User Experience**: Continuous background slideshow with 9 high-quality images
-- ✅ **Content Readability**: Enhanced with vignette overlays and backdrop blur
-- ✅ **Code Quality**: Single-responsibility components with zero duplication
+**Next Actions**:
+1. Complete Milestone 0 pre-deployment verification
+2. Deploy to CloudFlare Pages
+3. Transfer domains
+4. Begin plixo-api development (separate terminal/repo)
 
-**Phase 2 Data Foundation**: ✅ 100% COMPLETE - Ready for API development
-- ✅ **Type Safety**: Comprehensive TypeScript interfaces for all data structures
-- ✅ **Authentic Content**: Production-ready seed data based on actual career history
-- ✅ **Privacy Compliance**: GDPR-compliant analytics schema design
-- ✅ **Configuration Management**: Feature flags and settings infrastructure
+---
 
-**Interactive Project Enhancement**: ✅ 100% COMPLETE - Professional project showcase
-- ✅ **SlideInImage Component**: Sophisticated slide-in preview system with animation
-- ✅ **ProjectCard Layout**: Professional layout with proper footer positioning and content hierarchy
-- ✅ **Page Scrolling**: Perfect vertical scroll behavior, eliminated horizontal scroll
-- ✅ **Portfolio Integration**: Added authentic Plixo Portfolio project with real tech stack
-- ✅ **User Experience**: Smooth interactions, proper spacing, responsive design
+## 🔗 Related Documentation
 
-**Current Status**: EXCELLENT - Production-ready frontend with interactive features
-**Next Session Priority**: Begin Phase 2 Priority 2 - Local API Service Setup (Week 4 milestone)
-**Confidence Level**: VERY HIGH - Complete frontend foundation enables rapid API development
+### Project Management
+- **CLAUDE.md** - Session history and development notes
+- **PLANNING.md** - Technical architecture (if exists)
+- **DECISIONS.md** - Architectural decision records (if exists)
+- **DEPLOYMENT.md** - CloudFlare deployment guide
+
+### API Development
+- **../plixo-api/PRD.md** - Complete API product requirements
+- **../plixo-api/tasks/** - API development milestones
+
+### Repository
+- **README.md** - Project overview and setup
+- **package.json** - Dependencies and scripts
+
+---
+
+## 📝 Notes
+
+### Key Technologies
+- **Frontend**: React 19.1.1, TypeScript 5.8.3, Vite 7.1.12
+- **Styling**: Tailwind CSS v4.1.13
+- **Routing**: React Router v7.9.5
+- **Deployment**: CloudFlare Pages
+- **API** (future): CloudFlare Pages Functions + D1 Database
+
+### Performance Baselines
+- Bundle: 100.64KB gzipped
+- Build time: ~700ms
+- TypeScript: Strict mode, zero errors
+- Components: 100% type-safe
+
+### Deployment Workflow (After M0)
+```bash
+# Feature development
+git checkout -b feature/new-feature
+# ... make changes ...
+git commit -m "feat: description"
+git push origin feature/new-feature
+
+# Create PR → CloudFlare creates preview deployment
+# Review → Merge to main → Automatic production deployment
+```
+
+---
+
+## 🎯 Success Criteria Summary
+
+### Milestone 0 (Current)
+- ✅ Live at plixo.com
+- ✅ Automatic GitHub deployments
+- ✅ All features working in production
+
+### Milestone 2 (API Integration)
+- ✅ Dynamic portfolio content
+- ✅ Functional contact form
+- ✅ Live GitHub stats
+- ✅ Analytics tracking
+
+### Milestone 3 (Advanced Features)
+- ✅ 3D elements performing at 60fps
+- ✅ Interactive timeline engaging
+- ✅ Real-time features functional
+
+### Milestone 4 (Polish)
+- ✅ Lighthouse score > 90
+- ✅ WCAG 2.1 AA compliant
+- ✅ Cross-browser compatible
+- ✅ Production-ready
+
+---
+
+**For detailed task breakdowns, acceptance criteria, and implementation notes, see individual milestone files in `./tasks/`**
