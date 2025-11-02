@@ -1,13 +1,42 @@
-import { Icon } from "../components/atoms";
+import { useState, useEffect } from "react";
 import { ProjectCard } from "../components/molecules";
-import { projects } from "../config/temp-data";
+import { LoadingSpinner } from "../components/atoms";
+
+interface WorkProject {
+  title: string;
+  description: string;
+  technologies: string[];
+  status: "Live" | "Demo" | "In Development" | "Archived" | "Prototype";
+  image?: string;
+  liveUrl?: string;
+  githubUrl?: string;
+  demoUrl?: string;
+  featured?: boolean;
+}
 
 const Work = () => {
-  // Get featured projects sorted by priority
-  const featuredProjects = projects
-    .filter((project) => project.featured)
-    .sort((a, b) => a.priority - b.priority)
-    .slice(0, 6); // Show top 6 featured projects
+  const [projects, setProjects] = useState<WorkProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch("/config/work-projects.json");
+        if (!response.ok) {
+          throw new Error("Failed to load projects");
+        }
+        const data = await response.json();
+        setProjects(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load projects");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   return (
     <div className="relative min-h-full text-white overflow-y-auto">
@@ -23,70 +52,39 @@ const Work = () => {
           </p>
         </div>
 
-        {/* Project Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-          {featuredProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              title={project.title}
-              description={project.description}
-              technologies={project.technologies
-                .filter((tech) => tech.primary)
-                .map((tech) => tech.name)}
-              status={project.status}
-              image={project.images.thumbnail}
-              liveUrl={project.urls.live}
-              githubUrl={project.urls.github}
-              demoUrl={project.urls.demo}
-              featured={project.featured}
-            />
-          ))}
-        </div>
-
-        {/* Skills Section */}
-        <section className="text-center">
-          <h2 className="text-3xl font-bold mb-8">Technology Leadership</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-xl bg-slate-800/30">
-              <Icon
-                name="work"
-                size="xl"
-                className="text-blue-400 mx-auto mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-3">
-                Architecture & Design
-              </h3>
-              <p className="text-slate-300">
-                Designing scalable systems that grow with business needs while
-                maintaining performance and reliability.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-slate-800/30">
-              <Icon
-                name="user"
-                size="xl"
-                className="text-purple-400 mx-auto mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-3">Team Leadership</h3>
-              <p className="text-slate-300">
-                Mentoring engineers, establishing best practices, and fostering
-                collaborative development cultures.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-slate-800/30">
-              <Icon
-                name="gamepad"
-                size="xl"
-                className="text-cyan-400 mx-auto mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-3">Innovation</h3>
-              <p className="text-slate-300">
-                Bringing gaming-inspired problem-solving and creative thinking
-                to enterprise challenges.
-              </p>
-            </div>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-20">
+            <LoadingSpinner variant="primary" size="lg" />
           </div>
-        </section>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-20">
+            <p className="text-red-400 text-lg">{error}</p>
+          </div>
+        )}
+
+        {/* Projects Display */}
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {projects.map((project, index) => (
+              <ProjectCard
+                key={index}
+                title={project.title}
+                description={project.description}
+                technologies={project.technologies}
+                status={project.status}
+                image={project.image}
+                liveUrl={project.liveUrl}
+                githubUrl={project.githubUrl}
+                demoUrl={project.demoUrl}
+                featured={project.featured}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

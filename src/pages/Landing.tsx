@@ -25,16 +25,6 @@ const Landing = () => {
             </p>
             <p className="text-white/40 text-xs mt-1">v{packageJson.version}</p>
           </div>
-
-          {/* Subtle CTA */}
-          <div className="mt-12 opacity-75">
-            <a
-              href="/work"
-              className="text-white/80 hover:text-white border-b border-white/30 hover:border-white transition-colors pb-1 text-sm"
-            >
-              View Work
-            </a>
-          </div>
         </div>
       </section>
     </div>

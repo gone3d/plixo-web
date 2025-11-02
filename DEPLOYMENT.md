@@ -354,39 +354,85 @@ npx wrangler pages deploy dist --project-name=plixo-landing --branch=main
 
 ---
 
-## Environment Variables (Future API Integration)
+## Environment Variables (API Integration)
 
-When connecting to plixo-api backend:
+The frontend requires environment variables to connect to the plixo-api backend.
 
-### Step 1: Add Environment Variables
+### Local Development Setup
 
+Environment files are already configured in the repository:
+
+**`.env.development`** (committed to git):
 ```bash
-# Via Wrangler CLI
-npx wrangler pages secret put VITE_API_URL
-
-# Or via CloudFlare Dashboard:
-# Pages → plixo-portfolio → Settings → Environment variables
+VITE_API_URL=http://localhost:8788
 ```
+- Used by default when running `npm run dev`
+- Points to local API server
 
-### Step 2: Create Environment-Specific Variables
-
-**Production:**
-```
+**`.env.production`** (committed to git):
+```bash
 VITE_API_URL=https://api.plixo.com
 ```
+- Used when running `npm run build`
+- Points to production API
 
-**Preview (for testing):**
+**`.env.development.local`** (gitignored, optional):
+```bash
+# To test local app against PRODUCTION API:
+cp .env.development.local.example .env.development.local
 ```
-VITE_API_URL=https://api-preview.plixo.com
+- Override for local development
+- Takes precedence over `.env.development`
+- Useful for testing local app against production API
+- Automatically gitignored (never committed)
+
+### Environment Configuration Options
+
+| Scenario | Command | API Endpoint | Files Used |
+|----------|---------|--------------|------------|
+| **Local Dev → Local API** | `npm run dev` | http://localhost:8788 | `.env.development` |
+| **Local Dev → Production API** | `npm run dev` | https://api.plixo.com | `.env.development.local` (create from example) |
+| **Production Build** | `npm run build` | https://api.plixo.com | `.env.production` |
+
+### Production Environment Variables
+
+**Set in CloudFlare Dashboard:**
+
+1. Go to: **Pages** → **plixo-web** → **Settings** → **Environment Variables**
+2. Select **Production** environment
+3. Add variable:
+
+| Variable Name | Value | Notes |
+|---------------|-------|-------|
+| `VITE_API_URL` | `https://api.plixo.com` | Backend API URL |
+
+**For Preview/Development environment**, optionally add:
+```
+VITE_API_URL=http://localhost:8788
 ```
 
-### Step 3: Access in React Code
+### Access in React Code
+
+The API client automatically uses the environment variable:
 
 ```typescript
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8787'
+// src/services/api.ts
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788'
+
+export const apiClient = axios.create({
+  baseURL: API_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
 ```
 
-**Important:** Vite requires `VITE_` prefix for environment variables to be exposed to client-side code.
+**Important Notes:**
+- ✅ Vite requires `VITE_` prefix for client-side environment variables
+- ✅ Environment variables are embedded at build time
+- ✅ Changes require rebuild and redeploy
+- ✅ Never expose secrets (API keys, tokens) in `VITE_` variables
 
 ---
 

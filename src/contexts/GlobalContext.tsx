@@ -11,6 +11,7 @@ import type {
   PortfolioOverview
 } from '../types/portfolio'
 import { tempConfig } from '../config/temp-data'
+import { apiClient } from '../services/api'
 
 /**
  * Global State Interface
@@ -81,6 +82,13 @@ export interface GlobalState {
   development: {
     dataSource: 'config' | 'api'
   }
+
+  // API Health Status
+  api: {
+    status: 'online' | 'offline' | 'checking'
+    version?: string
+    lastChecked?: number
+  }
 }
 
 /**
@@ -126,6 +134,11 @@ export type GlobalAction =
 
   // Development Actions
   | { type: 'SET_DATA_SOURCE'; payload: 'config' | 'api' }
+
+  // API Health Actions
+  | { type: 'API_HEALTH_CHECK_START' }
+  | { type: 'API_HEALTH_CHECK_SUCCESS'; payload: { version: string } }
+  | { type: 'API_HEALTH_CHECK_ERROR' }
 
   // Bulk Actions
   | { type: 'INITIALIZE_FROM_CONFIG'; payload: typeof tempConfig }
@@ -178,6 +191,12 @@ const initialState: GlobalState = {
 
   development: {
     dataSource: 'config' // Default to config for development
+  },
+
+  api: {
+    status: 'checking',
+    version: undefined,
+    lastChecked: undefined
   }
 }
 
@@ -389,6 +408,33 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
         development: { ...state.development, dataSource: action.payload }
       }
 
+    // API Health Actions
+    case 'API_HEALTH_CHECK_START':
+      return {
+        ...state,
+        api: { ...state.api, status: 'checking' }
+      }
+
+    case 'API_HEALTH_CHECK_SUCCESS':
+      return {
+        ...state,
+        api: {
+          status: 'online',
+          version: action.payload.version,
+          lastChecked: Date.now()
+        }
+      }
+
+    case 'API_HEALTH_CHECK_ERROR':
+      return {
+        ...state,
+        api: {
+          status: 'offline',
+          version: undefined,
+          lastChecked: Date.now()
+        }
+      }
+
     // Bulk Actions
     case 'INITIALIZE_FROM_CONFIG':
       return {
@@ -437,6 +483,7 @@ export interface GlobalContextType {
     setCurrentPage: (page: string) => void
     trackInteraction: (type: string, element?: string) => void
     setDataSource: (dataSource: 'config' | 'api') => void
+    checkApiHealth: () => Promise<void>
     initializeFromTempConfig: () => void
   }
 
@@ -527,6 +574,25 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
       dispatch({ type: 'SET_DATA_SOURCE', payload: dataSource })
     },
 
+    checkApiHealth: async () => {
+      dispatch({ type: 'API_HEALTH_CHECK_START' })
+      try {
+        const response = await apiClient.get('/health')
+        // Production API returns: { status: "healthy", version: "1.1.1", timestamp: "...", database: "connected" }
+        if (response.data && response.data.version) {
+          dispatch({
+            type: 'API_HEALTH_CHECK_SUCCESS',
+            payload: { version: response.data.version }
+          })
+        } else {
+          dispatch({ type: 'API_HEALTH_CHECK_ERROR' })
+        }
+      } catch (error) {
+        console.error('API health check failed:', error)
+        dispatch({ type: 'API_HEALTH_CHECK_ERROR' })
+      }
+    },
+
     initializeFromTempConfig: () => {
       dispatch({ type: 'INITIALIZE_FROM_CONFIG', payload: tempConfig })
     }
@@ -563,6 +629,11 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
   // Initialize from temp config on mount
   useEffect(() => {
     actions.initializeFromTempConfig()
+  }, [])
+
+  // Check API health on mount
+  useEffect(() => {
+    actions.checkApiHealth()
   }, [])
 
   // Analytics session initialization
