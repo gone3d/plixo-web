@@ -1,0 +1,13 @@
+[
+  {
+    "title": "Plixo Portfolio Website",
+    "description": "Modern React portfolio showcasing technical leadership with real-time analytics, seamless animations, and encrypted API integration",
+    "technologies": ["React", "TypeScript", "Tailwind CSS", "Vite"],
+    "status": "In Development",
+    "image": "/assets/plixoScreenshot.png",
+    "liveUrl": "https://plixo.com",
+    "githubUrl": "https://github.com/gone3d/plixo-web",
+    "demoUrl": "/work",
+    "featured": true
+  }
+]

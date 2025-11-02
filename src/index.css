@@ -17,6 +17,17 @@
     @apply transition-colors duration-200 min-h-screen w-screen overflow-x-hidden m-0 p-0;
   }
 
+  /* Override browser autofill styles */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #ffffff;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px transparent;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     @apply w-2;
@@ -109,5 +120,48 @@
   /* Custom transforms */
   .transform-gpu {
     transform: translate3d(0, 0, 0);
+  }
+
+  /* Modal animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 200ms ease-out;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 200ms ease-out;
+  }
+
+  /* Sonner toast custom styles */
+  [data-sonner-toast] {
+    background: rgba(15, 23, 42, 0.4) !important;
+    backdrop-filter: blur(12px) !important;
+  }
+
+  [data-sonner-toast][data-type="error"] {
+    border-color: rgba(239, 68, 68, 0.5) !important;
+  }
+
+  [data-sonner-toast][data-type="success"] {
+    border-color: rgba(34, 197, 94, 0.5) !important;
   }
 }

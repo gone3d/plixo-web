@@ -1,5 +1,6 @@
-import { forwardRef } from 'react'
+import { forwardRef, useState } from 'react'
 import type { InputHTMLAttributes } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { cn } from '../../utils/cn'
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -24,18 +25,22 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       error,
       helpText,
       id,
+      type,
       ...props
     },
     ref
   ) => {
+    const [showPassword, setShowPassword] = useState(false)
     const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
+    const isPasswordField = type === 'password'
+    const inputType = isPasswordField && showPassword ? 'text' : type
 
-    const baseStyles = 'block w-full border rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-400'
+    const baseStyles = 'block w-full border rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-500 bg-transparent'
 
     const variants = {
-      default: 'bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-500',
-      error: 'bg-slate-800 border-red-500 text-white focus:border-red-500 focus:ring-red-500',
-      success: 'bg-slate-800 border-green-500 text-white focus:border-green-500 focus:ring-green-500'
+      default: 'border-white/20 text-white focus:border-blue-500 focus:ring-blue-500 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_transparent]',
+      error: 'border-red-500 text-white focus:border-red-500 focus:ring-red-500',
+      success: 'border-green-500 text-white focus:border-green-500 focus:ring-green-500'
     }
 
     const sizes = {
@@ -72,19 +77,37 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
           <input
             id={inputId}
+            type={inputType}
             className={cn(
               baseStyles,
               variants[error ? 'error' : variant],
               sizes[size],
               leftIcon && 'pl-10',
-              rightIcon && 'pr-10',
+              (rightIcon || isPasswordField) && 'pr-10',
               className
             )}
             ref={ref}
             {...props}
           />
 
-          {rightIcon && (
+          {/* Password visibility toggle */}
+          {isPasswordField && (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className={iconSizes[size]} />
+              ) : (
+                <Eye className={iconSizes[size]} />
+              )}
+            </button>
+          )}
+
+          {/* Right icon (only shown if not a password field) */}
+          {rightIcon && !isPasswordField && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <span className={cn('text-slate-400', iconSizes[size])}>
                 {rightIcon}
