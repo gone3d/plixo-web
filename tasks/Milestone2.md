@@ -32,15 +32,16 @@ Integrate plixo-web frontend with plixo-api backend to enable dynamic portfolio 
 
 ## Tasks
 
-### 2.1 API Service Layer Setup
+### 2.1 API Service Layer Setup ✅ COMPLETE
 
 **Effort**: ⏱️ S (4-6 hours)
 **Priority**: 🔴 CRITICAL
 **Repository**: plixo-web
+**Status**: COMPLETE (2025-11-01)
 
 #### Implementation Tasks
 
-- [ ] **Create API client service**
+- [x] **Create API client service**
   ```typescript
   // src/services/api.ts
   - Configure base URL (api.plixo.com)
@@ -50,13 +51,13 @@ Integrate plixo-web frontend with plixo-api backend to enable dynamic portfolio 
   - Configure timeout settings
   ```
 
-- [ ] **Install dependencies**
+- [x] **Install dependencies**
   ```bash
   npm install @tanstack/react-query axios
   npm install -D @tanstack/react-query-devtools
   ```
 
-- [ ] **Configure React Query**
+- [x] **Configure React Query**
   ```typescript
   // src/main.tsx
   - Set up QueryClient with caching strategy
@@ -65,17 +66,260 @@ Integrate plixo-web frontend with plixo-api backend to enable dynamic portfolio 
   - Set up dev tools (development only)
   ```
 
-- [ ] **Create environment configuration**
+- [x] **Create environment configuration**
   ```typescript
   // .env files
   .env.development:  VITE_API_URL=http://localhost:8788
   .env.production:   VITE_API_URL=https://api.plixo.com
   ```
 
+- [x] **Create health check hook**
+  ```typescript
+  // src/hooks/useHealth.ts
+  - Test API connectivity
+  - Verify CORS configuration
+  - Display connection status
+  ```
+
 **Acceptance Criteria**:
 - ✅ API client configured with proper error handling
 - ✅ React Query set up with optimal caching
 - ✅ Environment-based URL configuration working
+- ✅ CORS issues resolved (localhost:5173-5175 allowed)
+- ✅ Health endpoint verified working
+
+**Results**:
+- Bundle size: 125.75 KB gzipped (+25KB for React Query)
+- API connection successful: health endpoint returns proper JSON
+- Axios interceptors configured for JWT authentication
+- React Query DevTools integrated for development
+
+---
+
+### 2.1.1 Role-Based Access Control (RBAC) Implementation
+
+**Effort**: ⏱️ M (6-8 hours)
+**Priority**: 🔴 CRITICAL
+**Repository**: plixo-web
+**Status**: ⏳ PENDING
+
+**Why This Task**: Implement authentication and role-based access control BEFORE building more UI to ensure all new features are properly secured from the start.
+
+#### Three-Role System
+
+Based on plixo-api PRD.md, implement support for three user roles:
+
+1. **Guest Role** (Default for all visitors)
+   - Shared account: username `guest`, password `#Gone3D2025`
+   - Can view landing page only
+   - Can submit contact form messages (one-way communication)
+   - Cannot view submitted messages
+   - No access to other pages until logged in
+
+2. **User Role** (Individual accounts, created by admin)
+   - Can view all pages and portfolio content
+   - Can manage own contact form messages (view/edit/delete)
+   - Future: game accounts and personalized features
+   - Cannot access admin features
+
+3. **Admin Role** (Full system access)
+   - Username configurable, password `#TheFarm2025`
+   - Full access to all pages and features
+   - Can manage all users and content
+   - Can view and moderate all messages
+   - Access to analytics and system logs
+
+#### Implementation Tasks
+
+- [ ] **Create AuthContext with role support**
+  ```typescript
+  // src/contexts/AuthContext.tsx
+  interface User {
+    id: string
+    username: string
+    email: string
+    role: 'guest' | 'user' | 'admin'
+  }
+
+  interface AuthContextType {
+    user: User | null
+    isAuthenticated: boolean
+    isLoading: boolean
+    login: (username: string, password: string) => Promise<void>
+    logout: () => void
+    hasRole: (role: 'guest' | 'user' | 'admin') => boolean
+    hasAnyRole: (roles: Array<'guest' | 'user' | 'admin'>) => boolean
+  }
+  ```
+
+- [ ] **Create authentication service**
+  ```typescript
+  // src/services/auth.ts
+  - POST /api/auth/login (username, password)
+  - POST /api/auth/logout
+  - POST /api/auth/refresh (token refresh)
+  - GET /api/auth/me (get current user info)
+  - Store JWT token in localStorage
+  - Handle token refresh on expiry
+  ```
+
+- [ ] **Create useAuth hook**
+  ```typescript
+  // src/hooks/useAuth.ts
+  - Consume AuthContext
+  - Provide login/logout/user state
+  - Handle authentication errors
+  - Manage loading states
+  ```
+
+- [ ] **Create ProtectedRoute component**
+  ```typescript
+  // src/components/ProtectedRoute.tsx
+  - Check if user is authenticated
+  - Check if user has required role(s)
+  - Redirect to landing if not authenticated
+  - Show loading state while checking auth
+  ```
+
+- [ ] **Update App.tsx routing**
+  ```typescript
+  // All routes except "/" require authentication
+  <Route path="/" element={<Landing />} />
+  <Route path="/work" element={<ProtectedRoute><Work /></ProtectedRoute>} />
+  <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+  <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+  <Route path="/connect" element={<ProtectedRoute><Connect /></ProtectedRoute>} />
+  ```
+
+- [ ] **Update Navigation component**
+  ```typescript
+  // Only show navigation items if authenticated
+  // Desktop: Show only "plixo.com" logo + "Login" button when not authenticated
+  // Mobile: Hide menu button when not authenticated
+  ```
+
+**Acceptance Criteria**:
+- ✅ AuthContext provides global authentication state
+- ✅ Login/logout functionality working
+- ✅ JWT token stored and managed properly
+- ✅ Role-based access control implemented
+- ✅ Protected routes redirect unauthenticated users to landing
+- ✅ Navigation shows only logo + Login when not authenticated
+- ✅ Guest, User, and Admin roles properly differentiated
+
+**Permission Matrix Reference**:
+
+| Resource | Admin | User | Guest |
+|----------|-------|------|-------|
+| View landing page | ✅ | ✅ | ✅ |
+| View portfolio pages | ✅ | ✅ | ❌ |
+| Submit contact form | ✅ | ✅ | ✅ |
+| View own messages | ✅ | ✅ | ❌ |
+| View all messages | ✅ | ❌ | ❌ |
+| Manage content | ✅ | ❌ | ❌ |
+| View analytics | ✅ | ❌ | ❌ |
+
+---
+
+### 2.1.2 Login Modal & Authentication UI
+
+**Effort**: ⏱️ M (6-8 hours)
+**Priority**: 🔴 CRITICAL
+**Repository**: plixo-web
+**Status**: ⏳ PENDING
+**Dependencies**: Task 2.1.1 (RBAC)
+
+**Why This Task**: Build reusable modal system and login form to enable user authentication through clean, accessible UI.
+
+#### Implementation Tasks
+
+- [ ] **Create Modal molecule component**
+  ```typescript
+  // src/components/molecules/Modal.tsx
+  - Generic, reusable modal wrapper
+  - Overlay with backdrop blur
+  - Close on ESC key or backdrop click
+  - Accessible (ARIA labels, focus trap)
+  - Smooth open/close animations
+  - Responsive sizing (sm, md, lg)
+  ```
+
+- [ ] **Create LoginForm molecule component**
+  ```typescript
+  // src/components/molecules/LoginForm.tsx
+  - Use Modal component as wrapper
+  - Username and password inputs
+  - Form validation (required fields)
+  - Loading state during authentication
+  - Error messaging for failed login
+  - Success feedback on successful login
+  - Close modal after successful login
+  ```
+
+- [ ] **Add Login button to Navigation**
+  ```typescript
+  // Update Navigation component
+  // When not authenticated:
+  - Desktop: Show "plixo.com" logo (upper left) + "Login" button (upper right)
+  - Mobile: Show logo + "Login" button (no menu)
+
+  // When authenticated:
+  - Show full navigation with all menu items
+  - Show user indicator with logout option
+  ```
+
+- [ ] **Update Landing page**
+  ```typescript
+  // Remove from Landing page:
+  - "View Work" CTA link
+  - Temporary API health check UI
+
+  // Keep on Landing page:
+  - Hero section with name and title
+  - "A Continuously Evolving Work in Progress" notice
+  - Version number
+  - Background slideshow
+  ```
+
+- [ ] **Add form validation**
+  ```bash
+  npm install react-hook-form zod @hookform/resolvers
+  ```
+  ```typescript
+  // LoginForm validation schema
+  - Username: required, min 3 characters
+  - Password: required, min 8 characters
+  - Real-time validation feedback
+  ```
+
+- [ ] **Implement login flow UX**
+  ```typescript
+  1. User clicks "Login" button in Navigation
+  2. Modal opens with LoginForm
+  3. User enters credentials
+  4. Form validates inputs
+  5. On submit: call auth.login()
+  6. Show loading state
+  7. On success: close modal, redirect to /work or previous page
+  8. On error: show error message, keep modal open
+  ```
+
+**Acceptance Criteria**:
+- ✅ Modal component is reusable and accessible
+- ✅ LoginForm displays in modal with proper styling
+- ✅ Form validation provides helpful feedback
+- ✅ Login button appears in Navigation when not authenticated
+- ✅ Navigation menu hidden until user logs in
+- ✅ Landing page updated (no View Work link, no health check UI)
+- ✅ Successful login redirects to appropriate page
+- ✅ Failed login shows clear error message
+- ✅ Modal closes on successful authentication
+
+**Design Notes**:
+- Modal should match dark theme (bg-black/40 backdrop, slate-800 modal background)
+- LoginForm should use existing Button and Input atoms
+- Smooth transitions (fade in/out for modal, scale animation)
+- Mobile-responsive (full width on mobile, centered on desktop)
 
 ---
 
