@@ -26,9 +26,23 @@ const BackgroundSlideshow = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fadeOpacity, setFadeOpacity] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(!document.hidden);
   const [slideProgress, setSlideProgress] = useState(0);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const [effectiveDuration, setEffectiveDuration] = useState(transitionTime);
+
+  // Handle page visibility changes to prevent timer buildup when tab is hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsPageVisible(!document.hidden);
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   // Detect actual image aspect ratio and calculate effective duration with speed limit
   useEffect(() => {
@@ -85,7 +99,7 @@ const BackgroundSlideshow = ({
 
   // Slide animation - simple progress from 0 to 100
   useEffect(() => {
-    if (isPaused || images.length <= 1) {
+    if (isPaused || images.length <= 1 || !isPageVisible) {
       return;
     }
 
@@ -101,11 +115,11 @@ const BackgroundSlideshow = ({
     }, 50);
 
     return () => clearInterval(slideInterval);
-  }, [currentIndex, effectiveDuration, isPaused, images.length]);
+  }, [currentIndex, effectiveDuration, isPaused, images.length, isPageVisible]);
 
   // Auto-cycle through images with fade
   useEffect(() => {
-    if (images.length <= 1 || isPaused) {
+    if (images.length <= 1 || isPaused || !isPageVisible) {
       return;
     }
 
@@ -142,7 +156,7 @@ const BackgroundSlideshow = ({
     }, fadeStartDelay);
 
     return () => clearTimeout(timeout);
-  }, [currentIndex, effectiveDuration, isPaused, images.length, fadeDuration]);
+  }, [currentIndex, effectiveDuration, isPaused, images.length, fadeDuration, isPageVisible]);
 
   // Preload next images
   useEffect(() => {
