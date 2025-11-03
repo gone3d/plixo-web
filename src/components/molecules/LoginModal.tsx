@@ -32,9 +32,10 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       // Reset form
       setUsername("");
       setPassword("");
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-      toast.error(err.message || "Login failed");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -50,9 +51,10 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       onClose();
       // Reset state
       setShowGuestLogin(false);
-    } catch (err: any) {
-      setError(err.message || "Guest login failed");
-      toast.error(err.message || "Guest login failed");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Guest login failed";
+      setError(errorMessage);
+      toast.error(errorMessage);
       // Reset Turnstile on error
       setShowGuestLogin(false);
     }
