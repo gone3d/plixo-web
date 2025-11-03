@@ -18,6 +18,7 @@ export interface PanConfig {
   easing?: (t: number) => number
   startPosition?: number // 0-100 percentage
   endPosition?: number // 0-100 percentage
+  maxSpeedPxPerSec?: number // Maximum pan speed in pixels per second
 }
 
 /**
@@ -36,7 +37,54 @@ export const DEFAULT_PAN_CONFIG: PanConfig = {
   direction: 'auto',
   easing: (t: number) => t, // Linear for smooth continuous movement
   startPosition: 0,
-  endPosition: 100
+  endPosition: 100,
+  maxSpeedPxPerSec: undefined // No speed limit by default
+}
+
+/**
+ * Calculate pan distance in pixels based on direction and viewport
+ */
+export function calculatePanDistancePixels(
+  viewportDimensions: Dimensions,
+  imageDimensions: Dimensions,
+  direction: 'horizontal' | 'vertical' | 'none',
+  startPosition: number = 0, // 0-100
+  endPosition: number = 100 // 0-100
+): number {
+  if (direction === 'none') return 0
+
+  const imageRatio = imageDimensions.width / imageDimensions.height
+
+  if (direction === 'horizontal') {
+    // Image is full height, calculate actual image width in pixels
+    const imageWidthPx = viewportDimensions.height * imageRatio
+    const overflowPx = imageWidthPx - viewportDimensions.width
+    // Pan range is the percentage of overflow
+    const panRange = (endPosition - startPosition) / 100
+    return overflowPx * panRange
+  } else {
+    // direction === 'vertical'
+    // Image is full width, calculate actual image height in pixels
+    const imageHeightPx = viewportDimensions.width / imageRatio
+    const overflowPx = imageHeightPx - viewportDimensions.height
+    // Pan range is the percentage of overflow
+    const panRange = (endPosition - startPosition) / 100
+    return overflowPx * panRange
+  }
+}
+
+/**
+ * Calculate duration needed to stay under speed limit
+ */
+export function calculateSpeedLimitDuration(
+  panDistancePixels: number,
+  maxSpeedPxPerSec: number
+): number {
+  if (panDistancePixels === 0 || maxSpeedPxPerSec <= 0) {
+    return DEFAULT_PAN_CONFIG.duration
+  }
+  // duration (ms) = distance (px) / speed (px/sec) * 1000
+  return (panDistancePixels / maxSpeedPxPerSec) * 1000
 }
 
 /**
@@ -153,13 +201,33 @@ export class PanningController {
   private currentProgress: number = 0
   private updatePosition: (progress: number) => void
   private config: PanConfig
+  private panDistancePixels: number = 0
+  private lastUpdateTime: number = 0
+  private currentSpeedPxPerSec: number = 0
+  private onSpeedUpdate?: (speed: number) => void
 
   constructor(
     updatePosition: (progress: number) => void,
-    config: PanConfig = DEFAULT_PAN_CONFIG
+    config: PanConfig = DEFAULT_PAN_CONFIG,
+    onSpeedUpdate?: (speed: number) => void
   ) {
     this.updatePosition = updatePosition
     this.config = config
+    this.onSpeedUpdate = onSpeedUpdate
+  }
+
+  /**
+   * Set the pan distance in pixels (for speed calculation)
+   */
+  setPanDistance(pixels: number): void {
+    this.panDistancePixels = pixels
+  }
+
+  /**
+   * Get current speed in pixels per second
+   */
+  get speedPxPerSec(): number {
+    return this.currentSpeedPxPerSec
   }
 
   /**
@@ -173,6 +241,7 @@ export class PanningController {
 
       this.isRunning = true
       this.startTime = performance.now()
+      this.lastUpdateTime = this.startTime
       this.currentProgress = this.config.startPosition || 0
 
       const animate = (currentTime: number) => {
@@ -183,11 +252,27 @@ export class PanningController {
         const endPos = (this.config.endPosition || 100) / 100
         const easing = this.config.easing || ((t: number) => t)
 
+        const previousProgress = this.currentProgress
         this.currentProgress = startPos + (endPos - startPos) * easing(progress)
         this.updatePosition(this.currentProgress)
 
+        // Calculate current speed in pixels per second
+        if (this.panDistancePixels > 0) {
+          const deltaTime = (currentTime - this.lastUpdateTime) / 1000 // Convert to seconds
+          const deltaProgress = this.currentProgress - previousProgress
+          const deltaPixels = deltaProgress * this.panDistancePixels
+          this.currentSpeedPxPerSec = deltaTime > 0 ? deltaPixels / deltaTime : 0
+          this.lastUpdateTime = currentTime
+
+          // Notify speed update callback immediately
+          if (this.onSpeedUpdate) {
+            this.onSpeedUpdate(this.currentSpeedPxPerSec)
+          }
+        }
+
         if (progress >= 1) {
           this.isRunning = false
+          this.currentSpeedPxPerSec = 0
           resolve()
           return
         }

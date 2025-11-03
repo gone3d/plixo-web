@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navigation, BackgroundSlideshow } from "./components/molecules";
+import { BackgroundSpeedDebug } from "./components/atoms";
 import { Landing, Work, About, Insights, Connect } from "./pages";
 import { GlobalProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -33,7 +34,11 @@ function App() {
               images={backgroundImages}
               transitionTime={18000}
               displayMode="slide"
+              maxSpeedPxPerSec={15}
             />
+
+            {/* Background Speed Debug Display */}
+            <BackgroundSpeedDebug />
 
             <Navigation />
 
