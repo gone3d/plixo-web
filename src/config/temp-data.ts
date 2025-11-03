@@ -65,6 +65,142 @@ export const portfolioOverview: PortfolioOverview = {
  */
 export const projects: Project[] = [
   {
+    id: "tenebrae-platform",
+    title: "Tenebrae - Encrypted Contact & Analytics Platform",
+    description: "Secure communication management platform with privacy-first visitor analytics and multi-user admin dashboard",
+    longDescription: "Full-stack encrypted contact form system with sophisticated bot protection and real-time analytics. Built on Cloudflare Workers serverless architecture with React frontend, featuring end-to-end AES-256-GCM encryption, browser fingerprinting for privacy-compliant visitor tracking, and comprehensive admin dashboard with role-based access control. Demonstrates enterprise-grade security architecture combined with zero-infrastructure deployment patterns.",
+
+    technologies: [
+      { name: "React", category: "frontend", proficiency: 5, primary: true },
+      { name: "TypeScript", category: "frontend", proficiency: 5, primary: true },
+      { name: "Cloudflare Workers", category: "backend", proficiency: 5, primary: true },
+      { name: "Cloudflare D1", category: "database", proficiency: 4, primary: true },
+      { name: "Vite", category: "tools", proficiency: 4, primary: true },
+      { name: "Tailwind CSS", category: "frontend", proficiency: 5, primary: false },
+      { name: "ReCharts", category: "frontend", proficiency: 4, primary: false },
+      { name: "Web Crypto API", category: "specialized", proficiency: 5, primary: true },
+      { name: "Cloudflare Turnstile", category: "specialized", proficiency: 4, primary: false }
+    ],
+
+    category: "personal",
+    status: "Live",
+
+    metrics: {
+      performance: "66 KB gzipped bundle, sub-3s builds",
+      technical: "End-to-end AES-256-GCM encryption, zero-infrastructure deployment",
+      impact: "Privacy-first analytics without third-party trackers",
+      growth: "Multi-user RBAC with sophisticated bot protection"
+    },
+
+    urls: {
+      live: "https://www.tenebrae.ai",
+      github: "https://github.com/gone3d/tenebraeV2",
+      demo: "https://tenebrae.plixo.com"
+    },
+
+    images: {
+      thumbnail: "/assets/work/tenebrae_1.jpg",
+      screenshots: [
+        "/assets/work/tenebrae_1.jpg"
+      ]
+    },
+
+    featured: true,
+    priority: 0,
+    dateCreated: "2024-08-01",
+    lastUpdated: "2024-10-14",
+
+    teamSize: 1,
+    role: "Full-Stack Architect & Lead Developer",
+    duration: "3 months",
+
+    businessImpact: "Production-ready encrypted contact platform serving real clients with comprehensive analytics and zero-downtime serverless architecture. Demonstrates ability to architect secure systems with enterprise-grade encryption and privacy-compliant analytics.",
+
+    technicalChallenges: [
+      "Implementing end-to-end AES-256-GCM encryption for contact form submissions",
+      "Building privacy-first analytics with browser fingerprinting (no cookies/trackers)",
+      "Designing multi-layered bot protection (CAPTCHA + honeypot + rate limiting)",
+      "Creating serverless architecture on Cloudflare Workers with D1 database",
+      "Developing role-based admin dashboard with session tracking and geolocation"
+    ],
+
+    learningsAndGrowth: [
+      "Mastered Cloudflare Workers serverless architecture and edge computing",
+      "Deep expertise in Web Crypto API and encryption best practices",
+      "Advanced bot protection strategies and CAPTCHA integration",
+      "Privacy-compliant analytics design meeting GDPR requirements",
+      "Zero-infrastructure deployment with git-based CI/CD"
+    ]
+  },
+  {
+    id: "hourlings-writers-platform",
+    title: "Hourlings - Collaborative Writers Portal",
+    description: "Modern writers group platform with inline commenting, submission cycles, and collaborative feedback system",
+    longDescription: "Comprehensive writing community platform enabling creative writers to submit works, provide detailed feedback through inline and threaded comments, and manage organized submission cycles. Features sophisticated text selection system for inline commenting with position tracking, rich text editing with Quill, multi-theme support, and serverless Cloudflare Workers backend. Demonstrates full-stack expertise with innovative inline commenting architecture and production-ready collaborative features.",
+
+    technologies: [
+      { name: "React", category: "frontend", proficiency: 5, primary: true },
+      { name: "TypeScript", category: "frontend", proficiency: 5, primary: true },
+      { name: "Cloudflare Workers", category: "backend", proficiency: 5, primary: true },
+      { name: "Cloudflare D1", category: "database", proficiency: 4, primary: true },
+      { name: "Vite", category: "tools", proficiency: 4, primary: true },
+      { name: "Tailwind CSS", category: "frontend", proficiency: 5, primary: false },
+      { name: "Quill Editor", category: "frontend", proficiency: 4, primary: true },
+      { name: "Hono", category: "backend", proficiency: 4, primary: true },
+      { name: "React Markdown", category: "frontend", proficiency: 4, primary: false }
+    ],
+
+    category: "personal",
+    status: "In Development",
+
+    metrics: {
+      performance: "90% complete, 172+ tasks across 17 milestones",
+      technical: "Inline commenting with character-position tracking",
+      impact: "Serverless architecture on Cloudflare edge network",
+      growth: "Multi-theme system with 4 complete themes"
+    },
+
+    urls: {
+      live: "https://hourlings.plixo.com",
+      github: "https://github.com/gone3d/hourlings-ui",
+      demo: "https://hourlings.plixo.com"
+    },
+
+    images: {
+      thumbnail: "/assets/work/hourlings_1.jpg",
+      screenshots: [
+        "/assets/work/hourlings_1.jpg"
+      ]
+    },
+
+    featured: true,
+    priority: 1,
+    dateCreated: "2024-09-01",
+    lastUpdated: "2024-10-23",
+
+    teamSize: 1,
+    role: "Full-Stack Developer & Technical Architect",
+    duration: "2 months (ongoing)",
+
+    businessImpact: "Production-ready collaborative writing platform with innovative inline commenting system. Enables writing communities to provide detailed, contextual feedback on creative works with sophisticated text selection and positioning architecture.",
+
+    technicalChallenges: [
+      "Implementing sophisticated inline commenting with character-position tracking",
+      "Building threaded comment system supporting 3 levels of nesting",
+      "Creating rich text editor with word count and markdown support",
+      "Designing serverless backend with repository pattern on Cloudflare Workers",
+      "Developing multi-theme system with CSS variables and per-user preferences"
+    ],
+
+    learningsAndGrowth: [
+      "Advanced text selection and position tracking for inline comments",
+      "Quill editor integration with custom formatting and markdown",
+      "Hono framework for lightweight Cloudflare Workers APIs",
+      "Repository pattern implementation in serverless architecture",
+      "Multi-theme CSS variable system with dynamic switching"
+    ]
+  },
+  {
     id: "plixo-portfolio-website",
     title: "Plixo Portfolio Website",
     description: "Modern React portfolio showcasing technical leadership with real-time analytics, seamless animations, and encrypted API integration",
@@ -98,15 +234,14 @@ export const projects: Project[] = [
     },
 
     images: {
-      thumbnail: "/assets/WorkThumbPlixo.jpg",
+      thumbnail: "/assets/work/plixo_web_1.jpg",
       screenshots: [
-        "/projects/plixo-portfolio-1.jpg",
-        "/projects/plixo-portfolio-2.jpg"
+        "/assets/work/plixo_web_1.jpg"
       ]
     },
 
     featured: true,
-    priority: 0, // First priority
+    priority: 2, // Third priority
     dateCreated: "2025-09-28",
     lastUpdated: "2025-09-29",
 
@@ -935,55 +1070,55 @@ export const skills: Skill[] = [
  */
 export const backgroundImages: BackgroundImage[] = [
   {
-    filename: "astronomyBG1.jpg",
+    filename: "backgrounds/astronomyBG1.jpg",
     title: "Nebula Field",
     description: "Deep space nebula with stellar formation",
     tags: ["space", "nebula", "astronomy", "deep-field"]
   },
   {
-    filename: "astronomyBG2.jpg",
+    filename: "backgrounds/astronomyBG2.jpg",
     title: "Galaxy Cluster",
     description: "Distant galaxy cluster with gravitational lensing",
     tags: ["space", "galaxy", "astronomy", "deep-field"]
   },
   {
-    filename: "astronomyBG3.jpg",
+    filename: "backgrounds/astronomyBG3.jpg",
     title: "Cosmic Web",
     description: "Large-scale structure of the universe",
     tags: ["space", "cosmic-web", "astronomy", "structure"]
   },
   {
-    filename: "astronomyBG4.jpg",
+    filename: "backgrounds/astronomyBG4.jpg",
     title: "Star Formation Region",
     description: "Active stellar nursery with young hot stars",
     tags: ["space", "star-formation", "astronomy", "stellar"]
   },
   {
-    filename: "astronomyBG5.jpg",
+    filename: "backgrounds/astronomyBG5.jpg",
     title: "Spiral Galaxy",
     description: "Barred spiral galaxy with prominent arms",
     tags: ["space", "spiral-galaxy", "astronomy", "galactic"]
   },
   {
-    filename: "astronomyBG6.jpg",
+    filename: "backgrounds/astronomyBG6.jpg",
     title: "Planetary Nebula",
     description: "Dying star's expelled outer layers",
     tags: ["space", "planetary-nebula", "astronomy", "stellar-death"]
   },
   {
-    filename: "astronomyBG7.jpg",
+    filename: "backgrounds/astronomyBG7.jpg",
     title: "Galaxy Collision",
     description: "Interacting galaxies in gravitational dance",
     tags: ["space", "galaxy-collision", "astronomy", "interaction"]
   },
   {
-    filename: "astronomyBG8.jpg",
+    filename: "backgrounds/astronomyBG8.jpg",
     title: "Globular Cluster",
     description: "Dense collection of ancient stars",
     tags: ["space", "globular-cluster", "astronomy", "stellar-cluster"]
   },
   {
-    filename: "astronomyBG9.jpg",
+    filename: "backgrounds/astronomyBG9.jpg",
     title: "Dark Nebula",
     description: "Dense cloud of dust blocking starlight",
     tags: ["space", "dark-nebula", "astronomy", "dust-cloud"]

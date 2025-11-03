@@ -5,9 +5,12 @@ import {
   calculatePanDirection,
   getBackgroundStyles,
   getViewportDimensions,
+  calculatePanDistancePixels,
+  calculateSpeedLimitDuration,
   DEFAULT_FADE_CONFIG,
   DEFAULT_PAN_CONFIG,
 } from "../../utils";
+import { useGlobal } from "../../contexts/GlobalContext";
 
 interface BackgroundImage {
   filename: string;
@@ -23,6 +26,7 @@ interface BackgroundSlideshowProps {
   displayMode?: "cover" | "slide";
   fadeTransition?: boolean;
   fadeDuration?: number;
+  maxSpeedPxPerSec?: number; // Maximum pan speed in pixels/second
 }
 
 const BackgroundSlideshow = ({
@@ -33,6 +37,7 @@ const BackgroundSlideshow = ({
   displayMode = "slide",
   fadeTransition = true,
   fadeDuration = 1400, // Increased from 800ms to 1400ms for longer fade
+  maxSpeedPxPerSec, // Optional speed limit
 }: BackgroundSlideshowProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fadeOpacity, setFadeOpacity] = useState(0);
@@ -41,6 +46,9 @@ const BackgroundSlideshow = ({
   const [panDirection, setPanDirection] = useState<"horizontal" | "vertical" | "none">(
     "horizontal"
   );
+
+  // Get GlobalContext actions for instant speed updates
+  const { actions } = useGlobal();
 
   // Refs for animation controllers
   const fadeTransitionRef = useRef<FadeTransition | null>(null);
@@ -59,22 +67,47 @@ const BackgroundSlideshow = ({
       maxOpacity: 1,
     });
 
-    // Initialize panning controller
-    // Panning runs for full transition time, fade starts early to reach black when panning ends
-    panningControllerRef.current = new PanningController(setSlideProgress, {
-      ...DEFAULT_PAN_CONFIG,
-      duration: transitionTime,
-    });
-
-    // Calculate pan direction based on viewport
+    // Calculate pan direction and distance based on viewport
     const updatePanDirection = () => {
       const viewport = getViewportDimensions();
       // Assume 16:9 aspect ratio for astronomy images
-      const direction = calculatePanDirection(viewport, {
+      const imageDimensions = {
         width: 1600,  // 16:9 image dimensions
         height: 900,
-      });
+      };
+      const direction = calculatePanDirection(viewport, imageDimensions);
       setPanDirection(direction);
+
+      // Calculate pan distance in pixels
+      const distancePx = calculatePanDistancePixels(
+        viewport,
+        imageDimensions,
+        direction,
+        0,
+        100
+      );
+
+      // Calculate duration based on speed limit if provided
+      let effectiveDuration = transitionTime;
+      if (maxSpeedPxPerSec && distancePx > 0) {
+        const speedLimitDuration = calculateSpeedLimitDuration(distancePx, maxSpeedPxPerSec);
+        effectiveDuration = Math.max(speedLimitDuration, transitionTime);
+      }
+
+      // Initialize panning controller with speed update callback
+      panningControllerRef.current = new PanningController(
+        setSlideProgress,
+        {
+          ...DEFAULT_PAN_CONFIG,
+          duration: effectiveDuration,
+          maxSpeedPxPerSec,
+        },
+        (speed) => {
+          // Update GlobalContext instantly on every animation frame
+          actions.updateBackgroundSpeed(speed, distancePx, direction);
+        }
+      );
+      panningControllerRef.current.setPanDistance(distancePx);
     };
 
     updatePanDirection();
@@ -88,7 +121,7 @@ const BackgroundSlideshow = ({
         clearInterval(intervalRef.current);
       }
     };
-  }, [fadeDuration, transitionTime]);
+  }, [fadeDuration, transitionTime, maxSpeedPxPerSec]);
 
   // Handle image transition
   const transitionToNext = useCallback(async () => {
@@ -284,6 +317,7 @@ const BackgroundSlideshow = ({
           }}
         />
       )}
+
     </div>
   );
 };

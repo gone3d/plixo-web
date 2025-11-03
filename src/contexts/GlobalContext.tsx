@@ -89,6 +89,13 @@ export interface GlobalState {
     version?: string
     lastChecked?: number
   }
+
+  // Background Animation Debug
+  backgroundAnimation: {
+    speedPxPerSec: number
+    panDistancePx: number
+    direction: 'horizontal' | 'vertical' | 'none'
+  }
 }
 
 /**
@@ -139,6 +146,9 @@ export type GlobalAction =
   | { type: 'API_HEALTH_CHECK_START' }
   | { type: 'API_HEALTH_CHECK_SUCCESS'; payload: { version: string } }
   | { type: 'API_HEALTH_CHECK_ERROR' }
+
+  // Background Animation Actions
+  | { type: 'UPDATE_BACKGROUND_SPEED'; payload: { speedPxPerSec: number; panDistancePx: number; direction: 'horizontal' | 'vertical' | 'none' } }
 
   // Bulk Actions
   | { type: 'INITIALIZE_FROM_CONFIG'; payload: typeof tempConfig }
@@ -197,6 +207,12 @@ const initialState: GlobalState = {
     status: 'checking',
     version: undefined,
     lastChecked: undefined
+  },
+
+  backgroundAnimation: {
+    speedPxPerSec: 0,
+    panDistancePx: 0,
+    direction: 'horizontal'
   }
 }
 
@@ -435,6 +451,17 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
         }
       }
 
+    // Background Animation Actions
+    case 'UPDATE_BACKGROUND_SPEED':
+      return {
+        ...state,
+        backgroundAnimation: {
+          speedPxPerSec: action.payload.speedPxPerSec,
+          panDistancePx: action.payload.panDistancePx,
+          direction: action.payload.direction
+        }
+      }
+
     // Bulk Actions
     case 'INITIALIZE_FROM_CONFIG':
       return {
@@ -484,6 +511,7 @@ export interface GlobalContextType {
     trackInteraction: (type: string, element?: string) => void
     setDataSource: (dataSource: 'config' | 'api') => void
     checkApiHealth: () => Promise<void>
+    updateBackgroundSpeed: (speedPxPerSec: number, panDistancePx: number, direction: 'horizontal' | 'vertical' | 'none') => void
     initializeFromTempConfig: () => void
   }
 
@@ -591,6 +619,13 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
         console.error('API health check failed:', error)
         dispatch({ type: 'API_HEALTH_CHECK_ERROR' })
       }
+    },
+
+    updateBackgroundSpeed: (speedPxPerSec: number, panDistancePx: number, direction: 'horizontal' | 'vertical' | 'none') => {
+      dispatch({
+        type: 'UPDATE_BACKGROUND_SPEED',
+        payload: { speedPxPerSec, panDistancePx, direction }
+      })
     },
 
     initializeFromTempConfig: () => {
