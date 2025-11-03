@@ -81,9 +81,10 @@ const Navigation = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="md:hidden"
+                  className="md:hidden flex items-center gap-1"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
+                  {!isMenuOpen && <span className="text-sm font-medium">Menu</span>}
                   <Icon name={isMenuOpen ? "close" : "menu"} />
                 </Button>
               </>
@@ -103,7 +104,9 @@ const Navigation = () => {
                 </div>
 
                 {/* Mobile Login Button - Not Authenticated */}
-                <div className="md:hidden">
+                <div className="md:hidden flex items-center gap-2">
+                  {/* Big arrow prompt for mobile */}
+                  <Icon name="menu" size="lg" className="text-cyan-400 animate-pulse" />
                   <Button
                     variant="ghost"
                     size="sm"
