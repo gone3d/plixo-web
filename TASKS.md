@@ -1,31 +1,32 @@
 # Development Roadmap - Plixo Portfolio Website
 
-> **Project Status**: Phase 0 - Production Deployment
-> **Last Updated**: 2025-11-01
+> **Project Status**: Milestone 5 - Guest Login Implementation (URGENT)
+> **Last Updated**: 2025-11-02
 > **Version**: 1.0.3
 
 ---
 
 ## 📋 Quick Navigation
 
-- **Current Milestone**: [Milestone 0 - Production Deployment](./tasks/Milestone0.md)
-- **Completed**: [Milestone 1 - Foundation](./tasks/Milestone1.md)
+- **Current Milestone**: [Milestone 5 - Guest Login (Turnstile)](./tasks/Milestone5.md) 🔴 URGENT
+- **Completed**: [Milestone 0 - Production Deployment](./tasks/Milestone0.md) | [Milestone 1 - Foundation](./tasks/Milestone1.md)
 - **Upcoming**: [Milestone 2 - API Integration](./tasks/Milestone2.md)
 
 ---
 
-## 🎯 Current Priority: Production Deployment
+## 🎯 Current Priority: Guest Login with Cloudflare Turnstile
 
-**Status**: Ready to deploy
-**Estimated Time**: 1-2 hours
-**Next Action**: Connect GitHub repository to CloudFlare Pages
+**Status**: In Progress (URGENT - Resume distribution active)
+**Estimated Time**: 6-10 hours
+**Target Completion**: 2025-11-03 (Within 24 hours)
+**Next Action**: Install Turnstile SDK and add guest login button
 
 **Quick Start**:
-1. Review [Milestone 0 tasks](./tasks/Milestone0.md)
-2. Complete pre-deployment verification
-3. Connect GitHub to CloudFlare
-4. Transfer domains (plixo.com, www.plixo.com)
-5. Verify production deployment
+1. Review [Milestone 5 tasks](./tasks/Milestone5.md)
+2. Install @marsidev/react-turnstile package
+3. Get Turnstile credentials from Cloudflare dashboard
+4. Add "Continue as Guest" button to login modal
+5. Create /api/guest-login endpoint in plixo-api
 
 ---
 
@@ -33,8 +34,9 @@
 
 | Milestone | Status | Duration | Priority | Details |
 |-----------|--------|----------|----------|---------|
-| **M0: Production Deployment** | 🚧 In Progress | 1-2 hours | CRITICAL | [View Details](./tasks/Milestone0.md) |
+| **M0: Production Deployment** | ✅ Complete | 1.5 hours | CRITICAL | [View Details](./tasks/Milestone0.md) |
 | **M1: Foundation** | ✅ Complete | 2 weeks | CRITICAL | [View Details](./tasks/Milestone1.md) |
+| **M5: Guest Login (Turnstile)** | 🚧 In Progress | 6-10 hours | CRITICAL | [View Details](./tasks/Milestone5.md) |
 | **M2: API Integration** | ⏳ Pending | 4-6 weeks | HIGH | [View Details](./tasks/Milestone2.md) |
 | **M3: Advanced Features** | ⏳ Pending | 3-4 weeks | MEDIUM | [View Details](./tasks/Milestone3.md) |
 | **M4: Polish & Performance** | ⏳ Pending | 2-3 weeks | HIGH | [View Details](./tasks/Milestone4.md) |
@@ -109,6 +111,56 @@
 - ✅ Lighthouse score > 90
 
 [View Full Milestone 0 Details →](./tasks/Milestone0.md)
+
+---
+
+## 🚧 Milestone 5: Guest Login with Cloudflare Turnstile - IN PROGRESS
+
+**Target Completion**: 2025-11-03 (ASAP)
+**Estimated Time**: 6-10 hours
+**Urgency**: CRITICAL - Resume distribution active
+
+### Overview
+Implement secure guest login using Cloudflare Turnstile CAPTCHA to allow visitors to access portfolio without account creation while protecting against bot access. Required immediately as plixo.com link is being distributed with resumes.
+
+### Key Features
+- Guest login with Cloudflare Turnstile CAPTCHA verification
+- IP-based rate limiting (10 attempts per 24 hours)
+- Short-lived JWT tokens (2-hour expiration)
+- Guest session tracking in database
+- Automatic session expiration and cleanup
+
+### Major Tasks
+1. Frontend Turnstile Integration (1-2 hours)
+   - Install @marsidev/react-turnstile
+   - Add "Continue as Guest" button to login modal
+   - Integrate CAPTCHA widget with error handling
+
+2. Backend Guest Login API (2-3 hours)
+   - Create guest_sessions and rate_limits tables
+   - Implement /api/guest-login endpoint
+   - Add Turnstile verification and rate limiting
+
+3. AuthContext Guest Support (1-2 hours)
+   - Update user interface for guest role
+   - Handle session expiration
+   - Update protected routes
+
+4. Testing & Validation (1-2 hours)
+   - End-to-end guest login flow
+   - Rate limiting validation
+   - Cross-browser testing
+
+5. Production Deployment (30-60 minutes)
+   - Deploy plixo-api with guest login
+   - Deploy plixo-web with guest UI
+   - Verify Turnstile on production domain
+
+**Total Estimated Time**: 6-10 hours
+
+**Business Impact**: Enables safe portfolio access for recruiters/employers while maintaining security. Critical for active resume distribution.
+
+[View Full Milestone 5 Details →](./tasks/Milestone5.md)
 
 ---
 
@@ -215,7 +267,8 @@ Optimize performance, ensure accessibility compliance, achieve cross-browser com
 
 ```
 Week 1-2:  ✅ Milestone 1 - Foundation (COMPLETE)
-Week 3:    🚧 Milestone 0 - Production Deployment (IN PROGRESS)
+Week 3:    ✅ Milestone 0 - Production Deployment (COMPLETE)
+Day 1:     🚧 Milestone 5 - Guest Login with Turnstile (IN PROGRESS - URGENT)
 Week 4-9:  ⏳ Milestone 2 - API Integration (plixo-api development + frontend)
 Week 10-13: ⏳ Milestone 3 - Advanced Features
 Week 14-16: ⏳ Milestone 4 - Polish & Performance
@@ -224,23 +277,24 @@ Week 17:   🎉 LAUNCH - Full Portfolio Live
 
 ### Current Session Status
 
-**Last Updated**: 2025-11-01
+**Last Updated**: 2025-11-02
 **Current Version**: 1.0.3
 **Current Branch**: main
 
 **Recent Work**:
-- ✅ Updated favicon to new logo (g3dlogo.svg)
-- ✅ Bumped version to 1.0.3
-- ✅ Rebuilt application
-- ✅ Cache-busting added to favicon
-- ✅ Created comprehensive PRD for plixo-api
-- ✅ Migrated all phases to milestone structure
+- ✅ Deployed plixo-web to production (plixo.com)
+- ✅ Added 5 work projects to portfolio (Tenebrae, Hourlings, LeDemo, Preserves, Plixo)
+- ✅ Reorganized public/assets structure (backgrounds/, work/)
+- ✅ Implemented background pan speed limiting (15 px/s)
+- ✅ Added Activity icon speed debug display
+- 🚧 Created Milestone 5 for Guest Login with Turnstile
 
-**Next Actions**:
-1. Complete Milestone 0 pre-deployment verification
-2. Deploy to CloudFlare Pages
-3. Transfer domains
-4. Begin plixo-api development (separate terminal/repo)
+**Next Actions** (URGENT - Resume distribution active):
+1. Install @marsidev/react-turnstile package
+2. Get Turnstile credentials from Cloudflare dashboard
+3. Add "Continue as Guest" button to login modal
+4. Create /api/guest-login endpoint in plixo-api
+5. Deploy guest login to production within 24 hours
 
 ---
 
