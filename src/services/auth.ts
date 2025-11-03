@@ -53,6 +53,33 @@ class AuthService {
   }
 
   /**
+   * Guest login with Turnstile CAPTCHA token
+   */
+  async guestLogin(captchaToken: string): Promise<LoginData> {
+    try {
+      const { data } = await apiClient.post<LoginResponse>('/api/auth/guest-login', {
+        captchaToken,
+      })
+
+      if (data.success && data.data.token) {
+        this.setToken(data.data.token)
+        return data.data
+      }
+
+      throw new Error('Guest login failed: Invalid response from server')
+    } catch (error: any) {
+      // Handle specific error cases
+      if (error.response?.status === 400) {
+        throw new Error('CAPTCHA verification failed. Please try again.')
+      }
+      if (error.response?.status === 429) {
+        throw new Error('Too many guest login attempts. Please try again in 24 hours.')
+      }
+      throw new Error(error.response?.data?.error || 'Guest login failed. Please try again.')
+    }
+  }
+
+  /**
    * Logout and clear token
    */
   async logout(): Promise<void> {

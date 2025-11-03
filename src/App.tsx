@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navigation, BackgroundSlideshow } from "./components/molecules";
-import { BackgroundSpeedDebug } from "./components/atoms";
 import { Landing, Work, About, Insights, Connect } from "./pages";
 import { GlobalProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -20,30 +19,37 @@ function App() {
             theme="dark"
             toastOptions={{
               style: {
-                background: 'rgba(15, 23, 42, 0.4)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#fff',
+                background: "rgba(15, 23, 42, 0.4)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#fff",
               },
             }}
           />
 
-          <div className="min-h-screen w-screen overflow-x-hidden bg-black/20" style={{ margin: 0, padding: 0 }}>
+          <div
+            className="min-h-screen w-screen overflow-x-hidden bg-black/20"
+            style={{ margin: 0, padding: 0 }}
+          >
             {/* Global Background Slideshow */}
             <BackgroundSlideshow
               images={backgroundImages}
               transitionTime={18000}
-              displayMode="slide"
-              maxSpeedPxPerSec={15}
+              maxSpeedPxPerSec={30}
             />
-
-            {/* Background Speed Debug Display */}
-            <BackgroundSpeedDebug />
 
             <Navigation />
 
             {/* Main content - full height minus nav */}
-            <main className="w-full" style={{ minHeight: 'calc(100vh - 4rem)', paddingTop: '4rem', margin: 0, padding: 0 }}>
+            <main
+              className="w-full"
+              style={{
+                minHeight: "calc(100vh - 4rem)",
+                paddingTop: "4rem",
+                margin: 0,
+                padding: 0,
+              }}
+            >
               <Routes>
                 {/* Public route - no authentication required */}
                 <Route path="/" element={<Landing />} />
@@ -88,7 +94,9 @@ function App() {
                   element={
                     <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
                       <div className="text-center">
-                        <h1 className="text-4xl font-bold mb-4">Page Not Found</h1>
+                        <h1 className="text-4xl font-bold mb-4">
+                          Page Not Found
+                        </h1>
                         <p className="text-slate-400 mb-8">
                           The page you're looking for doesn't exist.
                         </p>

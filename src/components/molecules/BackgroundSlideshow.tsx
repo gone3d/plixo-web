@@ -1,16 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import {
-  FadeTransition,
-  PanningController,
-  calculatePanDirection,
-  getBackgroundStyles,
-  getViewportDimensions,
-  calculatePanDistancePixels,
-  calculateSpeedLimitDuration,
-  DEFAULT_FADE_CONFIG,
-  DEFAULT_PAN_CONFIG,
-} from "../../utils";
-import { useGlobal } from "../../contexts/GlobalContext";
+import { useState, useEffect } from "react";
 
 interface BackgroundImage {
   filename: string;
@@ -23,196 +11,138 @@ interface BackgroundSlideshowProps {
   transitionTime?: number;
   className?: string;
   pauseOnHover?: boolean;
-  displayMode?: "cover" | "slide";
-  fadeTransition?: boolean;
   fadeDuration?: number;
-  maxSpeedPxPerSec?: number; // Maximum pan speed in pixels/second
+  maxSpeedPxPerSec?: number;
 }
 
 const BackgroundSlideshow = ({
   images,
-  transitionTime = 36000, // Tripled from 12 seconds to 36 seconds
+  transitionTime = 18000,
   className = "",
   pauseOnHover = true,
-  displayMode = "slide",
-  fadeTransition = true,
-  fadeDuration = 1400, // Increased from 800ms to 1400ms for longer fade
-  maxSpeedPxPerSec, // Optional speed limit
+  fadeDuration = 1400,
+  maxSpeedPxPerSec = 15,
 }: BackgroundSlideshowProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fadeOpacity, setFadeOpacity] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [slideProgress, setSlideProgress] = useState(0);
-  const [panDirection, setPanDirection] = useState<"horizontal" | "vertical" | "none">(
-    "horizontal"
-  );
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
+  const [effectiveDuration, setEffectiveDuration] = useState(transitionTime);
 
-  // Get GlobalContext actions for instant speed updates
-  const { actions } = useGlobal();
-
-  // Refs for animation controllers
-  const fadeTransitionRef = useRef<FadeTransition | null>(null);
-  const panningControllerRef = useRef<PanningController | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Initialize animation controllers
+  // Detect actual image aspect ratio and calculate effective duration with speed limit
   useEffect(() => {
-    // Initialize fade transition
-    fadeTransitionRef.current = new FadeTransition(setFadeOpacity, {
-      ...DEFAULT_FADE_CONFIG,
-      duration: fadeDuration,
-      fadeOutDuration: fadeDuration * 0.4, // 40% for fade out
-      fadeInDuration: fadeDuration * 0.4, // 40% for fade in
-      holdDuration: fadeDuration * 0.2, // 20% hold (includes the 0.25s delay)
-      maxOpacity: 1,
-    });
-
-    // Calculate pan direction and distance based on viewport
-    const updatePanDirection = () => {
-      const viewport = getViewportDimensions();
-      // Assume 16:9 aspect ratio for astronomy images
-      const imageDimensions = {
-        width: 1600,  // 16:9 image dimensions
-        height: 900,
-      };
-      const direction = calculatePanDirection(viewport, imageDimensions);
-      setPanDirection(direction);
-
-      // Calculate pan distance in pixels
-      const distancePx = calculatePanDistancePixels(
-        viewport,
-        imageDimensions,
-        direction,
-        0,
-        100
-      );
-
-      // Calculate duration based on speed limit if provided
-      let effectiveDuration = transitionTime;
-      if (maxSpeedPxPerSec && distancePx > 0) {
-        const speedLimitDuration = calculateSpeedLimitDuration(distancePx, maxSpeedPxPerSec);
-        effectiveDuration = Math.max(speedLimitDuration, transitionTime);
-      }
-
-      // Initialize panning controller with speed update callback
-      panningControllerRef.current = new PanningController(
-        setSlideProgress,
-        {
-          ...DEFAULT_PAN_CONFIG,
-          duration: effectiveDuration,
-          maxSpeedPxPerSec,
-        },
-        (speed) => {
-          // Update GlobalContext instantly on every animation frame
-          actions.updateBackgroundSpeed(speed, distancePx, direction);
-        }
-      );
-      panningControllerRef.current.setPanDistance(distancePx);
-    };
-
-    updatePanDirection();
-    window.addEventListener("resize", updatePanDirection);
-
-    return () => {
-      fadeTransitionRef.current?.stop();
-      panningControllerRef.current?.stop();
-      window.removeEventListener("resize", updatePanDirection);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [fadeDuration, transitionTime, maxSpeedPxPerSec]);
-
-  // Handle image transition
-  const transitionToNext = useCallback(async () => {
-    if (images.length <= 1 || isPaused) return;
-
-    const nextIndex = (currentIndex + 1) % images.length;
-
-    if (fadeTransition && fadeTransitionRef.current) {
-      // Use custom fade transition
-      await fadeTransitionRef.current.start(() => {
-        // This callback runs at the peak of the fade (black screen)
-        setCurrentIndex(nextIndex);
-
-        // Reset and start panning for new image
-        if (displayMode === "slide" && panDirection !== "none" && panningControllerRef.current) {
-          // Panning uses full transition time
-          panningControllerRef.current.updateConfig({
-            duration: transitionTime,
-          });
-          panningControllerRef.current.stop();
-          panningControllerRef.current.start();
-        }
-      });
-    } else {
-      // Immediate transition without fade
-      setCurrentIndex(nextIndex);
-      if (displayMode === "slide" && panDirection !== "none" && panningControllerRef.current) {
-        // Update panning duration to use full transition time when no fade
-        panningControllerRef.current.updateConfig({
-          duration: transitionTime,
-        });
-        panningControllerRef.current.stop();
-        panningControllerRef.current.start();
-      }
-    }
-  }, [currentIndex, images.length, isPaused, fadeTransition, displayMode, panDirection, transitionTime]);
-
-  // Auto-cycle through images
-  useEffect(() => {
-    if (images.length <= 1 || isPaused) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+    if (!images[currentIndex]) {
+      setImageAspectRatio(null);
+      setEffectiveDuration(transitionTime);
       return;
     }
 
-    // Calculate when to start fade so it reaches black when panning ends
-    const fadeOutDuration = fadeDuration * 0.4; // 40% of fade duration
-    const fadeStartDelay = transitionTime - fadeOutDuration;
+    const img = new Image();
+    img.onload = () => {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      setImageAspectRatio(ratio);
 
-    // Set timeout to start fade at the right time
-    const timeoutId = setTimeout(() => {
-      transitionToNext();
+      // Calculate effective duration based on speed limit
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const viewportRatio = viewportWidth / viewportHeight;
 
-      // Set up the next cycle
-      intervalRef.current = setInterval(transitionToNext, transitionTime);
-    }, fadeStartDelay);
+      let panDistancePixels = 0;
 
-    return () => {
-      clearTimeout(timeoutId);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      // Calculate actual pan distance based on which direction we'll pan
+      if (Math.abs(ratio - viewportRatio) < 0.01) {
+        // No panning needed - aspect ratios match
+        panDistancePixels = 0;
+      } else if (ratio > viewportRatio) {
+        // Horizontal pan - image is wider
+        // Image will be sized to viewport height, so width = height * ratio
+        const imageWidth = viewportHeight * ratio;
+        panDistancePixels = imageWidth - viewportWidth;
+      } else {
+        // Vertical pan - image is taller
+        // Image will be sized to viewport width, so height = width / ratio
+        const imageHeight = viewportWidth / ratio;
+        panDistancePixels = imageHeight - viewportHeight;
+      }
+
+      // Calculate duration needed to stay under speed limit
+      if (maxSpeedPxPerSec && panDistancePixels > 0) {
+        const speedLimitDuration = (panDistancePixels / maxSpeedPxPerSec) * 1000;
+        setEffectiveDuration(Math.max(speedLimitDuration, transitionTime));
+      } else {
+        setEffectiveDuration(transitionTime);
       }
     };
-  }, [transitionTime, isPaused, transitionToNext, images.length]);
+    img.onerror = () => {
+      console.error(`Failed to load image: ${images[currentIndex].filename}`);
+      // Fallback to 16:9 on error
+      setImageAspectRatio(1600 / 900);
+      setEffectiveDuration(transitionTime);
+    };
+    img.src = `/assets/${images[currentIndex].filename}`;
+  }, [currentIndex, images, transitionTime, maxSpeedPxPerSec]);
 
-  // Start panning when component mounts or image changes
+  // Slide animation - simple progress from 0 to 100
   useEffect(() => {
-    if (
-      displayMode === "slide" &&
-      panDirection !== "none" &&
-      !isPaused &&
-      panningControllerRef.current &&
-      images.length > 0
-    ) {
-      panningControllerRef.current.start();
+    if (isPaused || images.length <= 1) {
+      return;
     }
-  }, [currentIndex, displayMode, panDirection, isPaused, images.length]);
 
-  // Handle pause/resume
+    // Reset slide progress when image changes
+    setSlideProgress(0);
+
+    // Animate slide progress over effective duration (may be longer than base transitionTime)
+    const slideInterval = setInterval(() => {
+      setSlideProgress((prev) => {
+        const increment = 100 / (effectiveDuration / 50); // Update every 50ms
+        return Math.min(prev + increment, 100);
+      });
+    }, 50);
+
+    return () => clearInterval(slideInterval);
+  }, [currentIndex, effectiveDuration, isPaused, images.length]);
+
+  // Auto-cycle through images with fade
   useEffect(() => {
-    if (panningControllerRef.current) {
-      if (isPaused) {
-        panningControllerRef.current.pause();
-      } else if (displayMode === "slide" && panDirection !== "none") {
-        panningControllerRef.current.resume();
-      }
+    if (images.length <= 1 || isPaused) {
+      return;
     }
-  }, [isPaused, displayMode, panDirection]);
+
+    // Start fade BEFORE pan completes, using effective duration
+    const fadeOutDuration = fadeDuration * 0.4;
+    const fadeStartDelay = effectiveDuration - fadeOutDuration;
+
+    const timeout = setTimeout(() => {
+      // Fade out
+      let opacity = 0;
+      const fadeOutInterval = setInterval(() => {
+        opacity += 0.02; // 2% per frame (50fps)
+        setFadeOpacity(opacity);
+
+        if (opacity >= 1) {
+          clearInterval(fadeOutInterval);
+
+          // Change image at peak of fade
+          const nextIndex = (currentIndex + 1) % images.length;
+          setCurrentIndex(nextIndex);
+
+          // Fade in
+          const fadeInInterval = setInterval(() => {
+            opacity -= 0.02;
+            setFadeOpacity(Math.max(0, opacity));
+
+            if (opacity <= 0) {
+              clearInterval(fadeInInterval);
+              setFadeOpacity(0);
+            }
+          }, 20);
+        }
+      }, 20);
+    }, fadeStartDelay);
+
+    return () => clearTimeout(timeout);
+  }, [currentIndex, effectiveDuration, isPaused, images.length, fadeDuration]);
 
   // Preload next images
   useEffect(() => {
@@ -259,28 +189,51 @@ const BackgroundSlideshow = ({
   const currentImage = images[currentIndex];
   const backgroundImageUrl = `/assets/${currentImage.filename}`;
 
-  // Get background styles based on display mode
-  const getBackgroundStylesForMode = () => {
-    if (displayMode === "cover") {
+  // Get background styles based on aspect ratio comparison
+  const getBackgroundStyles = () => {
+    const baseStyles = {
+      backgroundImage: `url('${backgroundImageUrl}')`,
+      backgroundRepeat: "no-repeat",
+      width: "100vw",
+      height: "100vh",
+    };
+
+    // Wait for aspect ratio detection
+    if (imageAspectRatio === null) {
       return {
-        backgroundImage: `url('${backgroundImageUrl}')`,
-        backgroundRepeat: "no-repeat",
+        ...baseStyles,
         backgroundPosition: "center center",
         backgroundSize: "cover",
-        width: "100vw",
-        height: "100vh",
       };
     }
 
-    // Slide mode with panning
-    const bgStyles = getBackgroundStyles(slideProgress, panDirection);
+    const viewportAspectRatio = window.innerWidth / window.innerHeight;
+    const aspectRatioDifference = imageAspectRatio - viewportAspectRatio;
+    const threshold = 0.01;
 
+    // Image and viewport are approximately same aspect ratio
+    if (Math.abs(aspectRatioDifference) < threshold) {
+      return {
+        ...baseStyles,
+        backgroundPosition: "center center",
+        backgroundSize: "cover",
+      };
+    }
+
+    // Image is wider than viewport - horizontal pan
+    if (imageAspectRatio > viewportAspectRatio) {
+      return {
+        ...baseStyles,
+        backgroundPosition: `${slideProgress}% center`,
+        backgroundSize: "auto 100%", // Height-based sizing
+      };
+    }
+
+    // Image is taller than viewport - vertical pan
     return {
-      backgroundImage: `url('${backgroundImageUrl}')`,
-      backgroundRepeat: "no-repeat",
-      ...bgStyles,
-      width: "100vw",
-      height: "100vh",
+      ...baseStyles,
+      backgroundPosition: `center ${slideProgress}%`,
+      backgroundSize: "100% auto", // Width-based sizing
     };
   };
 
@@ -295,7 +248,7 @@ const BackgroundSlideshow = ({
       }}
     >
       {/* Background Image */}
-      <div className="absolute inset-0" style={getBackgroundStylesForMode()} />
+      <div className="absolute inset-0" style={getBackgroundStyles()} />
 
       {/* Vignette overlay for content readability */}
       <div
@@ -307,17 +260,14 @@ const BackgroundSlideshow = ({
       />
 
       {/* Fade transition overlay */}
-      {fadeTransition && (
-        <div
-          className="absolute inset-0 bg-black transition-none"
-          style={{
-            opacity: fadeOpacity,
-            zIndex: 2,
-            pointerEvents: "none",
-          }}
-        />
-      )}
-
+      <div
+        className="absolute inset-0 bg-black"
+        style={{
+          opacity: fadeOpacity,
+          zIndex: 2,
+          pointerEvents: "none",
+        }}
+      />
     </div>
   );
 };
