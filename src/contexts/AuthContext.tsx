@@ -13,6 +13,7 @@ export interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   login: (username: string, password: string) => Promise<void>
+  guestLogin: (captchaToken: string) => Promise<void>
   logout: () => void
   hasRole: (role: 'guest' | 'user' | 'admin') => boolean
   hasAnyRole: (roles: Array<'guest' | 'user' | 'admin'>) => boolean
@@ -58,6 +59,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const guestLogin = async (captchaToken: string) => {
+    setIsLoading(true)
+    try {
+      const response = await authService.guestLogin(captchaToken)
+      setUser(response.user)
+    } catch (error) {
+      setIsLoading(false)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const logout = () => {
     authService.logout()
     setUser(null)
@@ -76,6 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated: !!user,
     isLoading,
     login,
+    guestLogin,
     logout,
     hasRole,
     hasAnyRole,

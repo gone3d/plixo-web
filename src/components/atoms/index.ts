@@ -16,4 +16,5 @@ export { default as UIImage } from './UIImage'
 export { default as SlideInImage } from './SlideInImage'
 export type { SlideInImageProps } from './SlideInImage'
 
-export { default as BackgroundSpeedDebug } from './BackgroundSpeedDebug'
+export { default as TurnstileWidget } from './TurnstileWidget'
+export type { TurnstileWidgetProps } from './TurnstileWidget'
