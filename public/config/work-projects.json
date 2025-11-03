@@ -1,10 +1,82 @@
 [
   {
+    "title": "Tenebrae - Secure Contact Platform",
+    "description": "Professional business website with encrypted contact form and visitor analytics, built for AI startup seeking funding",
+    "technologies": [
+      "React",
+      "TypeScript",
+      "Cloudflare Workers",
+      "Cloudflare D1",
+      "Web Crypto API",
+      "ReCharts"
+    ],
+    "status": "Live",
+    "image": "/assets/work/tenebrae_web_1.jpg",
+    "liveUrl": "https://www.tenebrae.ai",
+    "githubUrl": "https://github.com/gone3d/tenebraeV2",
+    "demoUrl": "https://tenebrae.plixo.com",
+    "featured": true
+  },
+  {
+    "title": "Preserves Monitor - API Management Dashboard",
+    "description": "Real-time API monitoring system for CIG Research managing multiple microservices built from unified template for seamless integration and intelligent maintenance",
+    "technologies": [
+      "React",
+      "TypeScript",
+      "Node.js",
+      "REST APIs",
+      "Health Monitoring",
+      "Authentication"
+    ],
+    "status": "Live",
+    "image": "/assets/work/cig_preserves_1.jpg",
+    "liveUrl": "https://www.cigtools.com/preserves",
+    "githubUrl": null,
+    "demoUrl": "https://www.cigtools.com/preserves",
+    "featured": true
+  },
+  {
+    "title": "Hourlings - Collaborative Writers Portal",
+    "description": "Modern writers group platform with inline commenting, submission cycles, and collaborative feedback system",
+    "technologies": [
+      "React",
+      "TypeScript",
+      "Cloudflare Workers",
+      "Cloudflare D1",
+      "Quill Editor",
+      "Hono"
+    ],
+    "status": "In Development",
+    "image": "/assets/work/hourlings_web_1.jpg",
+    "liveUrl": "https://hourlings.plixo.com",
+    "githubUrl": "https://github.com/gone3d/hourlings-ui",
+    "demoUrl": "https://hourlings.plixo.com",
+    "featured": true
+  },
+  {
+    "title": "Lottery Tax Calculator",
+    "description": "Live lottery jackpot tracker with comprehensive tax calculations using Cloudflare Workers as RSS proxy to solve CORS restrictions",
+    "technologies": [
+      "React",
+      "TypeScript",
+      "Cloudflare Workers",
+      "Vite",
+      "Tailwind CSS",
+      "RSS Parsing"
+    ],
+    "status": "Live",
+    "image": "/assets/work/lotto_web_1.jpg",
+    "liveUrl": "https://lotto.plixo.com",
+    "githubUrl": "https://github.com/gone3d/LeDemo",
+    "demoUrl": "https://lotto.plixo.com",
+    "featured": true
+  },
+  {
     "title": "Plixo Portfolio Website",
     "description": "Modern React portfolio showcasing technical leadership with real-time analytics, seamless animations, and encrypted API integration",
     "technologies": ["React", "TypeScript", "Tailwind CSS", "Vite"],
     "status": "In Development",
-    "image": "/assets/plixoScreenshot.png",
+    "image": "/assets/work/plixo_web_1.jpg",
     "liveUrl": "https://plixo.com",
     "githubUrl": "https://github.com/gone3d/plixo-web",
     "demoUrl": "/work",
