@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button, Icon } from "../atoms";
+import { Button, Icon, LoginPrompt } from "../atoms";
 import { LoginModal } from "../molecules";
 import { useAuth } from "../../contexts/AuthContext";
 import { cn } from "../../utils/cn";
@@ -90,7 +90,8 @@ const Navigation = () => {
             ) : (
               <>
                 {/* Desktop Login Button - Not Authenticated */}
-                <div className="hidden md:block">
+                <div className="hidden md:flex items-center gap-3">
+                  <LoginPrompt />
                   <Button
                     variant="ghost"
                     size="sm"
