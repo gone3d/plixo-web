@@ -5,3 +5,5 @@ export { default as MetricCard, VisitorMetricCard, PageViewMetricCard, SessionMe
 export { default as BackgroundSlideshow } from './BackgroundSlideshow'
 export { default as Modal } from './Modal'
 export { default as LoginForm } from './LoginForm'
+export { default as LoginModal } from './LoginModal'
+export type { LoginModalProps } from './LoginModal'

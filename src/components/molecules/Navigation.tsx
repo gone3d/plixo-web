@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button, Icon } from "../atoms";
-import { LoginForm } from "../molecules";
+import { LoginModal } from "../molecules";
 import { useAuth } from "../../contexts/AuthContext";
 import { cn } from "../../utils/cn";
 
@@ -160,7 +160,7 @@ const Navigation = () => {
       </nav>
 
       {/* Login Modal */}
-      <LoginForm isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </>
   );
 };
