@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { Button, Input, TurnstileWidget } from '../atoms';
-import Modal from './Modal';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { Button, Input, TurnstileWidget } from "../atoms";
+import Modal from "./Modal";
+import { toast } from "sonner";
 
 export interface LoginModalProps {
   isOpen: boolean;
@@ -11,48 +11,48 @@ export interface LoginModalProps {
 
 const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const { login, guestLogin, isLoading } = useAuth();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showGuestLogin, setShowGuestLogin] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!username || !password) {
-      setError('Please enter both username and password');
+      setError("Please enter both username and password");
       return;
     }
 
     try {
       await login(username, password);
-      toast.success('Successfully logged in');
+      toast.success("Successfully logged in");
       onClose();
       // Reset form
-      setUsername('');
-      setPassword('');
+      setUsername("");
+      setPassword("");
     } catch (err: any) {
-      setError(err.message || 'Login failed');
-      toast.error(err.message || 'Login failed');
+      setError(err.message || "Login failed");
+      toast.error(err.message || "Login failed");
     }
   };
 
   const handleGuestLogin = () => {
-    setError('');
+    setError("");
     setShowGuestLogin(true);
   };
 
   const handleTurnstileSuccess = async (token: string) => {
     try {
       await guestLogin(token);
-      toast.success('Welcome! You have guest access for 2 hours.');
+      toast.success("Welcome! You have guest access for 2 hours.");
       onClose();
       // Reset state
       setShowGuestLogin(false);
     } catch (err: any) {
-      setError(err.message || 'Guest login failed');
-      toast.error(err.message || 'Guest login failed');
+      setError(err.message || "Guest login failed");
+      toast.error(err.message || "Guest login failed");
       // Reset Turnstile on error
       setShowGuestLogin(false);
     }
@@ -64,18 +64,13 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   };
 
   const handleModalClose = () => {
-    setError('');
+    setError("");
     setShowGuestLogin(false);
     onClose();
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleModalClose}
-      title="Welcome"
-      size="sm"
-    >
+    <Modal isOpen={isOpen} onClose={handleModalClose} title="Welcome" size="sm">
       <div className="space-y-4">
         {!showGuestLogin ? (
           <>
@@ -109,7 +104,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 type="submit"
                 variant="primary"
                 size="lg"
-                className="w-full"
+                className="w-full bg-blue-600/40 hover:bg-blue-700/40"
                 isLoading={isLoading}
               >
                 Sign In
@@ -122,9 +117,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-slate-900/40 text-slate-400">
-                  or
-                </span>
+                <span className="px-2 bg-slate-900/40 text-slate-400">or</span>
               </div>
             </div>
 
@@ -140,7 +133,8 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             </Button>
 
             <p className="text-xs text-slate-400 text-center">
-              Guest access expires after 2 hours and requires human verification.
+              Guest access expires after 2 hours and requires human
+              verification.
             </p>
           </>
         ) : (
@@ -152,7 +146,8 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   Human Verification Required
                 </h3>
                 <p className="text-sm text-slate-400">
-                  Please complete the security check below to continue as a guest.
+                  Please complete the security check below to continue as a
+                  guest.
                 </p>
               </div>
 
