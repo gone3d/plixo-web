@@ -51,6 +51,58 @@ plixo-api/              ← Separate repo at ../plixo-api
 4. **Analytics Dashboard** (`/insights`) - Real-time visitor and GitHub metrics
 5. **Contact/Connect** (`/connect`) - Smart contact form with calendar integration
 
+## Environment Variable Strategy
+
+### Development Workflow (Local)
+
+**Single .env File Approach**:
+- Use `.env.development` file for all local development configuration
+- Manually edit `VITE_API_URL` to switch between local and production API
+- **DO NOT** create `.env.local`, `.env.production`, or other variants
+- Vite requires dev server restart when changing env vars
+
+**Current Configuration** (`.env.development`):
+```bash
+# Switch this line to test against different API endpoints
+VITE_API_URL=https://api.plixo.com    # Production API (typical for testing)
+# VITE_API_URL=http://localhost:8788  # Local API (when running plixo-api locally)
+
+# Turnstile test key for local development (always passes)
+VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+```
+
+**Common Workflows**:
+1. **Testing with Production API** (typical):
+   - Set `VITE_API_URL=https://api.plixo.com`
+   - Turnstile test key auto-passes locally
+   - No local API server needed
+
+2. **Testing with Local API** (when developing API features):
+   - Set `VITE_API_URL=http://localhost:8788`
+   - Run `npm run dev` in `../plixo-api`
+   - Run `npm run dev` in `plixo-web`
+
+### Production Deployment (CloudFlare Pages)
+
+**CloudFlare Console Configuration**:
+- Environment variables are set in CloudFlare Pages dashboard
+- **NOT** stored in repository files
+- Different values for preview vs production deployments
+
+**Production Environment Variables**:
+```bash
+# Set in CloudFlare Pages → Settings → Environment Variables
+VITE_API_URL=https://api.plixo.com
+VITE_TURNSTILE_SITE_KEY=0x4AAAAAAB40kAELVx8gHpRd  # Real prod key
+```
+
+**Key Points**:
+- ✅ `.env.development` is tracked in git (with safe defaults)
+- ❌ `.env.local` is NOT used (keep it simple)
+- ❌ `.env.production` is NOT used (CloudFlare dashboard instead)
+- ⚠️ Remember to restart dev server after changing env vars
+- 🔒 Sensitive keys go in CloudFlare dashboard, not in git
+
 ## Session History and Major Development Decisions
 
 ### Session 1 (2025-09-28)

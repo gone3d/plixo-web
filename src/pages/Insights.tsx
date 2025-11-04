@@ -1,44 +1,411 @@
-import { Icon } from '../components/atoms'
-import packageJson from '../../package.json'
+import { useState, useEffect } from 'react'
+import { Icon, Button, LoadingSpinner } from '../components/atoms'
+
+interface WebAnalytics {
+  pageViews: number
+  uniqueVisitors: number
+  bandwidth: number
+  requests: number
+  topPages: Array<{ path: string; views: number }>
+}
+
+interface CustomAnalytics {
+  totalEvents: number
+  pageViews: number
+  projectViews: number
+  externalLinks: number
+  contactForms: number
+  eventsByType: Array<{ eventType: string; count: number }>
+  eventsByPage: Array<{ page: string; count: number }>
+  eventsByCountry: Array<{ country: string; countryName: string; count: number }>
+  eventsByDevice: Array<{ deviceType: string; count: number }>
+  eventsByBrowser: Array<{ browserFamily: string; count: number }>
+}
+
+interface AnalyticsData {
+  webAnalytics: WebAnalytics | null
+  customAnalytics: CustomAnalytics | null
+  timeRange: {
+    since: string
+    until: string
+  }
+}
 
 const Insights = () => {
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [timeRange, setTimeRange] = useState<'1' | '7' | '30'>('30')
+
+  useEffect(() => {
+    fetchAnalytics()
+  }, [timeRange])
+
+  const fetchAnalytics = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Calculate time range
+      const now = new Date()
+      const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000)
+
+      const formatDate = (date: Date): string => {
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+      }
+
+      const since = formatDate(daysAgo)
+      const until = formatDate(now)
+
+      const response = await fetch(`https://api.plixo.com/api/analytics/overview?since=${since}&until=${until}`)
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setAnalyticsData(data)
+      } else {
+        setError(data.error || 'Failed to fetch analytics')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Format large numbers with commas
+  const formatNumber = (num: number) => new Intl.NumberFormat().format(num)
+
+  // Format bytes to human readable
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+  }
+
   return (
     <div className="relative min-h-full text-white overflow-y-auto">
-      <div className="relative z-10 max-w-4xl mx-auto py-20 px-4">
+      <div className="relative z-10 max-w-7xl mx-auto py-20 px-4">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Analytics & Insights
           </h1>
-        </div>
+          <p className="text-slate-300 mb-6">
+            Comparing CloudFlare Web Analytics vs Custom Event Tracking
+          </p>
 
-        {/* API Integration Notice */}
-        <div className="bg-slate-800/40 rounded-xl p-12 text-center border border-slate-700/40">
-          <Icon name="loading" size="xl" className="text-blue-400/50 mx-auto mb-8 animate-pulse" />
-
-          <h2 className="text-3xl font-semibold text-white mb-6">
-            Awaiting API Integration
-          </h2>
-
-          <div className="space-y-2 text-slate-300">
-            <p className="text-lg">
-              Version {packageJson.version} of <span className="text-white font-mono">plixo.com</span> is not currently connected to{' '}
-              <span className="text-white font-mono">api.plixo.com</span>
-            </p>
-            <p className="text-base mt-4">
-              Come back soon for updates...
-            </p>
-          </div>
-
-          <div className="mt-12 pt-8 border-t border-slate-700/40">
-            <p className="text-sm text-slate-400">
-              Real-time analytics, GitHub integration, and visitor metrics will be available once the backend API is deployed.
-            </p>
+          {/* Time Range Selector */}
+          <div className="flex justify-center items-center gap-3">
+            <span className="text-slate-400 text-sm">Time Range:</span>
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as '1' | '7' | '30')}
+              className="bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 hover:bg-slate-800/80 transition-colors"
+            >
+              <option value="1">Last 24 Hours</option>
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+            </select>
           </div>
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-slate-400">Loading analytics data...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 text-center">
+            <Icon name="warning" size="xl" className="text-red-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-semibold text-red-300 mb-2">Error Loading Analytics</h2>
+            <p className="text-red-200">{error}</p>
+            <Button onClick={fetchAnalytics} variant="primary" className="mt-6">
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {/* Analytics Dashboard */}
+        {!loading && !error && analyticsData && (
+          <div className="space-y-8">
+            {/* Time Range */}
+            <div className="text-center text-slate-400 text-sm">
+              Showing data from{' '}
+              {new Date(analyticsData.timeRange.since).toLocaleDateString()} to{' '}
+              {new Date(analyticsData.timeRange.until).toLocaleDateString()}
+            </div>
+
+            {/* Two Column Comparison */}
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* CloudFlare Web Analytics */}
+              <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                <div className="flex items-center gap-3 mb-6">
+                  <Icon name="chart" size="lg" className="text-blue-400" />
+                  <h2 className="text-2xl font-semibold">CloudFlare Analytics</h2>
+                </div>
+                <p className="text-slate-400 text-sm mb-6">
+                  Built-in historical data ({timeRange === '1' ? 'last 24 hours' : timeRange === '7' ? 'last 7 days' : 'last 30 days'})
+                </p>
+
+                {analyticsData.webAnalytics ? (
+                  <div className="space-y-4">
+                    <MetricCard
+                      label="Page Views"
+                      value={formatNumber(analyticsData.webAnalytics.pageViews)}
+                      icon="chart"
+                    />
+                    <MetricCard
+                      label="Unique Visitors"
+                      value={formatNumber(analyticsData.webAnalytics.uniqueVisitors)}
+                      icon="user"
+                    />
+                    <MetricCard
+                      label="Total Requests"
+                      value={formatNumber(analyticsData.webAnalytics.requests)}
+                      icon="external"
+                    />
+                    <MetricCard
+                      label="Bandwidth Used"
+                      value={formatBytes(analyticsData.webAnalytics.bandwidth)}
+                      icon="external"
+                    />
+
+                    {/* Top Pages */}
+                    {analyticsData.webAnalytics.topPages.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-slate-700/40">
+                        <h3 className="text-lg font-semibold mb-4 text-slate-300">Top Pages</h3>
+                        <div className="space-y-2">
+                          {analyticsData.webAnalytics.topPages.slice(0, 5).map((page, idx) => (
+                            <div key={idx} className="flex justify-between text-sm">
+                              <span className="text-slate-400 truncate">{page.path}</span>
+                              <span className="text-white font-mono ml-2">{formatNumber(page.views)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-slate-500 italic">No data available</p>
+                )}
+              </div>
+
+              {/* Custom Analytics Engine */}
+              <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                <div className="flex items-center gap-3 mb-6">
+                  <Icon name="chart" size="lg" className="text-purple-400" />
+                  <h2 className="text-2xl font-semibold">Custom Tracking</h2>
+                </div>
+                <p className="text-slate-400 text-sm mb-6">Analytics Engine event data (going forward)</p>
+
+                {analyticsData.customAnalytics ? (
+                  <div className="space-y-4">
+                    <MetricCard
+                      label="Total Events"
+                      value={formatNumber(analyticsData.customAnalytics.totalEvents)}
+                      icon="chart"
+                    />
+                    <MetricCard
+                      label="Page Views"
+                      value={formatNumber(analyticsData.customAnalytics.pageViews)}
+                      icon="chart"
+                    />
+                    <MetricCard
+                      label="Project Views"
+                      value={formatNumber(analyticsData.customAnalytics.projectViews)}
+                      icon="work"
+                    />
+                    <MetricCard
+                      label="External Links"
+                      value={formatNumber(analyticsData.customAnalytics.externalLinks)}
+                      icon="external"
+                    />
+                    <MetricCard
+                      label="Contact Forms"
+                      value={formatNumber(analyticsData.customAnalytics.contactForms)}
+                      icon="contact"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-slate-500 italic">No custom events yet</p>
+                    <p className="text-sm text-slate-600">
+                      Custom event tracking starts from deployment. Visit pages and interact with the site to generate events.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Additional Analytics - Only show if custom analytics has data */}
+            {analyticsData.customAnalytics && analyticsData.customAnalytics.totalEvents > 0 && (
+              <>
+                {/* Event Type Breakdown */}
+                {analyticsData.customAnalytics.eventsByType.length > 0 && (
+                  <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Icon name="chart" size="lg" className="text-green-400" />
+                      <h2 className="text-2xl font-semibold">Event Types</h2>
+                    </div>
+                    <div className="space-y-3">
+                      {analyticsData.customAnalytics.eventsByType.map((event, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-900/40 rounded-lg">
+                          <span className="text-slate-300 capitalize">{event.eventType.replace('_', ' ')}</span>
+                          <span className="text-white font-semibold font-mono">{formatNumber(event.count)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Page Analytics */}
+                {analyticsData.customAnalytics.eventsByPage.length > 0 && (
+                  <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Icon name="chart" size="lg" className="text-blue-400" />
+                      <h2 className="text-2xl font-semibold">Top Pages (Custom)</h2>
+                    </div>
+                    <div className="space-y-3">
+                      {analyticsData.customAnalytics.eventsByPage.slice(0, 10).map((page, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-900/40 rounded-lg">
+                          <span className="text-slate-300">{page.page || '/'}</span>
+                          <span className="text-white font-semibold font-mono">{formatNumber(page.count)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Geographic Distribution */}
+                {analyticsData.customAnalytics.eventsByCountry.length > 0 && (
+                  <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Icon name="external" size="lg" className="text-yellow-400" />
+                      <h2 className="text-2xl font-semibold">Geographic Distribution</h2>
+                    </div>
+                    <p className="text-slate-400 text-sm mb-4">
+                      Privacy-compliant: Country-level data only, no precise locations
+                    </p>
+                    <div className="space-y-3">
+                      {analyticsData.customAnalytics.eventsByCountry.slice(0, 10).map((country, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-900/40 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{getFlagEmoji(country.country)}</span>
+                            <span className="text-slate-300">{country.countryName}</span>
+                          </div>
+                          <span className="text-white font-semibold font-mono">{formatNumber(country.count)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Device & Browser Breakdown */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Device Types */}
+                  {analyticsData.customAnalytics.eventsByDevice.length > 0 && (
+                    <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Icon name="user" size="lg" className="text-cyan-400" />
+                        <h2 className="text-2xl font-semibold">Devices</h2>
+                      </div>
+                      <div className="space-y-3">
+                        {analyticsData.customAnalytics.eventsByDevice.map((device, idx) => {
+                          const total = analyticsData.customAnalytics!.eventsByDevice.reduce((sum, d) => sum + d.count, 0)
+                          const percentage = total > 0 ? Math.round((device.count / total) * 100) : 0
+                          return (
+                            <div key={idx} className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-300 capitalize">{device.deviceType}</span>
+                                <span className="text-white font-semibold">
+                                  {formatNumber(device.count)} ({percentage}%)
+                                </span>
+                              </div>
+                              <div className="w-full bg-slate-900/40 rounded-full h-2">
+                                <div
+                                  className="bg-cyan-400 h-2 rounded-full transition-all"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Browser Types */}
+                  {analyticsData.customAnalytics.eventsByBrowser.length > 0 && (
+                    <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Icon name="external" size="lg" className="text-orange-400" />
+                        <h2 className="text-2xl font-semibold">Browsers</h2>
+                      </div>
+                      <div className="space-y-3">
+                        {analyticsData.customAnalytics.eventsByBrowser.map((browser, idx) => {
+                          const total = analyticsData.customAnalytics!.eventsByBrowser.reduce((sum, b) => sum + b.count, 0)
+                          const percentage = total > 0 ? Math.round((browser.count / total) * 100) : 0
+                          return (
+                            <div key={idx} className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-300 capitalize">{browser.browserFamily}</span>
+                                <span className="text-white font-semibold">
+                                  {formatNumber(browser.count)} ({percentage}%)
+                                </span>
+                              </div>
+                              <div className="w-full bg-slate-900/40 rounded-full h-2">
+                                <div
+                                  className="bg-orange-400 h-2 rounded-full transition-all"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
+}
+
+// Metric Card Component
+const MetricCard = ({ label, value, icon }: { label: string; value: string; icon: string }) => (
+  <div className="flex items-center justify-between p-4 bg-slate-900/40 rounded-lg">
+    <div className="flex items-center gap-3">
+      <Icon name={icon as any} className="text-slate-500" />
+      <span className="text-slate-400">{label}</span>
+    </div>
+    <span className="text-white font-semibold text-lg">{value}</span>
+  </div>
+)
+
+// Get flag emoji from country code
+const getFlagEmoji = (countryCode: string): string => {
+  if (!countryCode || countryCode === 'unknown') return '🌍'
+
+  // Convert country code to regional indicator symbols
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0))
+
+  return String.fromCodePoint(...codePoints)
 }
 
 export default Insights
