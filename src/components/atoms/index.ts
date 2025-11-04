@@ -18,5 +18,3 @@ export type { SlideInImageProps } from './SlideInImage'
 
 export { default as TurnstileWidget } from './TurnstileWidget'
 export type { TurnstileWidgetProps } from './TurnstileWidget'
-
-export { default as LoginPrompt } from './LoginPrompt'

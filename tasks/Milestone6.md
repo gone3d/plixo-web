@@ -1,8 +1,9 @@
 # Milestone 6: CloudFlare Analytics Engine + GraphQL
 
-> **Status**: 🚀 ACTIVE
+> **Status**: 🚧 IN PROGRESS (Session 1: 2025-11-03)
 > **Started**: 2025-11-03
 > **Estimated Duration**: 12-16 hours
+> **Progress**: ~40% complete (6 hours logged)
 > **Target Completion**: 2025-11-10 (1 week)
 > **Priority**: 🔴 HIGH
 > **Strategic Value**: GraphQL resume gap + visitor insights
@@ -1619,3 +1620,138 @@ If issues discovered:
 **Estimated Total Time**: 12-16 hours (1 week at 2-3 hours/day)
 **Target Completion**: 2025-11-10
 **Strategic Value**: HIGH - Fills resume gap + enables data-driven portfolio optimization
+
+---
+
+## Session Log
+
+### Session 1 - 2025-11-03 (6 hours)
+
+**Goal**: Implement CloudFlare Analytics Engine GraphQL queries and get data flowing to Insights dashboard
+
+#### Accomplishments
+
+1. **✅ CloudFlare Web Analytics Integration - WORKING**
+   - Fixed GraphQL query parsing bug (`zone.totals` vs `zone.httpRequests1dGroups`)
+   - Added error handling to analytics overview endpoint (failures don't kill entire endpoint)
+   - Web Analytics now returning real data: 17,853 page views, 2,561 unique visitors, 370MB bandwidth
+   - Simplified query to fetch only totals (removed problematic dimension queries)
+
+2. **✅ Analytics Engine GraphQL Implementation**
+   - Created `analyticsEngineQuery.service.ts` with complete GraphQL query methods
+   - Implemented queries for: total events, page views, geographic distribution, device breakdown, browser breakdown
+   - Added parallel query execution for better performance
+   - Used `analyticsEngineEventsAdaptiveGroups` GraphQL API
+
+3. **✅ Custom Analytics Event Tracking - DEPLOYED**
+   - Events successfully writing to Analytics Engine (tested with curl)
+   - `/api/analytics/track` endpoint accepting events and returning success
+   - Sent 8 test events: page_view (4), project_view (2), contact_form (1), external_link (1)
+
+4. **✅ Environment Configuration**
+   - Added `CLOUDFLARE_ACCOUNT_ID` to production environment variables
+   - Confirmed account ID is set and recognized (`hasAccountId: true`)
+   - Debug endpoint showing partial account ID for verification
+
+5. **✅ Insights Page Updates**
+   - Added timeframe dropdown (1/7/30 days)
+   - Added visualization sections for geo, browser, device, event types
+   - Added flag emojis for country display
+   - Added percentage bars for device/browser breakdowns
+
+#### Current Blockers
+
+**🔴 BLOCKER: Custom Analytics GraphQL Queries Returning Zeros**
+- Web Analytics working perfectly ✅
+- Custom Analytics queries execute without errors ✅
+- But all custom analytics data returns 0 despite events being written ✅
+- GraphQL query may be missing dataset specification or using wrong field names
+
+**Debugging Steps Taken**:
+1. ✅ Verified events writing successfully (curl tests return `{"success":true}`)
+2. ✅ Confirmed `CLOUDFLARE_ACCOUNT_ID` environment variable set
+3. ✅ Added `dataset: this.datasetName` filter to all GraphQL queries
+4. ✅ Added debug logging to see GraphQL response structure
+5. ⏳ Need to check CloudFlare logs to see actual GraphQL response
+
+**Possible Issues**:
+- Dataset filter syntax may be incorrect for Analytics Engine GraphQL
+- Data propagation delay (Analytics Engine can take 5-10 minutes)
+- GraphQL schema mismatch (field names don't match Analytics Engine schema)
+- Query filtering on wrong dimensions
+
+#### Files Modified
+
+**Backend (plixo-api)**:
+- `src/lib/services/analyticsEngineQuery.service.ts` - Complete GraphQL query implementation
+- `src/lib/services/webAnalytics.service.ts` - Fixed query parsing, simplified to totals only
+- `functions/api/analytics/overview.ts` - Added error handling and debug info
+- `src/lib/utils/turnstile.ts` - Added test token detection
+
+**Frontend (plixo-web)**:
+- `src/pages/Insights.tsx` - Enhanced with new analytics visualizations
+- `src/types/analytics.ts` - Added new data types for custom analytics
+- `.env.development` - Updated to use production API and prod Turnstile key
+
+#### Next Session Priorities
+
+1. **🔴 CRITICAL: Fix Custom Analytics GraphQL Queries**
+   - Check CloudFlare logs for actual GraphQL response structure
+   - Verify dataset filter syntax against Analytics Engine docs
+   - Test with different query structures to isolate issue
+   - May need to remove dataset filter or use different approach
+
+2. **Validate Data Flow**
+   - Wait 10-15 minutes for data propagation
+   - Send more test events to build dataset
+   - Verify events appear in CloudFlare Analytics Engine dashboard
+
+3. **Query Refinement**
+   - Once data flowing, optimize query structure
+   - Add missing dimensions (top pages, countries, etc.) back to Web Analytics
+   - Implement proper error messages for empty data states
+
+4. **Frontend Integration**
+   - Wire up GraphQL client (urql) once queries working
+   - Add real-time data refresh
+   - Implement loading states and error handling
+
+#### Technical Decisions
+
+**Web Analytics Simplification**:
+- Removed dimension queries (countries, browsers, devices, status codes) due to schema issues
+- CloudFlare GraphQL field names (`clientCountryName`, `clientBrowser`, etc.) causing errors
+- Kept only totals query which works reliably
+- Can add dimensions back once we find correct field names
+
+**Error Handling Strategy**:
+- Analytics overview endpoint now catches errors independently for Web Analytics vs Custom Analytics
+- Failures in one don't break the other
+- Returns null for failed sections instead of 500 error
+- Debug info helps identify configuration issues
+
+**Dataset Specification**:
+- Added `dataset: "plixo_analytics"` to GraphQL filter variables
+- May need different approach (binding name vs dataset name)
+- CloudFlare docs unclear on exact syntax for Analytics Engine queries
+
+#### Performance Metrics
+
+- Web Analytics query: ~200-300ms response time ✅
+- Custom Analytics query: ~150-250ms (but returning empty) ⚠️
+- Analytics tracking POST: ~50-100ms ✅
+- Frontend build: 150.26 KB gzipped ✅
+
+#### Time Logged: 6 hours
+
+**Breakdown**:
+- GraphQL implementation: 2 hours
+- Web Analytics debugging: 1.5 hours
+- Custom Analytics setup: 1.5 hours
+- Frontend visualization: 1 hour
+
+**Estimated Remaining**: 6-10 hours
+- Fix Custom Analytics queries: 2-3 hours
+- Frontend GraphQL client setup: 1-2 hours
+- Dashboard polish: 1-2 hours
+- Testing & deployment: 2-3 hours
