@@ -17,17 +17,28 @@
 
 ## 🎯 Current Priority: CloudFlare Analytics Engine + GraphQL
 
-**Status**: 🚀 Starting Now
-**Estimated Time**: 12-16 hours
+**Status**: 🚧 In Progress (Session 1 complete - 2025-11-03)
+**Progress**: ~40% complete (6 hours logged)
+**Estimated Time**: 12-16 hours total
+**Remaining**: 6-10 hours
 **Target Completion**: 2025-11-10 (1 week)
 **Strategic Value**: Fills GraphQL resume gap + enables visitor insights
 
-**Quick Start**:
-1. Review [Milestone 6 tasks](./tasks/Milestone6.md)
-2. Set up CloudFlare Analytics Engine binding in plixo-api
-3. Build GraphQL schema for analytics queries
-4. Implement visitor tracking service
-5. Create Insights dashboard with real-time data
+**Session 1 Achievements** (2025-11-03 - 6 hours):
+- ✅ CloudFlare Web Analytics working (17,853 page views, 2,561 visitors showing)
+- ✅ GraphQL queries implemented for Analytics Engine
+- ✅ Event tracking deployed and accepting data
+- ✅ Insights page with visualizations for geo, browser, device data
+- 🔴 **BLOCKER**: Custom Analytics GraphQL returning zeros (need to check logs)
+
+**Next Session Priorities**:
+1. Check CloudFlare logs to debug GraphQL response structure
+2. Fix Custom Analytics queries (dataset filter issue)
+3. Validate data propagation (may need 10-15 min wait)
+4. Wire up GraphQL client (urql) for frontend
+5. Polish dashboard with real-time refresh
+
+**Detailed Progress**: See [Milestone 6 Session Log](./tasks/Milestone6.md#session-log)
 
 ---
 
@@ -38,7 +49,7 @@
 | **M0: Production Deployment** | ✅ Complete | 1.5 hours | CRITICAL | [View Details](./tasks/Milestone0.md) |
 | **M1: Foundation** | ✅ Complete | 2 weeks | CRITICAL | [View Details](./tasks/Milestone1.md) |
 | **M5: Guest Login (Turnstile)** | ✅ Complete | 8 hours | CRITICAL | [View Details](./tasks/Milestone5.md) |
-| **M6: Analytics + GraphQL** | 🚀 Active | 12-16 hours | HIGH | [View Details](./tasks/Milestone6.md) |
+| **M6: Analytics + GraphQL** | 🚧 40% (6/15hrs) | 12-16 hours | HIGH | [View Details](./tasks/Milestone6.md) |
 | **M2: API Integration** | 🚧 Partial | 4-6 weeks | HIGH | [View Details](./tasks/Milestone2.md) |
 | **M3: Advanced Features** | ⏳ Pending | 3-4 weeks | MEDIUM | [View Details](./tasks/Milestone3.md) |
 | **M4: Polish & Performance** | ⏳ Pending | 2-3 weeks | HIGH | [View Details](./tasks/Milestone4.md) |
