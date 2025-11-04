@@ -103,6 +103,8 @@ const ProjectCard = ({
         <div className="flex items-center justify-between pt-3 border-t border-slate-700/30 mt-auto">
           <a
             href={liveUrl || demoUrl || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors"
           >
             {liveUrl ? 'View Live' : demoUrl ? 'View Demo' : 'View Project'}
@@ -112,6 +114,8 @@ const ProjectCard = ({
           {githubUrl && (
             <a
               href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-slate-400 hover:text-white font-medium transition-colors"
               title="View on GitHub"
             >
