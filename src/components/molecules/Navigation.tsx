@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button, Icon, LoginPrompt } from "../atoms";
+import { Button, Icon } from "../atoms";
 import { LoginModal } from "../molecules";
 import { useAuth } from "../../contexts/AuthContext";
 import { cn } from "../../utils/cn";
@@ -65,13 +65,11 @@ const Navigation = () => {
                   <div className="flex items-center gap-2 ml-4 pl-4 border-l border-slate-700">
                     <span className="text-sm text-slate-400">
                       {user?.username}
-                      <span className="ml-1 text-xs text-blue-400">({user?.role})</span>
+                      <span className="ml-1 text-xs text-blue-400">
+                        ({user?.role})
+                      </span>
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleLogout}
-                    >
+                    <Button variant="ghost" size="sm" onClick={handleLogout}>
                       <Icon name="close" size="sm" />
                     </Button>
                   </div>
@@ -84,7 +82,9 @@ const Navigation = () => {
                   className="md:hidden flex items-center gap-1"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
-                  {!isMenuOpen && <span className="text-sm font-medium">Menu</span>}
+                  {!isMenuOpen && (
+                    <span className="text-sm font-medium">Menu</span>
+                  )}
                   <Icon name={isMenuOpen ? "close" : "menu"} />
                 </Button>
               </>
@@ -92,7 +92,6 @@ const Navigation = () => {
               <>
                 {/* Desktop Login Button - Not Authenticated */}
                 <div className="hidden md:flex items-center gap-3">
-                  <LoginPrompt />
                   <Button
                     variant="ghost"
                     size="sm"
@@ -106,7 +105,11 @@ const Navigation = () => {
                 {/* Mobile Login Button - Not Authenticated */}
                 <div className="md:hidden flex items-center gap-2">
                   {/* Big arrow prompt for mobile */}
-                  <Icon name="menu" size="lg" className="text-cyan-400 animate-pulse" />
+                  <Icon
+                    name="menu"
+                    size="lg"
+                    className="text-cyan-400 animate-pulse"
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
@@ -145,7 +148,9 @@ const Navigation = () => {
                 <div className="pt-4 border-t border-slate-700">
                   <div className="px-4 py-2 text-sm text-slate-400 mb-2">
                     {user?.username}
-                    <span className="ml-1 text-xs text-blue-400">({user?.role})</span>
+                    <span className="ml-1 text-xs text-blue-400">
+                      ({user?.role})
+                    </span>
                   </div>
                   <Button
                     variant="ghost"
