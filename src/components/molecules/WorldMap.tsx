@@ -63,19 +63,28 @@ export function WorldMap({ data, className = '' }: WorldMapProps) {
 
   return (
     <div className={`w-full ${className}`}>
-      <ComposableMap
-        projection="geoMercator"
-        projectionConfig={{
-          scale: 100,
-        }}
-        width={800}
-        height={400}
-        style={{
-          width: '100%',
-          height: 'auto',
-        }}
-      >
-        <ZoomableGroup center={[0, 20]} zoom={1}>
+      {/* Zoom instruction */}
+      <div className="text-center mb-3">
+        <p className="text-slate-400 text-xs">
+          🖱️ Scroll to zoom • Drag to pan
+        </p>
+      </div>
+
+      <div className="relative">
+        <ComposableMap
+          projection="geoMercator"
+          projectionConfig={{
+            scale: 100,
+          }}
+          width={800}
+          height={400}
+          style={{
+            width: '100%',
+            height: 'auto',
+            cursor: 'grab',
+          }}
+        >
+          <ZoomableGroup center={[0, 20]} zoom={1}>
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
               geographies.map((geo) => {
@@ -116,6 +125,7 @@ export function WorldMap({ data, className = '' }: WorldMapProps) {
           </Geographies>
         </ZoomableGroup>
       </ComposableMap>
+      </div>
 
       {/* Legend */}
       <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-400">

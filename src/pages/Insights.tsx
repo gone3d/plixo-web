@@ -348,9 +348,6 @@ const Insights = () => {
                       <Icon name="external" size="lg" className="text-yellow-400" />
                       <h2 className="text-2xl font-semibold">Geographic Distribution</h2>
                     </div>
-                    <p className="text-slate-400 text-sm mb-4">
-                      Privacy-compliant: Country-level data only, no precise locations
-                    </p>
 
                     <WorldMap data={analyticsData.customAnalytics.eventsByCountry} />
                   </div>
