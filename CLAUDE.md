@@ -1200,4 +1200,220 @@ functions/api/auth/
 
 ---
 
+## Session Summary - Analytics Migration to D1 & UX Refinements (2025-11-04)
+
+### **MAJOR ACCOMPLISHMENTS THIS SESSION**
+
+#### 1. **✅ Analytics Engine → D1 Database Migration - CRITICAL PIVOT**
+**Problem Discovered**: Analytics Engine requires Workers Paid plan ($5/month)
+**Solution Implemented**: Migrated entire analytics system to D1 database (free tier)
+
+**Backend Changes (plixo-api)**:
+- Created `analytics_events` table with comprehensive schema
+- Updated `AnalyticsService` to write to D1 instead of Analytics Engine
+- Built `AnalyticsD1QueryService` with SQL queries (replaced GraphQL)
+- Updated all analytics endpoints to use D1
+- Removed Analytics Engine binding from wrangler.toml
+- Migration 0003_analytics_tracking.sql executed successfully
+
+**Key Benefits**:
+- ✅ Works on Workers FREE plan (no monthly cost)
+- ✅ Instant query results (no 10-30 minute propagation delay)
+- ✅ Full SQL query control and flexibility
+- ✅ Same analytics data structure maintained
+- ✅ Frontend unchanged (REST API interface identical)
+
+#### 2. **✅ UX Improvements - Text Readability & External Links**
+
+**Text Shadow Enhancement**:
+- Created reusable `.text-shadow-glow` CSS class for better text contrast
+- Applied to subtitle, version text, and CAPTCHA instructions on Landing page
+- Reduced shadow intensity per user feedback (lighter, more subtle)
+- Removed heavy shadow from main heading for cleaner look
+
+**External Link Fix - CRITICAL UX**:
+- Fixed all ProjectCard links to open in new tabs (`target="_blank"`)
+- Added security attributes (`rel="noopener noreferrer"`)
+- Prevents guest session loss when viewing live projects or GitHub repos
+- Major UX improvement for recruiter experience
+
+**Landing Page Content**:
+- Updated name to "Don Anderson"
+- Updated title to "Staff Frontend Engineer"
+- Maintained professional polish with improved contrast
+
+#### 3. **✅ Analytics System Verification**
+- Deployed D1-based analytics to production
+- Sent test events and verified immediate storage
+- Confirmed instant query results (3 events tracked and retrieved)
+- Web Analytics still working (18,034 page views from CloudFlare)
+- Custom Analytics now operational on free tier
+
+### **TECHNICAL ACHIEVEMENTS**
+
+#### **Database Schema**
+```sql
+CREATE TABLE analytics_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_type TEXT NOT NULL, -- page_view, project_view, external_link, etc.
+  page_path TEXT,
+  user_role TEXT,
+  project_slug TEXT,
+  destination_url TEXT,
+  link_text TEXT,
+  count INTEGER DEFAULT 1,
+  duration_ms INTEGER,
+  page_count INTEGER,
+  country_code TEXT, -- Privacy-compliant (country-level only)
+  device_type TEXT,
+  browser_family TEXT,
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  event_date TEXT NOT NULL DEFAULT (date('now'))
+);
+```
+
+#### **CSS Utility Class**
+```css
+.text-shadow-glow {
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8),
+               0 0 8px rgba(0, 0, 0, 0.6),
+               1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+```
+
+#### **Security Improvements**
+- All external links: `target="_blank"` + `rel="noopener noreferrer"`
+- Prevents `window.opener` security vulnerabilities
+- Maintains guest session by keeping portfolio open in original tab
+
+### **FILES MODIFIED THIS SESSION**
+
+#### **Frontend (plixo-web v1.1.9)**
+```
+src/index.css
+  └── Added .text-shadow-glow utility class
+
+src/pages/Landing.tsx
+  └── Applied text shadows, updated content (Don Anderson, Staff Frontend Engineer)
+
+src/components/molecules/ProjectCard.tsx
+  └── Fixed external links to open in new tabs
+
+package.json
+  └── Version bumped: 1.1.8 → 1.1.9
+```
+
+#### **Backend (plixo-api v1.1.7)**
+```
+src/db/migrations/
+  └── 0003_analytics_tracking.sql (new) - Analytics table schema
+
+src/lib/services/
+  ├── analytics.service.ts (updated) - Now writes to D1
+  └── analyticsD1Query.service.ts (new) - SQL-based queries
+
+functions/api/analytics/
+  ├── track.ts (updated) - Uses D1 instead of Analytics Engine
+  └── overview.ts (updated) - Uses D1Query service
+
+wrangler.toml
+  └── Removed Analytics Engine binding
+
+package.json
+  └── Version bumped: 1.1.6 → 1.1.7
+```
+
+### **PRODUCTION STATUS**
+
+#### **✅ DEPLOYED & VERIFIED**
+- plixo-web: v1.1.9 deployed with UX improvements
+- plixo-api: v1.1.7 deployed with D1 analytics
+- Analytics events writing successfully to D1
+- Analytics queries returning data immediately
+- No errors in CloudFlare logs
+- Bundle: 152.15 KB gzipped (plixo-web)
+
+#### **📊 ANALYTICS STATUS**
+- **Web Analytics**: ✅ 18,034 page views, 2,644 visitors (CloudFlare)
+- **Custom Analytics**: ✅ Working on D1 database (free tier)
+- **Insights Dashboard**: ✅ Ready to display live data
+- **Event Tracking**: ✅ All events captured (page views, projects, links, forms)
+
+### **ARCHITECTURAL DECISIONS**
+
+#### **Why D1 Over Analytics Engine?**
+1. **Cost**: Free tier vs $5/month
+2. **Speed**: Instant queries vs 10-30 minute propagation
+3. **Control**: Full SQL flexibility vs limited GraphQL
+4. **Simplicity**: Single database vs separate Analytics Engine service
+5. **Scalability**: D1 can handle portfolio traffic easily
+
+#### **Data Privacy Maintained**
+- Country-level geo data only (no city/region)
+- No PII stored (hashed IPs in guest sessions only)
+- GDPR/CCPA compliant design
+- Anonymous session tracking
+
+### **BLOCKERS RESOLVED**
+
+#### **1. Analytics Engine Returning Zeros - RESOLVED ✅**
+- **Root Cause**: Analytics Engine requires Workers Paid plan ($5/month)
+- **Solution**: Complete migration to D1 database (free tier)
+- **Impact**: CRITICAL - entire analytics system now operational at zero cost
+
+#### **2. GraphQL Query Syntax Issues - OBSOLETE ✅**
+- **Root Cause**: Dataset filter incompatibility with Analytics Engine GraphQL
+- **Solution**: Replaced GraphQL entirely with SQL queries
+- **Impact**: Simpler, faster, more flexible query system
+
+#### **3. External Links Breaking Guest Sessions - RESOLVED ✅**
+- **Root Cause**: Links opened in same tab, forcing re-login
+- **Solution**: Added `target="_blank"` to all external links
+- **Impact**: CRITICAL UX improvement for recruiters viewing projects
+
+### **DEVELOPMENT VELOCITY**
+
+**Session Timeline**:
+- **Started**: 2025-11-04 evening
+- **Duration**: ~4 hours
+- **Scope**: Analytics migration + UX improvements + version bumps
+
+**Key Success Factors**:
+- Quick pivot when Analytics Engine limitation discovered
+- Leveraged existing D1 database infrastructure
+- SQL queries simpler than GraphQL for this use case
+- Maintained identical REST API interface (no frontend changes needed)
+
+### **LESSONS LEARNED**
+
+1. **Always Check Plan Requirements First**
+   - Analytics Engine docs didn't prominently mention paid plan requirement
+   - Could have saved time by checking CloudFlare billing first
+   - D1 ended up being better solution anyway (instant results)
+
+2. **SQL > GraphQL for Simple Analytics**
+   - SQL queries more straightforward for time-series data
+   - Full control over indexes and optimization
+   - Easier to debug and understand query logic
+
+3. **Free Tier Can Be Feature-Rich**
+   - D1 database on free tier handles analytics perfectly
+   - No need to upgrade to paid plan for portfolio use case
+   - Cost-effective architecture demonstrates smart engineering
+
+4. **UX Details Matter**
+   - Text shadows make content readable on varied backgrounds
+   - External links in new tabs prevent session loss
+   - Small fixes create big impact on user experience
+
+### **CONFIDENCE LEVEL**: VERY HIGH
+
+**Analytics System**: Production-ready, free tier, instant results
+**UX Quality**: Professional polish with text contrast and link behavior
+**Code Quality**: Clean SQL queries, type-safe, well-documented
+**Deployment Status**: Both repos deployed and verified working
+**Cost Efficiency**: Entire system running on free tier
+
+---
+
 **Portfolio Mission Reminder**: Demonstrate that experience + innovation = unstoppable technical leadership through cutting-edge web technologies and thoughtful user experience design.
