@@ -1938,6 +1938,49 @@ curl https://api.plixo.com/api/analytics/overview?days=1
 
 ---
 
+## 📈 Post-Launch Enhancement: Extended Time Ranges
+
+**Status**: 🔄 IN PROGRESS (2025-11-05)
+**Priority**: MEDIUM
+**Estimated Time**: 30 minutes
+
+### Goal
+
+Add more granular time range options to Insights dashboard to enable real-time monitoring and recent activity analysis.
+
+### Requirements
+
+**Current Time Ranges** (implemented):
+- ✅ 1 day
+- ✅ 7 days
+- ✅ 30 days
+
+**New Time Ranges** (to add):
+- 🔄 1 hour (last 60 minutes) - for real-time monitoring
+- 🔄 12 hours (last 12 hours) - for recent activity analysis
+
+### Implementation Tasks
+
+**Backend (plixo-api)**:
+1. Update `AnalyticsD1QueryService` to handle hour-based time ranges
+2. Ensure SQL queries work with datetime precision (currently uses date-only)
+3. Test queries with small time windows
+
+**Frontend (plixo-web)**:
+1. Add "1 Hour" and "12 Hours" options to timeframe dropdown in `Insights.tsx`
+2. Update time range calculation to support hours
+3. Verify real-time data updates correctly
+
+### Acceptance Criteria
+
+- ✅ Dropdown shows: "1 Hour", "12 Hours", "1 Day", "7 Days", "30 Days"
+- ✅ 1-hour range queries data from last 60 minutes
+- ✅ 12-hour range queries data from last 12 hours
+- ✅ All visualizations update correctly with new time ranges
+- ✅ Real-time monitoring works (1-hour view shows live activity)
+
+---
+
 ## 🎉 MILESTONE 6 COMPLETE
 
 **Achievement**: Full analytics system operational on free tier with instant queries
