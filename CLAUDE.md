@@ -1,5 +1,25 @@
 # Claude Session Guide - Plixo Portfolio Website
 
+## ⚠️ CRITICAL: Git Workflow Policy
+
+**IMPORTANT: DO NOT USE ANY GIT COMMANDS**
+
+- **NO `git add`**
+- **NO `git commit`**
+- **NO `git push`**
+- **NO `git status`** (unless explicitly asked)
+- **NO git commands whatsoever**
+
+**User Workflow**:
+1. Claude makes code changes using Read, Write, Edit tools
+2. User reviews changes locally
+3. User handles ALL git operations through GitHub Desktop or terminal
+4. User will explicitly say "push" or "deploy" when ready for remote deployment
+
+**Why**: User needs to review all changes before committing. Git operations are user responsibility only.
+
+---
+
 ## Portfolio Project Overview and Current Status
 
 **Mission**: Create a cutting-edge portfolio website that positions you as a forward-thinking Staff/Principal Engineer and technical leader who loves building innovative solutions, combining deep hands-on expertise with leadership experience to prove that experience + innovation = unstoppable.
