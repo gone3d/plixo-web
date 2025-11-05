@@ -60,13 +60,12 @@ function CustomTooltip({ active, payload }: any) {
 }
 
 // Custom label renderer for center text
-function CenterLabel({ viewBox, total }: any) {
-  const { cx, cy } = viewBox
+function CenterLabel({ total }: { total: number }) {
   return (
     <g>
       <text
-        x={cx}
-        y={cy - 10}
+        x="50%"
+        y="47%"
         textAnchor="middle"
         dominantBaseline="central"
         className="fill-slate-400 text-sm"
@@ -74,8 +73,8 @@ function CenterLabel({ viewBox, total }: any) {
         Total
       </text>
       <text
-        x={cx}
-        y={cy + 15}
+        x="50%"
+        y="53%"
         textAnchor="middle"
         dominantBaseline="central"
         className="fill-white text-2xl font-bold"
@@ -144,9 +143,7 @@ export function PieChartComponent({
             )}
           />
           {/* Center label showing total count */}
-          <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central">
-            <CenterLabel viewBox={{ cx: '50%', cy: '50%' }} total={total} />
-          </text>
+          <CenterLabel total={total} />
         </PieChart>
       </ResponsiveContainer>
     </div>

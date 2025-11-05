@@ -342,16 +342,24 @@ const Insights = () => {
                 )}
 
                 {/* Geographic Distribution */}
-                {analyticsData.customAnalytics.eventsByCountry.length > 0 && (
-                  <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
-                    <div className="flex items-center gap-3 mb-6">
-                      <Icon name="external" size="lg" className="text-yellow-400" />
-                      <h2 className="text-2xl font-semibold">Geographic Distribution</h2>
-                    </div>
+                {analyticsData.customAnalytics.eventsByCountry.length > 0 && (() => {
+                  const totalVisitors = analyticsData.customAnalytics.eventsByCountry.reduce((sum, c) => sum + c.count, 0)
+                  return (
+                    <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Icon name="globe" size="lg" className="text-yellow-400" />
+                        <h2 className="text-2xl font-semibold">
+                          Geographic Distribution
+                          <span className="text-slate-400 text-lg font-normal ml-2">
+                            ({formatNumber(totalVisitors)} total visitors)
+                          </span>
+                        </h2>
+                      </div>
 
-                    <WorldMap data={analyticsData.customAnalytics.eventsByCountry} />
-                  </div>
-                )}
+                      <WorldMap data={analyticsData.customAnalytics.eventsByCountry} />
+                    </div>
+                  )
+                })()}
 
                 {/* Device & Browser Breakdown */}
                 <div className="grid md:grid-cols-2 gap-8">
@@ -360,7 +368,7 @@ const Insights = () => {
                     <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                          <Icon name="user" size="lg" className="text-cyan-400" />
+                          <Icon name="monitor-smartphone" size="lg" className="text-cyan-400" />
                           <h2 className="text-2xl font-semibold">Devices</h2>
                         </div>
                         <ChartToggle activeChart={deviceChart} onToggle={setDeviceChart} />
@@ -390,7 +398,7 @@ const Insights = () => {
                     <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                          <Icon name="external" size="lg" className="text-orange-400" />
+                          <Icon name="monitor" size="lg" className="text-orange-400" />
                           <h2 className="text-2xl font-semibold">Browsers</h2>
                         </div>
                         <ChartToggle activeChart={browserChart} onToggle={setBrowserChart} />
