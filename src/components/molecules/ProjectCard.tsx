@@ -1,6 +1,7 @@
 import { Icon, SlideInImage } from "../atoms";
 import { cn } from "../../utils/cn";
 import type { IconName } from "../atoms/Icon";
+import { analyticsClient } from "../../services/analyticsClient";
 
 export interface ProjectCardProps {
   title: string;
@@ -27,6 +28,19 @@ const ProjectCard = ({
   featured = false,
   className,
 }: ProjectCardProps) => {
+  // Generate slug for tracking
+  const projectSlug = title.toLowerCase().replace(/\s+/g, '-');
+
+  // Track project view when card is clicked
+  const handleProjectView = () => {
+    analyticsClient.trackProjectView(projectSlug);
+  };
+
+  // Track external link clicks
+  const handleExternalLinkClick = (destination: string, linkText: string) => {
+    analyticsClient.trackExternalLink(destination, linkText);
+  };
+
   const statusColors = {
     Live: "bg-green-500/20 text-green-400 border-green-500/30",
     Demo: "bg-blue-500/20 text-blue-400 border-blue-500/30",
@@ -46,8 +60,9 @@ const ProjectCard = ({
 
   return (
     <div
+      onClick={handleProjectView}
       className={cn(
-        "group relative bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden transition-all duration-300 flex flex-col h-96",
+        "group relative bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden transition-all duration-300 flex flex-col h-96 cursor-pointer",
         "hover:bg-slate-800/70 hover:border-slate-600/50 hover:scale-105 hover:shadow-xl",
         featured && "ring-2 ring-blue-500/30 border-blue-500/30",
         className
@@ -105,6 +120,14 @@ const ProjectCard = ({
             href={liveUrl || demoUrl || '#'}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => {
+              e.stopPropagation();
+              const url = liveUrl || demoUrl || '#';
+              const linkText = liveUrl ? 'View Live' : demoUrl ? 'View Demo' : 'View Project';
+              if (url !== '#') {
+                handleExternalLinkClick(url, linkText);
+              }
+            }}
             className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors"
           >
             {liveUrl ? 'View Live' : demoUrl ? 'View Demo' : 'View Project'}
@@ -116,6 +139,10 @@ const ProjectCard = ({
               href={githubUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExternalLinkClick(githubUrl, 'GitHub');
+              }}
               className="inline-flex items-center gap-2 text-slate-400 hover:text-white font-medium transition-colors"
               title="View on GitHub"
             >
