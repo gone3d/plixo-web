@@ -70,7 +70,12 @@ export function WorldMap({ data, className = '' }: WorldMapProps) {
         </p>
       </div>
 
-      <div className="relative">
+      <div className="relative rounded-lg overflow-hidden">
+        {/* Subtle vignette fade */}
+        <div className="absolute inset-0 pointer-events-none z-10" style={{
+          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(15, 23, 42, 0.3) 100%)'
+        }} />
+
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{
