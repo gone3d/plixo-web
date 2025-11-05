@@ -1,7 +1,13 @@
 import { Icon } from "../components/atoms";
 import packageJson from "../../package.json";
+import { analyticsClient } from "../services/analyticsClient";
 
 const Connect = () => {
+  // Track external link clicks
+  const handleExternalLinkClick = (destination: string, linkText: string) => {
+    analyticsClient.trackExternalLink(destination, linkText);
+  };
+
   return (
     <div className="relative min-h-full text-white overflow-y-auto">
       <div className="relative z-10 max-w-4xl mx-auto py-20 px-4">
@@ -51,6 +57,7 @@ const Connect = () => {
                     href="https://linkedin.com"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => handleExternalLinkClick('https://linkedin.com', 'LinkedIn')}
                     className="flex items-center justify-center gap-3 p-3 rounded-lg bg-slate-800/70 hover:bg-slate-800 transition-colors"
                   >
                     <Icon name="linkedin" className="text-blue-400" />
@@ -65,6 +72,7 @@ const Connect = () => {
                     href="https://github.com"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => handleExternalLinkClick('https://github.com', 'GitHub')}
                     className="flex items-center justify-center gap-3 p-3 rounded-lg bg-slate-800/70 hover:bg-slate-800 transition-colors"
                   >
                     <Icon name="github" className="text-slate-300" />
@@ -120,6 +128,7 @@ const Connect = () => {
                   href="https://linkedin.com"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => handleExternalLinkClick('https://linkedin.com', 'LinkedIn')}
                   className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors"
                 >
                   <Icon name="linkedin" className="text-blue-400" />
@@ -134,6 +143,7 @@ const Connect = () => {
                   href="https://github.com"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => handleExternalLinkClick('https://github.com', 'GitHub')}
                   className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors"
                 >
                   <Icon name="github" className="text-slate-300" />
