@@ -71,9 +71,9 @@ export function WorldMap({ data, className = '' }: WorldMapProps) {
       </div>
 
       <div className="relative rounded-lg overflow-hidden">
-        {/* Subtle vignette fade */}
-        <div className="absolute inset-0 pointer-events-none z-10" style={{
-          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(15, 23, 42, 0.3) 100%)'
+        {/* Subtle vignette fade with blur */}
+        <div className="absolute inset-0 pointer-events-none z-10 backdrop-blur-[2px]" style={{
+          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(15, 23, 42, 0.4) 100%)'
         }} />
 
         <ComposableMap
