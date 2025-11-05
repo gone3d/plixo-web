@@ -12,6 +12,7 @@ import type {
 } from '../types/portfolio'
 import { tempConfig } from '../config/temp-data'
 import { apiClient } from '../services/api'
+import { createLinearSequence, createShuffledSequence } from '../utils/shuffle'
 
 /**
  * Global State Interface
@@ -96,6 +97,12 @@ export interface GlobalState {
     panDistancePx: number
     direction: 'horizontal' | 'vertical' | 'none'
   }
+
+  // Background Image Sequence (for slideshow randomization)
+  background: {
+    currentImageIndex: number
+    imageDisplaySequence: number[]
+  }
 }
 
 /**
@@ -149,6 +156,10 @@ export type GlobalAction =
 
   // Background Animation Actions
   | { type: 'UPDATE_BACKGROUND_SPEED'; payload: { speedPxPerSec: number; panDistancePx: number; direction: 'horizontal' | 'vertical' | 'none' } }
+
+  // Background Image Sequence Actions
+  | { type: 'SET_BACKGROUND_INDEX'; payload: number }
+  | { type: 'SHUFFLE_DISPLAY_SEQUENCE' }
 
   // Bulk Actions
   | { type: 'INITIALIZE_FROM_CONFIG'; payload: typeof tempConfig }
@@ -213,6 +224,11 @@ const initialState: GlobalState = {
     speedPxPerSec: 0,
     panDistancePx: 0,
     direction: 'horizontal'
+  },
+
+  background: {
+    currentImageIndex: 0,
+    imageDisplaySequence: []
   }
 }
 
@@ -462,8 +478,29 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
         }
       }
 
+    // Background Image Sequence Actions
+    case 'SET_BACKGROUND_INDEX':
+      return {
+        ...state,
+        background: {
+          ...state.background,
+          currentImageIndex: action.payload
+        }
+      }
+
+    case 'SHUFFLE_DISPLAY_SEQUENCE':
+      return {
+        ...state,
+        background: {
+          ...state.background,
+          imageDisplaySequence: createShuffledSequence(state.data.backgroundImages.length),
+          currentImageIndex: 0 // Reset to start of new shuffled sequence
+        }
+      }
+
     // Bulk Actions
     case 'INITIALIZE_FROM_CONFIG':
+      const images = action.payload.backgroundImages
       return {
         ...state,
         data: {
@@ -471,7 +508,7 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
           projects: action.payload.projects,
           experiences: action.payload.experiences,
           skills: action.payload.skills,
-          backgroundImages: action.payload.backgroundImages,
+          backgroundImages: images,
           appConfig: action.payload.appConfig
         },
         features: {
@@ -481,6 +518,10 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
         ui: {
           ...state.ui,
           theme: action.payload.appConfig.theme.defaultTheme
+        },
+        background: {
+          ...state.background,
+          imageDisplaySequence: createLinearSequence(images.length)
         }
       }
 
@@ -512,6 +553,8 @@ export interface GlobalContextType {
     setDataSource: (dataSource: 'config' | 'api') => void
     checkApiHealth: () => Promise<void>
     updateBackgroundSpeed: (speedPxPerSec: number, panDistancePx: number, direction: 'horizontal' | 'vertical' | 'none') => void
+    setBackgroundIndex: (index: number) => void
+    shuffleDisplaySequence: () => void
     initializeFromTempConfig: () => void
   }
 
@@ -626,6 +669,14 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
         type: 'UPDATE_BACKGROUND_SPEED',
         payload: { speedPxPerSec, panDistancePx, direction }
       })
+    },
+
+    setBackgroundIndex: (index: number) => {
+      dispatch({ type: 'SET_BACKGROUND_INDEX', payload: index })
+    },
+
+    shuffleDisplaySequence: () => {
+      dispatch({ type: 'SHUFFLE_DISPLAY_SEQUENCE' })
     },
 
     initializeFromTempConfig: () => {
@@ -840,5 +891,15 @@ export function useAppSettings() {
         })
       }
     }
+  }
+}
+
+export function useBackground() {
+  const { state, actions } = useGlobal()
+  return {
+    ...state.background,
+    backgroundImages: state.data.backgroundImages,
+    setBackgroundIndex: actions.setBackgroundIndex,
+    shuffleDisplaySequence: actions.shuffleDisplaySequence
   }
 }

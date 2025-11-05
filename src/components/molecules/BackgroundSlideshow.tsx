@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
-
-interface BackgroundImage {
-  filename: string;
-  title?: string;
-  text?: string;
-}
+import { useBackground } from "../../contexts/GlobalContext";
 
 interface BackgroundSlideshowProps {
-  images: BackgroundImage[];
   transitionTime?: number;
   className?: string;
   pauseOnHover?: boolean;
@@ -16,20 +10,31 @@ interface BackgroundSlideshowProps {
 }
 
 const BackgroundSlideshow = ({
-  images,
   transitionTime = 18000,
   className = "",
   pauseOnHover = true,
   fadeDuration = 1400,
   maxSpeedPxPerSec = 15,
 }: BackgroundSlideshowProps) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Get background state from GlobalContext
+  const {
+    currentImageIndex,
+    imageDisplaySequence,
+    backgroundImages,
+    setBackgroundIndex,
+    shuffleDisplaySequence,
+  } = useBackground();
+
   const [fadeOpacity, setFadeOpacity] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(!document.hidden);
   const [slideProgress, setSlideProgress] = useState(0);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const [effectiveDuration, setEffectiveDuration] = useState(transitionTime);
+
+  // Get actual image from display sequence
+  const actualImageIndex = imageDisplaySequence[currentImageIndex] ?? currentImageIndex;
+  const currentImage = backgroundImages[actualImageIndex];
 
   // Handle page visibility changes to prevent timer buildup when tab is hidden
   useEffect(() => {
@@ -46,7 +51,7 @@ const BackgroundSlideshow = ({
 
   // Detect actual image aspect ratio and calculate effective duration with speed limit
   useEffect(() => {
-    if (!images[currentIndex]) {
+    if (!currentImage) {
       setImageAspectRatio(null);
       setEffectiveDuration(transitionTime);
       return;
@@ -70,12 +75,10 @@ const BackgroundSlideshow = ({
         panDistancePixels = 0;
       } else if (ratio > viewportRatio) {
         // Horizontal pan - image is wider
-        // Image will be sized to viewport height, so width = height * ratio
         const imageWidth = viewportHeight * ratio;
         panDistancePixels = imageWidth - viewportWidth;
       } else {
         // Vertical pan - image is taller
-        // Image will be sized to viewport width, so height = width / ratio
         const imageHeight = viewportWidth / ratio;
         panDistancePixels = imageHeight - viewportHeight;
       }
@@ -89,41 +92,40 @@ const BackgroundSlideshow = ({
       }
     };
     img.onerror = () => {
-      console.error(`Failed to load image: ${images[currentIndex].filename}`);
-      // Fallback to 16:9 on error
+      console.error(`Failed to load image: ${currentImage.filename}`);
       setImageAspectRatio(1600 / 900);
       setEffectiveDuration(transitionTime);
     };
-    img.src = `/assets/${images[currentIndex].filename}`;
-  }, [currentIndex, images, transitionTime, maxSpeedPxPerSec]);
+    img.src = `/assets/${currentImage.filename}`;
+  }, [currentImageIndex, currentImage, transitionTime, maxSpeedPxPerSec]);
 
   // Slide animation - simple progress from 0 to 100
   useEffect(() => {
-    if (isPaused || images.length <= 1 || !isPageVisible) {
+    if (isPaused || backgroundImages.length <= 1 || !isPageVisible) {
       return;
     }
 
     // Reset slide progress when image changes
     setSlideProgress(0);
 
-    // Animate slide progress over effective duration (may be longer than base transitionTime)
+    // Animate slide progress over effective duration
     const slideInterval = setInterval(() => {
       setSlideProgress((prev) => {
-        const increment = 100 / (effectiveDuration / 50); // Update every 50ms
+        const increment = 100 / (effectiveDuration / 50);
         return Math.min(prev + increment, 100);
       });
     }, 50);
 
     return () => clearInterval(slideInterval);
-  }, [currentIndex, effectiveDuration, isPaused, images.length, isPageVisible]);
+  }, [currentImageIndex, effectiveDuration, isPaused, backgroundImages.length, isPageVisible]);
 
-  // Auto-cycle through images with fade
+  // Auto-cycle through images with fade - tenebrae-web style
   useEffect(() => {
-    if (images.length <= 1 || isPaused || !isPageVisible) {
+    if (backgroundImages.length <= 1 || isPaused || !isPageVisible) {
       return;
     }
 
-    // Start fade BEFORE pan completes, using effective duration
+    // Start fade BEFORE pan completes
     const fadeOutDuration = fadeDuration * 0.4;
     const fadeStartDelay = effectiveDuration - fadeOutDuration;
 
@@ -137,9 +139,15 @@ const BackgroundSlideshow = ({
         if (opacity >= 1) {
           clearInterval(fadeOutInterval);
 
-          // Change image at peak of fade
-          const nextIndex = (currentIndex + 1) % images.length;
-          setCurrentIndex(nextIndex);
+          // Change image when fully faded to black
+          const nextIndex = (currentImageIndex + 1) % backgroundImages.length;
+
+          // If we're at the last image in the sequence, shuffle for next cycle
+          if (currentImageIndex === backgroundImages.length - 1) {
+            shuffleDisplaySequence();
+          } else {
+            setBackgroundIndex(nextIndex);
+          }
 
           // Fade in
           const fadeInInterval = setInterval(() => {
@@ -156,19 +164,29 @@ const BackgroundSlideshow = ({
     }, fadeStartDelay);
 
     return () => clearTimeout(timeout);
-  }, [currentIndex, effectiveDuration, isPaused, images.length, fadeDuration, isPageVisible]);
+  }, [
+    currentImageIndex,
+    effectiveDuration,
+    isPaused,
+    backgroundImages.length,
+    fadeDuration,
+    isPageVisible,
+    setBackgroundIndex,
+    shuffleDisplaySequence,
+  ]);
 
   // Preload next images
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (backgroundImages.length <= 1) return;
 
     const preloadImages: HTMLImageElement[] = [];
-    const preloadCount = Math.min(3, images.length - 1);
+    const preloadCount = Math.min(3, backgroundImages.length - 1);
 
     for (let i = 1; i <= preloadCount; i++) {
       const img = new Image();
-      const indexToPreload = (currentIndex + i) % images.length;
-      img.src = `/assets/${images[indexToPreload].filename}`;
+      const nextSequenceIndex = (currentImageIndex + i) % backgroundImages.length;
+      const nextImageIndex = imageDisplaySequence[nextSequenceIndex] ?? nextSequenceIndex;
+      img.src = `/assets/${backgroundImages[nextImageIndex].filename}`;
       preloadImages.push(img);
     }
 
@@ -177,7 +195,7 @@ const BackgroundSlideshow = ({
         img.src = "";
       });
     };
-  }, [currentIndex, images]);
+  }, [currentImageIndex, backgroundImages, imageDisplaySequence]);
 
   const handleMouseEnter = () => {
     if (pauseOnHover) {
@@ -191,7 +209,7 @@ const BackgroundSlideshow = ({
     }
   };
 
-  if (!images.length) {
+  if (!backgroundImages.length || !currentImage) {
     return (
       <div
         className={`fixed inset-0 bg-black ${className}`}
@@ -200,7 +218,6 @@ const BackgroundSlideshow = ({
     );
   }
 
-  const currentImage = images[currentIndex];
   const backgroundImageUrl = `/assets/${currentImage.filename}`;
 
   // Get background styles based on aspect ratio comparison
@@ -239,7 +256,7 @@ const BackgroundSlideshow = ({
       return {
         ...baseStyles,
         backgroundPosition: `${slideProgress}% center`,
-        backgroundSize: "auto 100%", // Height-based sizing
+        backgroundSize: "auto 100%",
       };
     }
 
@@ -247,7 +264,7 @@ const BackgroundSlideshow = ({
     return {
       ...baseStyles,
       backgroundPosition: `center ${slideProgress}%`,
-      backgroundSize: "100% auto", // Width-based sizing
+      backgroundSize: "100% auto",
     };
   };
 
