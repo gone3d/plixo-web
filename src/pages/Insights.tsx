@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Icon, Button, LoadingSpinner } from '../components/atoms'
 import {
-  WorldMap,
+  GeographicMap,
+  MapTabs,
   ChartToggle,
   BarChartComponent,
   PieChartComponent,
   type ChartType,
+  type MapView,
 } from '../components/molecules'
 
 interface WebAnalytics {
@@ -27,6 +29,7 @@ interface CustomAnalytics {
   eventsByCountry: Array<{ country: string; countryName: string; count: number }>
   eventsByDevice: Array<{ deviceType: string; count: number }>
   eventsByBrowser: Array<{ browserFamily: string; count: number }>
+  eventsByUSState: Array<{ state: string; stateName: string; count: number }>
 }
 
 interface AnalyticsData {
@@ -49,6 +52,9 @@ const Insights = () => {
   const [pageChart, setPageChart] = useState<ChartType>('bar')
   const [deviceChart, setDeviceChart] = useState<ChartType>('pie')
   const [browserChart, setBrowserChart] = useState<ChartType>('pie')
+
+  // Map view toggle (world vs USA)
+  const [mapView, setMapView] = useState<MapView>('world')
 
   useEffect(() => {
     fetchAnalytics()
@@ -342,24 +348,28 @@ const Insights = () => {
                 )}
 
                 {/* Geographic Distribution */}
-                {analyticsData.customAnalytics.eventsByCountry.length > 0 && (() => {
-                  const totalVisitors = analyticsData.customAnalytics.eventsByCountry.reduce((sum, c) => sum + c.count, 0)
-                  return (
-                    <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
-                      <div className="flex items-center gap-3 mb-6">
+                {analyticsData.customAnalytics.eventsByCountry.length > 0 && (
+                  <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
                         <Icon name="globe" size="lg" className="text-yellow-400" />
-                        <h2 className="text-2xl font-semibold">
-                          Geographic Distribution
-                          <span className="text-slate-400 text-lg font-normal ml-2">
-                            ({formatNumber(totalVisitors)} total visitors)
-                          </span>
-                        </h2>
+                        <h2 className="text-2xl font-semibold">Geographic Distribution</h2>
                       </div>
-
-                      <WorldMap data={analyticsData.customAnalytics.eventsByCountry} />
+                      <MapTabs
+                        activeView={mapView}
+                        onViewChange={setMapView}
+                        worldCount={analyticsData.customAnalytics.eventsByCountry.reduce((sum, c) => sum + c.count, 0)}
+                        usaCount={(analyticsData.customAnalytics.eventsByUSState || []).reduce((sum, s) => sum + s.count, 0)}
+                      />
                     </div>
-                  )
-                })()}
+
+                    <GeographicMap
+                      activeView={mapView}
+                      worldData={analyticsData.customAnalytics.eventsByCountry}
+                      usaData={analyticsData.customAnalytics.eventsByUSState || []}
+                    />
+                  </div>
+                )}
 
                 {/* Device & Browser Breakdown */}
                 <div className="grid md:grid-cols-2 gap-8">
