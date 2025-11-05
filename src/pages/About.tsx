@@ -1,9 +1,16 @@
 import { Icon } from '../components/atoms'
 import { useGlobal } from '../contexts/GlobalContext'
 import packageJson from '../../package.json'
+import { analyticsClient } from '../services/analyticsClient'
 
 const About = () => {
   const { state } = useGlobal()
+
+  // Track external link clicks
+  const handleExternalLinkClick = (destination: string, linkText: string) => {
+    analyticsClient.trackExternalLink(destination, linkText)
+  }
+
   return (
     <div className="relative min-h-full text-white overflow-y-auto">
       <div className="relative z-10 max-w-4xl mx-auto py-20 px-4">
@@ -167,6 +174,7 @@ const About = () => {
                     href="https://github.com/gone3d/plixo-web"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => handleExternalLinkClick('https://github.com/gone3d/plixo-web', 'GitHub - plixo-web')}
                     className="flex items-center gap-3 p-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg transition-colors"
                   >
                     <Icon name="github" className="text-slate-300" />
@@ -181,6 +189,7 @@ const About = () => {
                     href="https://github.com/gone3d/plixo-api"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => handleExternalLinkClick('https://github.com/gone3d/plixo-api', 'GitHub - plixo-api')}
                     className="flex items-center gap-3 p-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg transition-colors"
                   >
                     <Icon name="github" className="text-slate-300" />
