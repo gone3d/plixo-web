@@ -78,7 +78,7 @@ export function BarChartComponent({
         <BarChart
           data={chartData}
           layout="vertical"
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
           <XAxis
@@ -92,7 +92,7 @@ export function BarChartComponent({
             dataKey="name"
             stroke="#94a3b8"
             tick={{ fill: '#94a3b8', fontSize: 12 }}
-            width={150}
+            width={80}
             label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft' } : undefined}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1e293b', opacity: 0.3 }} />
