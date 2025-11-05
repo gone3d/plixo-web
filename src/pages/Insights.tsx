@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Icon, Button, LoadingSpinner } from '../components/atoms'
+import {
+  WorldMap,
+  ChartToggle,
+  BarChartComponent,
+  PieChartComponent,
+  type ChartType,
+} from '../components/molecules'
 
 interface WebAnalytics {
   pageViews: number
@@ -36,6 +43,12 @@ const Insights = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [timeRange, setTimeRange] = useState<'hour_1' | 'hour_12' | '1' | '7' | '30'>('30')
+
+  // Chart type toggles for each section
+  const [eventTypeChart, setEventTypeChart] = useState<ChartType>('bar')
+  const [pageChart, setPageChart] = useState<ChartType>('bar')
+  const [deviceChart, setDeviceChart] = useState<ChartType>('pie')
+  const [browserChart, setBrowserChart] = useState<ChartType>('pie')
 
   useEffect(() => {
     fetchAnalytics()
@@ -271,36 +284,60 @@ const Insights = () => {
                 {/* Event Type Breakdown */}
                 {analyticsData.customAnalytics.eventsByType.length > 0 && (
                   <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
-                    <div className="flex items-center gap-3 mb-6">
-                      <Icon name="chart" size="lg" className="text-green-400" />
-                      <h2 className="text-2xl font-semibold">Event Types</h2>
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <Icon name="chart" size="lg" className="text-green-400" />
+                        <h2 className="text-2xl font-semibold">Event Types</h2>
+                      </div>
+                      <ChartToggle activeChart={eventTypeChart} onToggle={setEventTypeChart} />
                     </div>
-                    <div className="space-y-3">
-                      {analyticsData.customAnalytics.eventsByType.map((event, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-900/40 rounded-lg">
-                          <span className="text-slate-300 capitalize">{event.eventType.replace('_', ' ')}</span>
-                          <span className="text-white font-semibold font-mono">{formatNumber(event.count)}</span>
-                        </div>
-                      ))}
-                    </div>
+
+                    {eventTypeChart === 'bar' ? (
+                      <BarChartComponent
+                        data={analyticsData.customAnalytics.eventsByType.map(e => ({
+                          name: e.eventType.replace('_', ' '),
+                          value: e.count,
+                        }))}
+                      />
+                    ) : (
+                      <PieChartComponent
+                        data={analyticsData.customAnalytics.eventsByType.map(e => ({
+                          name: e.eventType.replace('_', ' '),
+                          value: e.count,
+                        }))}
+                        showPercentage={true}
+                      />
+                    )}
                   </div>
                 )}
 
                 {/* Page Analytics */}
                 {analyticsData.customAnalytics.eventsByPage.length > 0 && (
                   <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
-                    <div className="flex items-center gap-3 mb-6">
-                      <Icon name="chart" size="lg" className="text-blue-400" />
-                      <h2 className="text-2xl font-semibold">Top Pages (Custom)</h2>
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <Icon name="chart" size="lg" className="text-blue-400" />
+                        <h2 className="text-2xl font-semibold">Top Pages</h2>
+                      </div>
+                      <ChartToggle activeChart={pageChart} onToggle={setPageChart} />
                     </div>
-                    <div className="space-y-3">
-                      {analyticsData.customAnalytics.eventsByPage.slice(0, 10).map((page, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-900/40 rounded-lg">
-                          <span className="text-slate-300">{page.page || '/'}</span>
-                          <span className="text-white font-semibold font-mono">{formatNumber(page.count)}</span>
-                        </div>
-                      ))}
-                    </div>
+
+                    {pageChart === 'bar' ? (
+                      <BarChartComponent
+                        data={analyticsData.customAnalytics.eventsByPage.map(p => ({
+                          name: p.page || '/',
+                          value: p.count,
+                        }))}
+                      />
+                    ) : (
+                      <PieChartComponent
+                        data={analyticsData.customAnalytics.eventsByPage.map(p => ({
+                          name: p.page || '/',
+                          value: p.count,
+                        }))}
+                        showPercentage={true}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -314,17 +351,8 @@ const Insights = () => {
                     <p className="text-slate-400 text-sm mb-4">
                       Privacy-compliant: Country-level data only, no precise locations
                     </p>
-                    <div className="space-y-3">
-                      {analyticsData.customAnalytics.eventsByCountry.slice(0, 10).map((country, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-900/40 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{getFlagEmoji(country.country)}</span>
-                            <span className="text-slate-300">{country.countryName}</span>
-                          </div>
-                          <span className="text-white font-semibold font-mono">{formatNumber(country.count)}</span>
-                        </div>
-                      ))}
-                    </div>
+
+                    <WorldMap data={analyticsData.customAnalytics.eventsByCountry} />
                   </div>
                 )}
 
@@ -333,64 +361,60 @@ const Insights = () => {
                   {/* Device Types */}
                   {analyticsData.customAnalytics.eventsByDevice.length > 0 && (
                     <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
-                      <div className="flex items-center gap-3 mb-6">
-                        <Icon name="user" size="lg" className="text-cyan-400" />
-                        <h2 className="text-2xl font-semibold">Devices</h2>
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                          <Icon name="user" size="lg" className="text-cyan-400" />
+                          <h2 className="text-2xl font-semibold">Devices</h2>
+                        </div>
+                        <ChartToggle activeChart={deviceChart} onToggle={setDeviceChart} />
                       </div>
-                      <div className="space-y-3">
-                        {analyticsData.customAnalytics.eventsByDevice.map((device, idx) => {
-                          const total = analyticsData.customAnalytics!.eventsByDevice.reduce((sum, d) => sum + d.count, 0)
-                          const percentage = total > 0 ? Math.round((device.count / total) * 100) : 0
-                          return (
-                            <div key={idx} className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-slate-300 capitalize">{device.deviceType}</span>
-                                <span className="text-white font-semibold">
-                                  {formatNumber(device.count)} ({percentage}%)
-                                </span>
-                              </div>
-                              <div className="w-full bg-slate-900/40 rounded-full h-2">
-                                <div
-                                  className="bg-cyan-400 h-2 rounded-full transition-all"
-                                  style={{ width: `${percentage}%` }}
-                                />
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
+
+                      {deviceChart === 'bar' ? (
+                        <BarChartComponent
+                          data={analyticsData.customAnalytics.eventsByDevice.map(d => ({
+                            name: d.deviceType,
+                            value: d.count,
+                          }))}
+                        />
+                      ) : (
+                        <PieChartComponent
+                          data={analyticsData.customAnalytics.eventsByDevice.map(d => ({
+                            name: d.deviceType,
+                            value: d.count,
+                          }))}
+                          showPercentage={true}
+                        />
+                      )}
                     </div>
                   )}
 
                   {/* Browser Types */}
                   {analyticsData.customAnalytics.eventsByBrowser.length > 0 && (
                     <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
-                      <div className="flex items-center gap-3 mb-6">
-                        <Icon name="external" size="lg" className="text-orange-400" />
-                        <h2 className="text-2xl font-semibold">Browsers</h2>
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                          <Icon name="external" size="lg" className="text-orange-400" />
+                          <h2 className="text-2xl font-semibold">Browsers</h2>
+                        </div>
+                        <ChartToggle activeChart={browserChart} onToggle={setBrowserChart} />
                       </div>
-                      <div className="space-y-3">
-                        {analyticsData.customAnalytics.eventsByBrowser.map((browser, idx) => {
-                          const total = analyticsData.customAnalytics!.eventsByBrowser.reduce((sum, b) => sum + b.count, 0)
-                          const percentage = total > 0 ? Math.round((browser.count / total) * 100) : 0
-                          return (
-                            <div key={idx} className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-slate-300 capitalize">{browser.browserFamily}</span>
-                                <span className="text-white font-semibold">
-                                  {formatNumber(browser.count)} ({percentage}%)
-                                </span>
-                              </div>
-                              <div className="w-full bg-slate-900/40 rounded-full h-2">
-                                <div
-                                  className="bg-orange-400 h-2 rounded-full transition-all"
-                                  style={{ width: `${percentage}%` }}
-                                />
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
+
+                      {browserChart === 'bar' ? (
+                        <BarChartComponent
+                          data={analyticsData.customAnalytics.eventsByBrowser.map(b => ({
+                            name: b.browserFamily,
+                            value: b.count,
+                          }))}
+                        />
+                      ) : (
+                        <PieChartComponent
+                          data={analyticsData.customAnalytics.eventsByBrowser.map(b => ({
+                            name: b.browserFamily,
+                            value: b.count,
+                          }))}
+                          showPercentage={true}
+                        />
+                      )}
                     </div>
                   )}
                 </div>
@@ -413,18 +437,5 @@ const MetricCard = ({ label, value, icon }: { label: string; value: string; icon
     <span className="text-white font-semibold text-lg">{value}</span>
   </div>
 )
-
-// Get flag emoji from country code
-const getFlagEmoji = (countryCode: string): string => {
-  if (!countryCode || countryCode === 'unknown') return '🌍'
-
-  // Convert country code to regional indicator symbols
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0))
-
-  return String.fromCodePoint(...codePoints)
-}
 
 export default Insights
