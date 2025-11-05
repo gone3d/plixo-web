@@ -1070,58 +1070,76 @@ export const skills: Skill[] = [
  */
 export const backgroundImages: BackgroundImage[] = [
   {
-    filename: "backgrounds/astronomyBG1.jpg",
+    filename: "backgrounds/astronomyBG01.jpg",
     title: "Nebula Field",
     description: "Deep space nebula with stellar formation",
     tags: ["space", "nebula", "astronomy", "deep-field"]
   },
   {
-    filename: "backgrounds/astronomyBG2.jpg",
+    filename: "backgrounds/astronomyBG02.jpg",
     title: "Galaxy Cluster",
     description: "Distant galaxy cluster with gravitational lensing",
     tags: ["space", "galaxy", "astronomy", "deep-field"]
   },
   {
-    filename: "backgrounds/astronomyBG3.jpg",
+    filename: "backgrounds/astronomyBG03.jpg",
     title: "Cosmic Web",
     description: "Large-scale structure of the universe",
     tags: ["space", "cosmic-web", "astronomy", "structure"]
   },
   {
-    filename: "backgrounds/astronomyBG4.jpg",
+    filename: "backgrounds/astronomyBG04.jpg",
     title: "Star Formation Region",
     description: "Active stellar nursery with young hot stars",
     tags: ["space", "star-formation", "astronomy", "stellar"]
   },
   {
-    filename: "backgrounds/astronomyBG5.jpg",
+    filename: "backgrounds/astronomyBG05.jpg",
     title: "Spiral Galaxy",
     description: "Barred spiral galaxy with prominent arms",
     tags: ["space", "spiral-galaxy", "astronomy", "galactic"]
   },
   {
-    filename: "backgrounds/astronomyBG6.jpg",
+    filename: "backgrounds/astronomyBG06.jpg",
     title: "Planetary Nebula",
     description: "Dying star's expelled outer layers",
     tags: ["space", "planetary-nebula", "astronomy", "stellar-death"]
   },
   {
-    filename: "backgrounds/astronomyBG7.jpg",
+    filename: "backgrounds/astronomyBG07.jpg",
     title: "Galaxy Collision",
     description: "Interacting galaxies in gravitational dance",
     tags: ["space", "galaxy-collision", "astronomy", "interaction"]
   },
   {
-    filename: "backgrounds/astronomyBG8.jpg",
+    filename: "backgrounds/astronomyBG08.jpg",
     title: "Globular Cluster",
     description: "Dense collection of ancient stars",
     tags: ["space", "globular-cluster", "astronomy", "stellar-cluster"]
   },
   {
-    filename: "backgrounds/astronomyBG9.jpg",
+    filename: "backgrounds/astronomyBG09.jpg",
     title: "Dark Nebula",
     description: "Dense cloud of dust blocking starlight",
     tags: ["space", "dark-nebula", "astronomy", "dust-cloud"]
+  },
+  {
+    filename: "backgrounds/astronomyBG10.jpg",
+    title: "Stellar Nursery",
+    description: "Active region of new star formation",
+    tags: ["space", "star-formation", "astronomy", "nebula"]
+  },
+  {
+    filename: "backgrounds/astronomyBG11.jpg",
+    title: "Deep Space View",
+    description: "Expansive view of distant galaxies and cosmic structures",
+    tags: ["space", "deep-field", "astronomy", "galaxies"]
+  },
+  {
+    filename: "backgrounds/astronomyBG12.jpg",
+    title: "Cosmic Phenomena",
+    description: "Dramatic celestial events and formations",
+    tags: ["space", "phenomena", "astronomy", "cosmic"]
   }
 ]
 
