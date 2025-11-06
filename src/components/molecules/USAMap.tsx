@@ -223,6 +223,40 @@ export function USAMap({ data, className = "" }: USAMapProps) {
         </div>
         <span>High</span>
       </div>
+
+      {/* Details Panel - List all states */}
+      {data.length > 0 && (
+        <div className="mt-6 bg-slate-800/30 rounded-lg p-4 border border-slate-700/40">
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">
+            State Breakdown ({data.length} {data.length === 1 ? 'state' : 'states'})
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
+            {data
+              .sort((a, b) => b.count - a.count)
+              .map((item) => {
+                const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : '0';
+                return (
+                  <div
+                    key={item.state}
+                    className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors"
+                  >
+                    <span className="text-slate-300 font-medium truncate">
+                      {item.stateName}
+                    </span>
+                    <div className="flex items-baseline gap-1.5 ml-2 shrink-0">
+                      <span className="text-white font-semibold">
+                        {item.count.toLocaleString()}
+                      </span>
+                      <span className="text-slate-400">
+                        ({percentage}%)
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
