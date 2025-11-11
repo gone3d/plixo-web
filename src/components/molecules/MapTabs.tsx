@@ -43,7 +43,7 @@ export function MapTabs({
         aria-controls="world-map-panel"
       >
         <span className="text-sm">🌍</span>
-        <span>World</span>
+        <span className="hidden sm:inline">World</span>
         <span className="text-xs opacity-75">
           ({worldCount.toLocaleString()})
         </span>
@@ -58,7 +58,7 @@ export function MapTabs({
         aria-controls="usa-map-panel"
       >
         <span className="text-sm">🇺🇸</span>
-        <span>USA</span>
+        <span className="hidden sm:inline">USA</span>
         <span className="text-xs opacity-75">
           ({usaCount.toLocaleString()})
         </span>

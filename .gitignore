@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 assets-nogithub
+
+# Machine-specific setup notes
+MACBOOK.md
