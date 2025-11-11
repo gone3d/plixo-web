@@ -38,3 +38,37 @@ export function shuffleOrder(num: number): number[] {
 
   return array
 }
+
+/**
+ * Calculate color based on percentage of maximum value
+ * Used for choropleth map visualizations (geographic distribution)
+ * Relative scale: top 20% gets highest color, etc.
+ *
+ * @param count - The count value for this region
+ * @param max - The maximum count across all regions
+ * @returns Hex color code for the choropleth visualization
+ *
+ * @example
+ * getColorForCount(0, 100) // "#1e293b" (no data - slate-800)
+ * getColorForCount(10, 100) // "#0ea5e9" (bottom 20% - sky-500)
+ * getColorForCount(50, 100) // "#6366f1" (40-60% - indigo-500)
+ * getColorForCount(90, 100) // "#9333ea" (top 20% - purple-600)
+ */
+export function getColorForCount(count: number, max: number): string {
+  if (count === 0 || max === 0) return "#1e293b"; // slate-800 (no data)
+
+  const percentOfMax = (count / max) * 100;
+
+  switch (true) {
+    case percentOfMax >= 80:
+      return "#9333ea"; // purple-600 (top 20%)
+    case percentOfMax >= 60:
+      return "#8b5cf6"; // violet-500
+    case percentOfMax >= 40:
+      return "#6366f1"; // indigo-500
+    case percentOfMax >= 20:
+      return "#3b82f6"; // blue-500
+    default:
+      return "#0ea5e9"; // sky-500 (bottom 20%)
+  }
+}
