@@ -13,6 +13,7 @@ import {
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
+import { getColorForCount } from "../../utils/utils";
 
 // TopoJSON world map data (110m resolution for performance)
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -28,24 +29,6 @@ export interface WorldMapProps {
   className?: string;
 }
 
-/**
- * Calculate color based on percentage of maximum value
- * Relative scale: top 20% gets highest color, etc.
- */
-function getColorForCount(count: number, max: number): string {
-  if (count === 0 || max === 0) return "#1e293b"; // slate-800 (no data)
-
-  // Calculate percentage of max (0-100)
-  const percentOfMax = (count / max) * 100;
-
-  // Relative 20% intervals based on max value
-  if (percentOfMax >= 80) return "#9333ea"; // purple-600 (top 20%)
-  if (percentOfMax >= 60) return "#8b5cf6"; // violet-500
-  if (percentOfMax >= 40) return "#6366f1"; // indigo-500
-  if (percentOfMax >= 20) return "#3b82f6"; // blue-500
-  return "#334155"; // slate-700 (bottom 20%)
-}
-
 export function WorldMap({ data, className = "" }: WorldMapProps) {
   // Track hovered country for info panel
   const [hoveredCountry, setHoveredCountry] = useState<{
@@ -53,6 +36,9 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
     count: number;
     percentage: string;
   } | null>(null);
+
+  // Track zoom level for dynamic stroke width
+  const [zoom, setZoom] = useState(1);
 
   // Calculate max, total, and country map
   const { max, total, countryMap } = useMemo(() => {
@@ -125,7 +111,11 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
             cursor: "grab",
           }}
         >
-          <ZoomableGroup center={[0, 20]} zoom={1}>
+          <ZoomableGroup
+            center={[0, 20]}
+            zoom={1}
+            onMoveEnd={(position) => setZoom(position.zoom)}
+          >
             <Geographies geography={geoUrl}>
               {({ geographies }) =>
                 geographies.map((geo, index) => {
@@ -192,6 +182,9 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
                   const percentage =
                     total > 0 ? ((count / total) * 100).toFixed(1) : "0";
 
+                  // Calculate stroke width inversely proportional to zoom
+                  const strokeWidth = 0.5 / zoom;
+
                   return (
                     <Geography
                       key={geo.rsmKey}
@@ -199,7 +192,7 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
                       fill={getColorForCount(count, max)}
                       fillOpacity={0.7}
                       stroke="#64748b"
-                      strokeWidth={0.5}
+                      strokeWidth={strokeWidth}
                       onMouseEnter={() => {
                         setHoveredCountry({
                           name: countryName,
@@ -241,7 +234,7 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
         <div className="flex gap-1">
           <div
             className="w-8 h-4 rounded"
-            style={{ backgroundColor: "#334155" }}
+            style={{ backgroundColor: "#0ea5e9" }}
           />
           <div
             className="w-8 h-4 rounded"
@@ -262,6 +255,40 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
         </div>
         <span>High</span>
       </div>
+
+      {/* Details Panel - List all countries */}
+      {data.length > 0 && (
+        <div className="mt-6 bg-slate-800/30 rounded-lg p-4 border border-slate-700/40">
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">
+            Country Breakdown ({data.length} {data.length === 1 ? 'country' : 'countries'})
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
+            {data
+              .sort((a, b) => b.count - a.count)
+              .map((item) => {
+                const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : '0';
+                return (
+                  <div
+                    key={item.country}
+                    className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors"
+                  >
+                    <span className="text-slate-300 font-medium truncate">
+                      {item.countryName}
+                    </span>
+                    <div className="flex items-baseline gap-1.5 ml-2 shrink-0">
+                      <span className="text-white font-semibold">
+                        {item.count.toLocaleString()}
+                      </span>
+                      <span className="text-slate-400">
+                        ({percentage}%)
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
