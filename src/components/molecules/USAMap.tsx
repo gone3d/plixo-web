@@ -13,6 +13,7 @@ import {
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
+import { getColorForCount } from "../../utils/utils";
 
 // TopoJSON US states data (10m resolution for performance)
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
@@ -29,21 +30,38 @@ export interface USAMapProps {
 }
 
 /**
- * Calculate color based on percentage of maximum value
- * Relative scale: top 20% gets highest color, etc.
+ * Normalize state name/code to standard 2-letter abbreviation
+ * Handles both full names and abbreviations from backend
  */
-function getColorForCount(count: number, max: number): string {
-  if (count === 0 || max === 0) return "#1e293b"; // slate-800 (no data)
+function normalizeStateCode(stateInput: string): string {
+  const upper = stateInput.toUpperCase();
 
-  // Calculate percentage of max (0-100)
-  const percentOfMax = (count / max) * 100;
+  // If already 2-letter code, return it
+  if (upper.length === 2) return upper;
 
-  // Relative 20% intervals based on max value
-  if (percentOfMax >= 80) return "#9333ea"; // purple-600 (top 20%)
-  if (percentOfMax >= 60) return "#8b5cf6"; // violet-500
-  if (percentOfMax >= 40) return "#6366f1"; // indigo-500
-  if (percentOfMax >= 20) return "#3b82f6"; // blue-500
-  return "#334155"; // slate-700 (bottom 20%)
+  // Map full state names to abbreviations
+  const stateNameToCode: Record<string, string> = {
+    'ALABAMA': 'AL', 'ALASKA': 'AK', 'ARIZONA': 'AZ', 'ARKANSAS': 'AR',
+    'CALIFORNIA': 'CA', 'COLORADO': 'CO', 'CONNECTICUT': 'CT',
+    'DELAWARE': 'DE', 'FLORIDA': 'FL', 'GEORGIA': 'GA',
+    'HAWAII': 'HI', 'IDAHO': 'ID', 'ILLINOIS': 'IL', 'INDIANA': 'IN',
+    'IOWA': 'IA', 'KANSAS': 'KS', 'KENTUCKY': 'KY', 'LOUISIANA': 'LA',
+    'MAINE': 'ME', 'MARYLAND': 'MD', 'MASSACHUSETTS': 'MA',
+    'MICHIGAN': 'MI', 'MINNESOTA': 'MN', 'MISSISSIPPI': 'MS',
+    'MISSOURI': 'MO', 'MONTANA': 'MT', 'NEBRASKA': 'NE', 'NEVADA': 'NV',
+    'NEW HAMPSHIRE': 'NH', 'NEW JERSEY': 'NJ', 'NEW MEXICO': 'NM',
+    'NEW YORK': 'NY', 'NORTH CAROLINA': 'NC', 'NORTH DAKOTA': 'ND',
+    'OHIO': 'OH', 'OKLAHOMA': 'OK', 'OREGON': 'OR',
+    'PENNSYLVANIA': 'PA', 'RHODE ISLAND': 'RI', 'SOUTH CAROLINA': 'SC',
+    'SOUTH DAKOTA': 'SD', 'TENNESSEE': 'TN', 'TEXAS': 'TX',
+    'UTAH': 'UT', 'VERMONT': 'VT', 'VIRGINIA': 'VA',
+    'WASHINGTON': 'WA', 'WEST VIRGINIA': 'WV', 'WISCONSIN': 'WI',
+    'WYOMING': 'WY', 'DISTRICT OF COLUMBIA': 'DC',
+    'PUERTO RICO': 'PR', 'VIRGIN ISLANDS': 'VI', 'GUAM': 'GU',
+    'AMERICAN SAMOA': 'AS', 'NORTHERN MARIANA ISLANDS': 'MP',
+  };
+
+  return stateNameToCode[upper] || upper;
 }
 
 export function USAMap({ data, className = "" }: USAMapProps) {
@@ -54,19 +72,34 @@ export function USAMap({ data, className = "" }: USAMapProps) {
     percentage: string;
   } | null>(null);
 
+  // Track zoom level for dynamic stroke width
+  const [zoom, setZoom] = useState(1);
+
   // Calculate max, total, and state map
   const { max, total, stateMap } = useMemo(() => {
     const counts = data.map((d) => d.count).filter((c) => c > 0);
     const total = data.reduce((sum, d) => sum + d.count, 0);
     const max = counts.length > 0 ? Math.max(...counts) : 0;
-    const stateMap = new Map(
-      data.map((d) => [
-        d.state.toUpperCase(),
-        { count: d.count, name: d.stateName },
-      ])
-    );
 
-    console.log("USAMap stateMap:", Array.from(stateMap.entries()));
+    // Build state map with normalized keys (merge duplicates)
+    const stateMap = new Map<string, { count: number; name: string }>();
+
+    for (const item of data) {
+      const normalizedCode = normalizeStateCode(item.state);
+      const existing = stateMap.get(normalizedCode);
+
+      if (existing) {
+        // Merge duplicate entries by summing counts
+        existing.count += item.count;
+      } else {
+        stateMap.set(normalizedCode, {
+          count: item.count,
+          name: item.stateName,
+        });
+      }
+    }
+
+    console.log("USAMap stateMap (normalized):", Array.from(stateMap.entries()));
     console.log("USAMap total:", total, "max:", max);
 
     return {
@@ -125,7 +158,11 @@ export function USAMap({ data, className = "" }: USAMapProps) {
             cursor: "grab",
           }}
         >
-          <ZoomableGroup center={[-96, 38]} zoom={1}>
+          <ZoomableGroup
+            center={[-96, 38]}
+            zoom={1}
+            onMoveEnd={(position) => setZoom(position.zoom)}
+          >
             <Geographies geography={geoUrl}>
               {({ geographies }) =>
                 geographies.map((geo) => {
@@ -153,6 +190,9 @@ export function USAMap({ data, className = "" }: USAMapProps) {
                   const percentage =
                     total > 0 ? ((count / total) * 100).toFixed(1) : "0";
 
+                  // Calculate stroke width inversely proportional to zoom
+                  const strokeWidth = 0.5 / zoom;
+
                   return (
                     <Geography
                       key={geo.rsmKey}
@@ -160,7 +200,7 @@ export function USAMap({ data, className = "" }: USAMapProps) {
                       fill={getColorForCount(count, max)}
                       fillOpacity={0.7}
                       stroke="#64748b"
-                      strokeWidth={0.5}
+                      strokeWidth={strokeWidth}
                       onMouseEnter={() => {
                         setHoveredState({
                           name: stateName,
@@ -202,7 +242,7 @@ export function USAMap({ data, className = "" }: USAMapProps) {
         <div className="flex gap-1">
           <div
             className="w-8 h-4 rounded"
-            style={{ backgroundColor: "#334155" }}
+            style={{ backgroundColor: "#0ea5e9" }}
           />
           <div
             className="w-8 h-4 rounded"
