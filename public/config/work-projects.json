@@ -64,11 +64,11 @@
       "react-markdown",
       "File System Access API"
     ],
-    "status": "In Development",
-    "image": "/assets/work/markdown_viewer_1.jpg",
-    "liveUrl": null,
-    "githubUrl": null,
-    "demoUrl": null,
+    "status": "Live",
+    "image": "/assets/work/mdviewer_web_1.jpg",
+    "liveUrl": "https://mdviewer.plixo.com",
+    "githubUrl": "https://github.com/gone3d/MarkdownViewer",
+    "demoUrl": "https://mdviewer.plixo.com",
     "featured": false
   },
   {
