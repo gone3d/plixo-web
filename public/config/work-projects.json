@@ -64,12 +64,12 @@
       "react-markdown",
       "File System Access API"
     ],
-    "status": "Live",
+    "status": "In Development",
     "image": "/assets/work/mdviewer_web_1.jpg",
     "liveUrl": "https://mdviewer.plixo.com",
     "githubUrl": "https://github.com/gone3d/MarkdownViewer",
     "demoUrl": "https://mdviewer.plixo.com",
-    "featured": false
+    "featured": true
   },
   {
     "title": "Lottery Tax Calculator",
@@ -87,7 +87,7 @@
     "liveUrl": "https://lotto.plixo.com",
     "githubUrl": "https://github.com/gone3d/LeDemo",
     "demoUrl": "https://lotto.plixo.com",
-    "featured": true
+    "featured": false
   },
   {
     "title": "Plixo Portfolio Website",
@@ -98,6 +98,6 @@
     "liveUrl": "https://plixo.com",
     "githubUrl": "https://github.com/gone3d/plixo-web",
     "demoUrl": "/work",
-    "featured": true
+    "featured": false
   }
 ]
