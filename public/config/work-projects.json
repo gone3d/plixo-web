@@ -54,6 +54,24 @@
     "featured": true
   },
   {
+    "title": "MarkdownViewer",
+    "description": "Advanced markdown editor with VS Code-authentic syntax highlighting, real-time preview, and intelligent TOC generation using File System Access API",
+    "technologies": [
+      "React 18",
+      "TypeScript",
+      "Vite",
+      "Tailwind CSS",
+      "react-markdown",
+      "File System Access API"
+    ],
+    "status": "In Development",
+    "image": "/assets/work/markdown_viewer_1.jpg",
+    "liveUrl": null,
+    "githubUrl": null,
+    "demoUrl": null,
+    "featured": false
+  },
+  {
     "title": "Lottery Tax Calculator",
     "description": "Live lottery jackpot tracker with comprehensive tax calculations using Cloudflare Workers as RSS proxy to solve CORS restrictions",
     "technologies": [
