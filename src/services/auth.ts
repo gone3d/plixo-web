@@ -29,7 +29,7 @@ class AuthService {
    */
   async login(username: string, password: string): Promise<LoginData> {
     try {
-      const { data } = await apiClient.post<LoginResponse>('/api/auth/login', {
+      const { data } = await apiClient.post<LoginResponse>('/auth/login', {
         username,
         password,
       })
@@ -57,7 +57,7 @@ class AuthService {
    */
   async guestLogin(captchaToken: string): Promise<LoginData> {
     try {
-      const { data } = await apiClient.post<LoginResponse>('/api/auth/guest-login', {
+      const { data } = await apiClient.post<LoginResponse>('/auth/guest-login', {
         captchaToken,
       })
 
@@ -84,7 +84,7 @@ class AuthService {
    */
   async logout(): Promise<void> {
     try {
-      await apiClient.post('/api/auth/logout')
+      await apiClient.post('/auth/logout')
     } catch (error) {
       console.error('Logout request failed:', error)
     } finally {
@@ -97,7 +97,7 @@ class AuthService {
    */
   async getCurrentUser(): Promise<User> {
     try {
-      const { data } = await apiClient.get<AuthUserResponse>('/api/auth/me')
+      const { data } = await apiClient.get<AuthUserResponse>('/auth/me')
 
       if (data.success && data.data) {
         return data.data
@@ -119,7 +119,7 @@ class AuthService {
   async refreshToken(): Promise<string> {
     try {
       const { data } = await apiClient.post<{ success: boolean; data: { token: string; expiresAt: string } }>(
-        '/api/auth/refresh'
+        '/auth/refresh'
       )
 
       if (data.success && data.data.token) {

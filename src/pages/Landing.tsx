@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import packageJson from "../../package.json";
 import { useAuth } from "../contexts/AuthContext";
 import { TurnstileWidget, Button } from "../components/atoms";
+import { MaintenanceBanner } from "../components/molecules";
+import { maintenanceService } from "../services/maintenance";
 import { toast } from "sonner";
 
 const Landing = () => {
   const { guestLogin, isAuthenticated } = useAuth();
   const [showTurnstile, setShowTurnstile] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+
+  // Check maintenance status on mount
+  useEffect(() => {
+    const checkMaintenanceStatus = async () => {
+      const status = await maintenanceService.getStatus();
+      setIsMaintenanceMode(status.enabled);
+    };
+
+    checkMaintenanceStatus();
+  }, []);
 
   const handleGuestLoginClick = () => {
     setShowTurnstile(true);
@@ -62,33 +75,41 @@ const Landing = () => {
             </p>
           </div>
 
-          {/* Guest Login Button - Only show if not authenticated */}
+          {/* Guest Login or Maintenance Banner - Only show if not authenticated */}
           {!isAuthenticated && (
             <div className="mt-8 min-h-[200px] flex flex-col items-center justify-center">
-              {!showTurnstile ? (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={handleGuestLoginClick}
-                  className="bg-slate-800/40 backdrop-blur-sm border border-blue-500/50 hover:bg-slate-700/50 hover:border-blue-400/70 shadow-lg hover:shadow-blue-500/20 hover:shadow-xl transition-all"
-                >
-                  Continue As Guest
-                </Button>
+              {isMaintenanceMode ? (
+                /* Show Maintenance Banner when maintenance mode is enabled */
+                <MaintenanceBanner className="max-w-md" />
               ) : (
-                <div className="flex flex-col items-center gap-4">
-                  <p className="text-white/80 text-sm text-shadow-glow">
-                    Please verify you're human
-                  </p>
-                  <TurnstileWidget
-                    onSuccess={handleTurnstileSuccess}
-                    onError={handleTurnstileError}
-                  />
-                  {isLoggingIn && (
-                    <p className="text-white/60 text-sm animate-pulse text-shadow-glow">
-                      Logging in...
-                    </p>
+                /* Show normal guest login flow when not in maintenance */
+                <>
+                  {!showTurnstile ? (
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      onClick={handleGuestLoginClick}
+                      className="bg-slate-800/40 backdrop-blur-sm border border-blue-500/50 hover:bg-slate-700/50 hover:border-blue-400/70 shadow-lg hover:shadow-blue-500/20 hover:shadow-xl transition-all"
+                    >
+                      Continue As Guest
+                    </Button>
+                  ) : (
+                    <div className="flex flex-col items-center gap-4">
+                      <p className="text-white/80 text-sm text-shadow-glow">
+                        Please verify you're human
+                      </p>
+                      <TurnstileWidget
+                        onSuccess={handleTurnstileSuccess}
+                        onError={handleTurnstileError}
+                      />
+                      {isLoggingIn && (
+                        <p className="text-white/60 text-sm animate-pulse text-shadow-glow">
+                          Logging in...
+                        </p>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           )}
