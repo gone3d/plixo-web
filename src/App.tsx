@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navigation, BackgroundSlideshow } from "./components/molecules";
-import { Landing, Work, About, Insights, Connect } from "./pages";
+import { Landing, Work, About, Insights, Console, Connect } from "./pages";
 import { GlobalProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -77,6 +77,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <Insights />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/console"
+              element={
+                <ProtectedRoute>
+                  <Console />
                 </ProtectedRoute>
               }
             />
