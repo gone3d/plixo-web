@@ -10,6 +10,8 @@ import {
   type MapView,
 } from '../components/molecules'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788'
+
 interface WebAnalytics {
   pageViews: number
   uniqueVisitors: number
@@ -71,7 +73,7 @@ const Insights = () => {
       if (timeRange.startsWith('hour_')) {
         // Hour-based range: use ?hours=X parameter
         const hours = timeRange.replace('hour_', '')
-        apiUrl = `https://api.plixo.com/api/analytics/overview?hours=${hours}`
+        apiUrl = `${API_BASE_URL}/analytics/overview?hours=${hours}`
       } else {
         // Day-based range: calculate date range
         const now = new Date()
@@ -87,7 +89,7 @@ const Insights = () => {
         const since = formatDate(daysAgo)
         const until = formatDate(now)
 
-        apiUrl = `https://api.plixo.com/api/analytics/overview?since=${since}&until=${until}`
+        apiUrl = `${API_BASE_URL}/analytics/overview?since=${since}&until=${until}`
       }
 
       const response = await fetch(apiUrl)
