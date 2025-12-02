@@ -34,7 +34,7 @@ class AnalyticsClient {
     if (!this.enabled) return;
 
     try {
-      await fetch(`${API_BASE_URL}/api/analytics/track`, {
+      await fetch(`${API_BASE_URL}/analytics/track`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
