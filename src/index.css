@@ -9,7 +9,7 @@
   }
 
   html {
-    @apply scroll-smooth h-full w-full;
+    @apply scroll-smooth h-full w-full overflow-x-hidden;
   }
 
   body {

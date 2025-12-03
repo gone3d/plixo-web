@@ -19,10 +19,8 @@ const BackgroundSlideshow = ({
   // Get background state from GlobalContext
   const {
     currentImageIndex,
-    imageDisplaySequence,
     backgroundImages,
     setBackgroundIndex,
-    shuffleDisplaySequence,
   } = useBackground();
 
   const [fadeOpacity, setFadeOpacity] = useState(0);
@@ -32,9 +30,8 @@ const BackgroundSlideshow = ({
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const [effectiveDuration, setEffectiveDuration] = useState(transitionTime);
 
-  // Get actual image from display sequence
-  const actualImageIndex = imageDisplaySequence[currentImageIndex] ?? currentImageIndex;
-  const currentImage = backgroundImages[actualImageIndex];
+  // Get current image directly by index
+  const currentImage = backgroundImages[currentImageIndex];
 
   // Handle page visibility changes to prevent timer buildup when tab is hidden
   useEffect(() => {
@@ -139,15 +136,9 @@ const BackgroundSlideshow = ({
         if (opacity >= 1) {
           clearInterval(fadeOutInterval);
 
-          // Change image when fully faded to black
+          // Change image when fully faded to black - loop to next image
           const nextIndex = (currentImageIndex + 1) % backgroundImages.length;
-
-          // If we're at the last image in the sequence, shuffle for next cycle
-          if (currentImageIndex === backgroundImages.length - 1) {
-            shuffleDisplaySequence();
-          } else {
-            setBackgroundIndex(nextIndex);
-          }
+          setBackgroundIndex(nextIndex);
 
           // Fade in
           const fadeInInterval = setInterval(() => {
@@ -172,7 +163,6 @@ const BackgroundSlideshow = ({
     fadeDuration,
     isPageVisible,
     setBackgroundIndex,
-    shuffleDisplaySequence,
   ]);
 
   // Preload next images
@@ -184,8 +174,7 @@ const BackgroundSlideshow = ({
 
     for (let i = 1; i <= preloadCount; i++) {
       const img = new Image();
-      const nextSequenceIndex = (currentImageIndex + i) % backgroundImages.length;
-      const nextImageIndex = imageDisplaySequence[nextSequenceIndex] ?? nextSequenceIndex;
+      const nextImageIndex = (currentImageIndex + i) % backgroundImages.length;
       img.src = `/assets/${backgroundImages[nextImageIndex].filename}`;
       preloadImages.push(img);
     }
@@ -195,7 +184,7 @@ const BackgroundSlideshow = ({
         img.src = "";
       });
     };
-  }, [currentImageIndex, backgroundImages, imageDisplaySequence]);
+  }, [currentImageIndex, backgroundImages]);
 
   const handleMouseEnter = () => {
     if (pauseOnHover) {
