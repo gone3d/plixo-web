@@ -70,6 +70,13 @@ const Console = () => {
         return
       }
 
+      // Block guest users from accessing Console
+      if (currentUser.role === 'guest') {
+        setHasAdminAccess(false)
+        setIsVerifyingAccess(false)
+        return
+      }
+
       try {
         const isAdmin = await verifyRole('admin')
         setHasAdminAccess(isAdmin)
@@ -331,8 +338,8 @@ const Console = () => {
     )
   }
 
-  // If not authenticated, show unauthorized message
-  if (!currentUser) {
+  // If not authenticated or guest user, show access denied message
+  if (!currentUser || currentUser.role === 'guest') {
     return (
       <div className="relative min-h-full text-white overflow-y-auto">
         <div className="relative z-10 max-w-7xl mx-auto py-20 px-4">
@@ -341,13 +348,15 @@ const Console = () => {
               Console
             </h1>
             <p className="text-slate-300 text-lg">
-              Login required
+              {!currentUser ? 'Login required' : 'Access restricted'}
             </p>
           </div>
 
           <div className="bg-slate-800/40 rounded-xl p-12 border border-slate-700/40 text-center">
             <p className="text-slate-400 text-lg">
-              You must be logged in to access this area.
+              {!currentUser
+                ? 'You must be logged in to access this area.'
+                : 'Guest accounts do not have access to the Console. Please contact an administrator for a user account.'}
             </p>
           </div>
         </div>

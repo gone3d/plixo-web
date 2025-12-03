@@ -12,7 +12,6 @@ import type {
 } from '../types/portfolio'
 import { tempConfig } from '../config/temp-data'
 import { apiClient } from '../services/api'
-import { createLinearSequence, createShuffledSequence } from '../utils/shuffle'
 
 /**
  * Global State Interface
@@ -98,10 +97,9 @@ export interface GlobalState {
     direction: 'horizontal' | 'vertical' | 'none'
   }
 
-  // Background Image Sequence (for slideshow randomization)
+  // Background Image Index (for slideshow)
   background: {
     currentImageIndex: number
-    imageDisplaySequence: number[]
   }
 }
 
@@ -157,9 +155,8 @@ export type GlobalAction =
   // Background Animation Actions
   | { type: 'UPDATE_BACKGROUND_SPEED'; payload: { speedPxPerSec: number; panDistancePx: number; direction: 'horizontal' | 'vertical' | 'none' } }
 
-  // Background Image Sequence Actions
+  // Background Image Index Actions
   | { type: 'SET_BACKGROUND_INDEX'; payload: number }
-  | { type: 'SHUFFLE_DISPLAY_SEQUENCE' }
 
   // Bulk Actions
   | { type: 'INITIALIZE_FROM_CONFIG'; payload: typeof tempConfig }
@@ -227,8 +224,7 @@ const initialState: GlobalState = {
   },
 
   background: {
-    currentImageIndex: 0,
-    imageDisplaySequence: []
+    currentImageIndex: 0
   }
 }
 
@@ -478,23 +474,13 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
         }
       }
 
-    // Background Image Sequence Actions
+    // Background Image Index Actions
     case 'SET_BACKGROUND_INDEX':
       return {
         ...state,
         background: {
           ...state.background,
           currentImageIndex: action.payload
-        }
-      }
-
-    case 'SHUFFLE_DISPLAY_SEQUENCE':
-      return {
-        ...state,
-        background: {
-          ...state.background,
-          imageDisplaySequence: createShuffledSequence(state.data.backgroundImages.length),
-          currentImageIndex: 0 // Reset to start of new shuffled sequence
         }
       }
 
@@ -520,8 +506,7 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
           theme: action.payload.appConfig.theme.defaultTheme
         },
         background: {
-          ...state.background,
-          imageDisplaySequence: createLinearSequence(images.length)
+          currentImageIndex: 0
         }
       }
 
@@ -554,7 +539,6 @@ export interface GlobalContextType {
     checkApiHealth: () => Promise<void>
     updateBackgroundSpeed: (speedPxPerSec: number, panDistancePx: number, direction: 'horizontal' | 'vertical' | 'none') => void
     setBackgroundIndex: (index: number) => void
-    shuffleDisplaySequence: () => void
     initializeFromTempConfig: () => void
   }
 
@@ -673,10 +657,6 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
 
     setBackgroundIndex: (index: number) => {
       dispatch({ type: 'SET_BACKGROUND_INDEX', payload: index })
-    },
-
-    shuffleDisplaySequence: () => {
-      dispatch({ type: 'SHUFFLE_DISPLAY_SEQUENCE' })
     },
 
     initializeFromTempConfig: () => {
@@ -899,7 +879,6 @@ export function useBackground() {
   return {
     ...state.background,
     backgroundImages: state.data.backgroundImages,
-    setBackgroundIndex: actions.setBackgroundIndex,
-    shuffleDisplaySequence: actions.shuffleDisplaySequence
+    setBackgroundIndex: actions.setBackgroundIndex
   }
 }

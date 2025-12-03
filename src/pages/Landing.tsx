@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import packageJson from "../../package.json";
 import { useAuth } from "../contexts/AuthContext";
+import { useGlobal } from "../contexts/GlobalContext";
 import { TurnstileWidget, Button } from "../components/atoms";
 import { MaintenanceBanner } from "../components/molecules";
 import { maintenanceService } from "../services/maintenance";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 
 const Landing = () => {
   const { guestLogin, isAuthenticated } = useAuth();
+  const { state } = useGlobal();
   const [showTurnstile, setShowTurnstile] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
@@ -71,7 +73,13 @@ const Landing = () => {
               A Continuously Evolving Work in Progress
             </p>
             <p className="text-white/40 text-xs mt-1 text-shadow-glow">
-              v{packageJson.version}
+              App v{packageJson.version}
+              {state.api.version && (
+                <span className="mx-2">•</span>
+              )}
+              {state.api.version && (
+                <span>API v{state.api.version}</span>
+              )}
             </p>
           </div>
 

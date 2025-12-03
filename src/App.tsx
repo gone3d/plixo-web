@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
-import { Navigation, BackgroundSlideshow } from "./components/molecules";
+import { Navigation, BackgroundSlideshow, BackgroundController } from "./components/molecules";
 import { Landing, Work, About, Insights, Console, Connect } from "./pages";
 import { GlobalProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { usePageViewTracking } from "./hooks/usePageViewTracking";
 import "./App.css";
 
@@ -39,11 +39,14 @@ function AppContent() {
           maxSpeedPxPerSec={30}
         />
 
+        {/* Background Controller */}
+        <BackgroundController />
+
         <Navigation />
 
         {/* Main content - full height minus nav */}
         <main
-          className="w-full"
+          className="w-full overflow-x-hidden"
           style={{
             minHeight: "calc(100vh - 4rem)",
             paddingTop: "4rem",
@@ -83,7 +86,7 @@ function AppContent() {
             <Route
               path="/console"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute excludeRoles={['guest']}>
                   <Console />
                 </ProtectedRoute>
               }

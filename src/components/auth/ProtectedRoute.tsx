@@ -4,7 +4,8 @@ import { useAuth } from '../../contexts/AuthContext'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  requiredRole: 'guest' | 'user' | 'admin'
+  requiredRole?: 'guest' | 'user' | 'admin'
+  excludeRoles?: Array<'guest' | 'user' | 'admin'>
   fallbackPath?: string
 }
 
@@ -15,12 +16,14 @@ interface ProtectedRouteProps {
  * preventing client-side authorization bypass attacks.
  *
  * @param children - The component to render if authorized
- * @param requiredRole - The role required to access this route
+ * @param requiredRole - Specific role required (checks server-side if provided)
+ * @param excludeRoles - Roles to exclude from access (checked client-side for UX)
  * @param fallbackPath - Where to redirect if unauthorized (default: '/')
  */
 export const ProtectedRoute = ({
   children,
   requiredRole,
+  excludeRoles = [],
   fallbackPath = '/'
 }: ProtectedRouteProps) => {
   const { user, isLoading, verifyRole } = useAuth()
@@ -41,7 +44,21 @@ export const ProtectedRoute = ({
         return
       }
 
-      // Verify role on server (prevents client-side bypass)
+      // Check if user's role is excluded (client-side check for better UX)
+      if (excludeRoles.length > 0 && excludeRoles.includes(user.role)) {
+        setIsAuthorized(false)
+        setIsVerifying(false)
+        return
+      }
+
+      // If no specific role required, just need to be authenticated
+      if (!requiredRole) {
+        setIsAuthorized(true)
+        setIsVerifying(false)
+        return
+      }
+
+      // Verify specific role on server (prevents client-side bypass)
       try {
         const hasRole = await verifyRole(requiredRole)
         setIsAuthorized(hasRole)
@@ -54,7 +71,7 @@ export const ProtectedRoute = ({
     }
 
     checkAuthorization()
-  }, [user, isLoading, requiredRole, verifyRole])
+  }, [user, isLoading, requiredRole, excludeRoles, verifyRole])
 
   // Show loading state while checking
   if (isLoading || isVerifying) {

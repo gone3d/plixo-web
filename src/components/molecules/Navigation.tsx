@@ -11,14 +11,23 @@ const Navigation = () => {
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
 
-  const navItems = [
+  const allNavItems = [
     { path: "/", label: "Home", icon: "home" as const },
     { path: "/work", label: "Work", icon: "work" as const },
     { path: "/about", label: "About", icon: "user" as const },
     { path: "/insights", label: "Insights", icon: "chart" as const },
-    { path: "/console", label: "Console", icon: "settings" as const },
+    { path: "/console", label: "Console", icon: "settings" as const, requireAuth: true, excludeGuest: true },
     { path: "/connect", label: "Connect", icon: "contact" as const },
   ];
+
+  // Filter navigation items based on user role
+  const navItems = allNavItems.filter(item => {
+    // If item requires auth and excludes guests, hide from guest users
+    if (item.excludeGuest && user?.role === 'guest') {
+      return false;
+    }
+    return true;
+  });
 
   const isActive = (path: string) => {
     if (path === "/") {
