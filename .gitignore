@@ -27,3 +27,8 @@ assets-nogithub
 
 # Machine-specific setup notes
 MACBOOK.md
+
+.env.*
+.env
+
+screenshots/

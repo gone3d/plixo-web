@@ -17,6 +17,8 @@ export interface AuthContextType {
   logout: () => void
   hasRole: (role: 'guest' | 'user' | 'admin') => boolean
   hasAnyRole: (roles: Array<'guest' | 'user' | 'admin'>) => boolean
+  verifyRole: (role: 'guest' | 'user' | 'admin') => Promise<boolean>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -85,6 +87,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return user ? roles.includes(user.role) : false
   }
 
+  const verifyRole = async (role: 'guest' | 'user' | 'admin'): Promise<boolean> => {
+    try {
+      const response = await authService.verifyRole(role)
+      return response.hasRole
+    } catch (error) {
+      console.error('Role verification failed:', error)
+      return false
+    }
+  }
+
+  const refreshUser = async () => {
+    try {
+      const userData = await authService.getCurrentUser()
+      setUser(userData)
+    } catch (error) {
+      console.error('Failed to refresh user:', error)
+      authService.removeToken()
+      setUser(null)
+    }
+  }
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -94,6 +117,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout,
     hasRole,
     hasAnyRole,
+    verifyRole,
+    refreshUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

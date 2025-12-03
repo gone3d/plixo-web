@@ -2,26 +2,35 @@
 
 ## Quick Reference
 
-### Default Setup (No changes needed)
+### Current Setup (Local Dev → Production API)
 
 ```bash
-npm run dev    # Uses local API (localhost:8788)
+npm run dev    # Uses PRODUCTION API (api.plixo.com) with production database
 npm run build  # Uses production API (api.plixo.com)
 ```
 
-### Testing Local App Against Production API
+**⚠️ IMPORTANT: Guest login does not work when testing locally against production API**
+- Turnstile CAPTCHA validation fails (test tokens don't work with production secret)
+- **Solution**: Use admin login credentials instead
+  - Username: `admin`
+  - Password: `admin123`
 
-When you want to test your local development app against the production API:
+### Switching Between Local/Production API
+
+**Currently configured:** Local frontend → Production API
 
 ```bash
-# 1. Create the local override file
-cp .env.development.local.example .env.development.local
+# Current .env.development setting:
+VITE_API_URL=https://api.plixo.com
+VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA  # Test key for localhost
+```
 
-# 2. Run dev server (now points to api.plixo.com)
-npm run dev
+**To use local API instead:**
 
-# 3. To go back to local API, just delete the file
-rm .env.development.local
+```bash
+# Edit .env.development:
+VITE_API_URL=http://localhost:8788
+# (Keep same Turnstile test key)
 ```
 
 ## Environment Files
@@ -36,8 +45,13 @@ rm .env.development.local
 ## Environment Variables
 
 - **VITE_API_URL**: Backend API endpoint
-  - Local: `http://localhost:8788`
-  - Production: `https://api.plixo.com`
+  - Local API: `http://localhost:8788`
+  - Production API: `https://api.plixo.com` (current setting)
+
+- **VITE_TURNSTILE_SITE_KEY**: Cloudflare Turnstile CAPTCHA key
+  - Test key (localhost): `1x00000000000000000000AA` (current setting)
+  - Production key: `0x4AAAAAAB40kAELVx8gHpRd`
+  - **Note**: Test key only works with local API, not production API
 
 ## CloudFlare Pages Deployment
 

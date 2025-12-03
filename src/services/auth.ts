@@ -23,6 +23,12 @@ interface AuthUserResponse {
   data: User
 }
 
+interface VerifyRoleResponse {
+  success: boolean
+  hasRole: boolean
+  currentRole: string
+}
+
 class AuthService {
   /**
    * Login with username and password
@@ -135,24 +141,24 @@ class AuthService {
   }
 
   /**
-   * Store token in localStorage
+   * Store token in sessionStorage (cleared when browser/tab closes)
    */
   setToken(token: string): void {
-    localStorage.setItem(TOKEN_KEY, token)
+    sessionStorage.setItem(TOKEN_KEY, token)
   }
 
   /**
-   * Get token from localStorage
+   * Get token from sessionStorage
    */
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY)
+    return sessionStorage.getItem(TOKEN_KEY)
   }
 
   /**
-   * Remove token from localStorage
+   * Remove token from sessionStorage
    */
   removeToken(): void {
-    localStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(TOKEN_KEY)
   }
 
   /**
@@ -160,6 +166,33 @@ class AuthService {
    */
   isAuthenticated(): boolean {
     return !!this.getToken()
+  }
+
+  /**
+   * Verify user has specific role (server-side check)
+   *
+   * This method calls the API to verify the user's role from the database,
+   * not from the cached JWT payload. This ensures fresh, server-verified data.
+   *
+   * @param role - The role to check for ('guest', 'user', or 'admin')
+   * @returns Promise with hasRole boolean and currentRole string
+   */
+  async verifyRole(role: 'guest' | 'user' | 'admin'): Promise<VerifyRoleResponse> {
+    try {
+      const { data } = await apiClient.get<VerifyRoleResponse>(
+        `/auth/verify-role?required=${role}`
+      )
+
+      return data
+    } catch (error: any) {
+      // If request fails (401, 403, etc.), user doesn't have the role
+      console.error('Role verification failed:', error.response?.status, error.response?.data || error.message)
+      return {
+        success: false,
+        hasRole: false,
+        currentRole: error.response?.data?.currentRole || 'unknown'
+      }
+    }
   }
 }
 
