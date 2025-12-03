@@ -7,6 +7,8 @@ interface User {
   role: 'guest' | 'user' | 'admin'
   is_active: boolean
   created_at: string
+  updated_at: string
+  last_login?: string | null
 }
 
 interface UserListProps {

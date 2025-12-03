@@ -205,7 +205,6 @@ const Console = () => {
 
       // Non-admin users must provide current password
       const isEditingSelf = userId === currentUser?.id
-      const isAdmin = currentUser?.role === 'admin'
 
       if (isEditingSelf && !formData.currentPassword) {
         toast.error('Current password required to change password')

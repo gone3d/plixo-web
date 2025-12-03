@@ -1,4 +1,4 @@
-import { Icon, Button, LoadingSpinner } from '../atoms'
+import { Icon, Button } from '../atoms'
 
 interface User {
   id: string
@@ -7,14 +7,16 @@ interface User {
   role: 'guest' | 'user' | 'admin'
   is_active: boolean
   created_at: string
+  updated_at: string
+  last_login?: string | null
 }
 
 interface LoginHistoryEntry {
-  id: number
-  login_at: string
+  id: string
+  login_success: boolean
   ip_address: string | null
   user_agent: string | null
-  success: boolean
+  created_at: string
 }
 
 interface UserDetailData {
@@ -32,7 +34,6 @@ interface UserDetailProps {
 
 const UserDetail = ({
   userDetail,
-  loading,
   onBack,
   onEdit,
   onDelete,
@@ -154,7 +155,7 @@ const UserDetail = ({
                         className="border-b border-slate-700/20 hover:bg-slate-800/20 transition-colors"
                       >
                         <td className="py-3 px-4 text-white">
-                          {formatDate(entry.login_at)}
+                          {formatDate(entry.created_at)}
                         </td>
                         <td className="py-3 px-4 text-slate-300 font-mono text-sm">
                           {entry.ip_address || 'N/A'}
@@ -165,12 +166,12 @@ const UserDetail = ({
                         <td className="py-3 px-4">
                           <span
                             className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                              entry.success
+                              entry.login_success
                                 ? 'bg-green-500/20 text-green-400'
                                 : 'bg-red-500/20 text-red-400'
                             }`}
                           >
-                            {entry.success ? 'Success' : 'Failed'}
+                            {entry.login_success ? 'Success' : 'Failed'}
                           </span>
                         </td>
                       </tr>
