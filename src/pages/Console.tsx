@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Icon, Button, LoadingSpinner } from '../components/atoms'
+import { LoadingSpinner } from '../components/atoms'
+import { UserList, UserDetail, CreateUser, EditUser } from '../components/molecules'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
+import { apiClient } from '../services/api'
 
 interface User {
   id: string
@@ -30,11 +32,13 @@ interface UserDetailData {
 type ViewMode = 'list' | 'detail' | 'create' | 'edit'
 
 const Console = () => {
-  const { user: currentUser, isLoading: authLoading } = useAuth()
+  const { user: currentUser, isLoading: authLoading, verifyRole } = useAuth()
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isVerifyingAccess, setIsVerifyingAccess] = useState(true)
+  const [hasAdminAccess, setHasAdminAccess] = useState(false)
 
   // Filters
   const [roleFilter, setRoleFilter] = useState<string>('')
@@ -48,16 +52,61 @@ const Console = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    currentPassword: '',
     password: '',
+    confirmPassword: '',
     role: 'user' as 'user' | 'admin',
     is_active: true
   })
 
+  // Server-side role verification on mount
   useEffect(() => {
-    if (viewMode === 'list') {
+    const checkAdminAccess = async () => {
+      if (authLoading) return
+
+      if (!currentUser) {
+        setHasAdminAccess(false)
+        setIsVerifyingAccess(false)
+        return
+      }
+
+      try {
+        const isAdmin = await verifyRole('admin')
+        setHasAdminAccess(isAdmin)
+
+        // If not admin, redirect to edit own profile
+        if (!isAdmin && currentUser) {
+          setFormData({
+            username: currentUser.username,
+            email: currentUser.email || '',
+            currentPassword: '',
+            password: '',
+            confirmPassword: '',
+            role: currentUser.role === 'admin' ? 'admin' : 'user',
+            is_active: true
+          })
+          setSelectedUser({
+            user: currentUser as User,
+            loginHistory: []
+          })
+          setViewMode('edit')
+        }
+      } catch (error) {
+        console.error('Failed to verify admin access:', error)
+        setHasAdminAccess(false)
+      } finally {
+        setIsVerifyingAccess(false)
+      }
+    }
+
+    checkAdminAccess()
+  }, [currentUser, authLoading, verifyRole])
+
+  useEffect(() => {
+    if (viewMode === 'list' && hasAdminAccess) {
       fetchUsers()
     }
-  }, [viewMode, roleFilter, statusFilter, searchQuery])
+  }, [viewMode, roleFilter, statusFilter, searchQuery, hasAdminAccess])
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -69,20 +118,15 @@ const Console = () => {
       if (statusFilter) params.append('status', statusFilter)
       if (searchQuery) params.append('search', searchQuery)
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8788'
-      const response = await fetch(`${apiUrl}/admin/users?${params}`, {
-        credentials: 'include'
-      })
+      const { data } = await apiClient.get(`/admin/users?${params}`)
 
-      const data = await response.json()
-
-      if (response.ok && data.success) {
-        setUsers(data.users)
+      if (data.success && data.data) {
+        setUsers(data.data.users)
       } else {
         setError(data.error || 'Failed to fetch users')
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -93,22 +137,17 @@ const Console = () => {
     setError(null)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8788'
-      const response = await fetch(`${apiUrl}/admin/users/${userId}`, {
-        credentials: 'include'
-      })
+      const { data } = await apiClient.get(`/admin/users/${userId}`)
 
-      const data = await response.json()
-
-      if (response.ok && data.success) {
+      if (data.success) {
         setSelectedUser(data)
         setViewMode('detail')
       } else {
         setError(data.error || 'Failed to fetch user details')
         toast.error(data.error || 'Failed to fetch user details')
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || err.message || 'Unknown error'
       setError(errorMsg)
       toast.error(errorMsg)
     } finally {
@@ -117,66 +156,119 @@ const Console = () => {
   }
 
   const handleCreateUser = async () => {
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+
     setLoading(true)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8788'
-      const response = await fetch(`${apiUrl}/admin/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData)
+      const { data } = await apiClient.post('/admin/users', {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        is_active: formData.is_active
       })
 
-      const data = await response.json()
-
-      if (response.ok && data.success) {
+      if (data.success) {
         toast.success('User created successfully')
-        setFormData({ username: '', email: '', password: '', role: 'user', is_active: true })
+        setFormData({
+          username: '',
+          email: '',
+          currentPassword: '',
+          password: '',
+          confirmPassword: '',
+          role: 'user',
+          is_active: true
+        })
         setViewMode('list')
       } else {
         toast.error(data.error || 'Failed to create user')
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Unknown error')
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || err.message || 'Unknown error')
     } finally {
       setLoading(false)
     }
   }
 
   const handleUpdateUser = async (userId: string) => {
+    // Validation for password change
+    if (formData.password || formData.confirmPassword) {
+      if (formData.password !== formData.confirmPassword) {
+        toast.error('Passwords do not match')
+        return
+      }
+
+      // Non-admin users must provide current password
+      const isEditingSelf = userId === currentUser?.id
+      const isAdmin = currentUser?.role === 'admin'
+
+      if (isEditingSelf && !formData.currentPassword) {
+        toast.error('Current password required to change password')
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
-      const updateData: any = {
-        role: formData.role,
-        is_active: formData.is_active
+      const isEditingSelf = userId === currentUser?.id
+      const updateData: any = {}
+
+      // Only include role and is_active when admin is editing OTHER users
+      if (hasAdminAccess && !isEditingSelf) {
+        updateData.role = formData.role
+        updateData.is_active = formData.is_active
       }
 
-      // Only include password if it's been changed
+      // Include email if changed (only when editing self)
+      if (isEditingSelf && formData.email !== selectedUser?.user.email) {
+        updateData.email = formData.email
+      }
+
+      // Only include password fields if changing password
       if (formData.password) {
         updateData.password = formData.password
+        if (formData.currentPassword) {
+          updateData.currentPassword = formData.currentPassword
+        }
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8788'
-      const response = await fetch(`${apiUrl}/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(updateData)
-      })
+      const { data } = await apiClient.put(`/admin/users/${userId}`, updateData)
 
-      const data = await response.json()
-
-      if (response.ok && data.success) {
+      if (data.success) {
         toast.success('User updated successfully')
-        setFormData({ username: '', email: '', password: '', role: 'user', is_active: true })
-        setViewMode('list')
+
+        // Clear password fields only
+        setFormData({
+          ...formData,
+          currentPassword: '',
+          password: '',
+          confirmPassword: ''
+        })
+
+        // If admin, go back to list, otherwise stay on profile
+        if (hasAdminAccess) {
+          setFormData({
+            username: '',
+            email: '',
+            currentPassword: '',
+            password: '',
+            confirmPassword: '',
+            role: 'user',
+            is_active: true
+          })
+          setViewMode('list')
+        }
       } else {
         toast.error(data.error || 'Failed to update user')
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Unknown error')
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || err.message || 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -190,22 +282,16 @@ const Console = () => {
     setLoading(true)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8788'
-      const response = await fetch(`${apiUrl}/admin/users/${userId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      })
+      const { data } = await apiClient.delete(`/admin/users/${userId}`)
 
-      const data = await response.json()
-
-      if (response.ok && data.success) {
+      if (data.success) {
         toast.success('User deleted successfully')
         setViewMode('list')
       } else {
         toast.error(data.error || 'Failed to delete user')
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Unknown error')
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || err.message || 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -215,7 +301,9 @@ const Console = () => {
     setFormData({
       username: user.username,
       email: user.email,
+      currentPassword: '',
       password: '',
+      confirmPassword: '',
       role: user.role === 'admin' ? 'admin' : 'user',
       is_active: user.is_active
     })
@@ -223,16 +311,9 @@ const Console = () => {
     setViewMode('edit')
   }
 
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'Never'
-    return new Date(dateString).toLocaleString()
-  }
 
-  // Check if current user is admin
-  const isAdmin = currentUser?.role === 'admin'
-
-  // Show loading spinner while checking authentication
-  if (authLoading) {
+  // Show loading spinner while checking authentication and authorization
+  if (authLoading || isVerifyingAccess) {
     return (
       <div className="relative min-h-full text-white overflow-y-auto">
         <div className="relative z-10 max-w-7xl mx-auto py-20 px-4">
@@ -244,14 +325,15 @@ const Console = () => {
 
           <div className="bg-slate-800/40 rounded-xl p-12 border border-slate-700/40 text-center">
             <LoadingSpinner size="lg" />
-            <p className="mt-4 text-slate-400">Verifying authentication...</p>
+            <p className="mt-4 text-slate-400">Verifying access...</p>
           </div>
         </div>
       </div>
     )
   }
 
-  if (!isAdmin) {
+  // If not authenticated, show unauthorized message
+  if (!currentUser) {
     return (
       <div className="relative min-h-full text-white overflow-y-auto">
         <div className="relative z-10 max-w-7xl mx-auto py-20 px-4">
@@ -260,14 +342,13 @@ const Console = () => {
               Console
             </h1>
             <p className="text-slate-300 text-lg">
-              Admin access required
+              Login required
             </p>
           </div>
 
           <div className="bg-slate-800/40 rounded-xl p-12 border border-slate-700/40 text-center">
-            <Icon name="warning" size="xl" className="text-yellow-400 mx-auto mb-4" />
             <p className="text-slate-400 text-lg">
-              You must be an administrator to access this area.
+              You must be logged in to access this area.
             </p>
           </div>
         </div>
@@ -277,496 +358,84 @@ const Console = () => {
 
   return (
     <div className="relative min-h-full text-white overflow-y-auto">
-      <div className="relative z-10 max-w-7xl mx-auto py-20 px-4">
+      <div className="relative z-10 max-w-6xl mx-auto py-20 px-4">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-            Console
+            {hasAdminAccess ? 'Console' : 'Profile Settings'}
           </h1>
-          <p className="text-slate-300 text-lg">
-            User Management
+          <p className="text-slate-300">
+            {hasAdminAccess ? 'User Management' : 'Manage your account'}
           </p>
         </div>
 
         {/* Main Panel */}
-        <div className="bg-slate-800/40 rounded-xl p-8 border border-slate-700/40">
+        <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-700/40">
           {/* View: User List */}
           {viewMode === 'list' && (
-            <>
-              {/* Filters and Actions */}
-              <div className="mb-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold">Users</h2>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => {
-                      setFormData({ username: '', email: '', password: '', role: 'user', is_active: true })
-                      setViewMode('create')
-                    }}
-                  >
-                    <Icon name="plus" size="sm" />
-                    <span className="ml-2">Create User</span>
-                  </Button>
-                </div>
-
-                {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm text-slate-400 mb-2">Role</label>
-                    <select
-                      value={roleFilter}
-                      onChange={(e) => setRoleFilter(e.target.value)}
-                      className="w-full bg-slate-900/40 border border-slate-700/40 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="">All Roles</option>
-                      <option value="admin">Admin</option>
-                      <option value="user">User</option>
-                      <option value="guest">Guest</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm text-slate-400 mb-2">Status</label>
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full bg-slate-900/40 border border-slate-700/40 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="">All Status</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm text-slate-400 mb-2">Search</label>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Username or email..."
-                      className="w-full bg-slate-900/40 border border-slate-700/40 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 placeholder-slate-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Loading State */}
-              {loading && (
-                <div className="text-center py-12">
-                  <LoadingSpinner size="lg" />
-                  <p className="mt-4 text-slate-400">Loading users...</p>
-                </div>
-              )}
-
-              {/* Error State */}
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-                  <Icon name="warning" size="lg" className="text-red-400 mx-auto mb-2" />
-                  <p className="text-red-200">{error}</p>
-                </div>
-              )}
-
-              {/* Users Table */}
-              {!loading && !error && (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-slate-700/40">
-                        <th className="text-left py-3 px-4 text-slate-400 font-medium">Username</th>
-                        <th className="text-left py-3 px-4 text-slate-400 font-medium">Email</th>
-                        <th className="text-left py-3 px-4 text-slate-400 font-medium">Role</th>
-                        <th className="text-left py-3 px-4 text-slate-400 font-medium">Status</th>
-                        <th className="text-left py-3 px-4 text-slate-400 font-medium">Last Login</th>
-                        <th className="text-left py-3 px-4 text-slate-400 font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.map((user) => (
-                        <tr
-                          key={user.id}
-                          className="border-b border-slate-700/20 hover:bg-slate-700/20 transition-colors"
-                        >
-                          <td className="py-3 px-4">
-                            <button
-                              onClick={() => fetchUserDetail(user.id)}
-                              className="text-blue-400 hover:text-blue-300 font-medium"
-                            >
-                              {user.username}
-                            </button>
-                          </td>
-                          <td className="py-3 px-4 text-slate-300">{user.email}</td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                              user.role === 'admin' ? 'bg-purple-500/20 text-purple-300' :
-                              user.role === 'user' ? 'bg-blue-500/20 text-blue-300' :
-                              'bg-slate-500/20 text-slate-300'
-                            }`}>
-                              {user.role}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                              user.is_active ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
-                            }`}>
-                              {user.is_active ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-slate-400 text-sm">
-                            {formatDate(user.last_login)}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => startEdit(user)}
-                                title="Edit user"
-                              >
-                                <Icon name="edit" size="sm" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteUser(user.id, user.username)}
-                                disabled={user.id === currentUser?.id}
-                                title={user.id === currentUser?.id ? "Cannot delete yourself" : "Delete user"}
-                              >
-                                <Icon name="trash" size="sm" className={user.id === currentUser?.id ? 'text-slate-600' : 'text-red-400'} />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {users.length === 0 && (
-                    <div className="text-center py-12">
-                      <p className="text-slate-400">No users found</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
+            <UserList
+              users={users}
+              loading={loading}
+              error={error}
+              currentUserId={currentUser?.id}
+              roleFilter={roleFilter}
+              statusFilter={statusFilter}
+              searchQuery={searchQuery}
+              onRoleFilterChange={setRoleFilter}
+              onStatusFilterChange={setStatusFilter}
+              onSearchQueryChange={setSearchQuery}
+              onCreateUser={() => {
+                setFormData({
+                  username: '',
+                  email: '',
+                  currentPassword: '',
+                  password: '',
+                  confirmPassword: '',
+                  role: 'user',
+                  is_active: true
+                })
+                setViewMode('create')
+              }}
+              onViewUser={fetchUserDetail}
+              onEditUser={startEdit}
+              onDeleteUser={handleDeleteUser}
+            />
           )}
 
           {/* View: User Detail */}
           {viewMode === 'detail' && selectedUser && (
-            <>
-              <div className="mb-6">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                >
-                  <Icon name="arrow-left" size="sm" />
-                  <span className="ml-2">Back to List</span>
-                </Button>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-semibold mb-4">User Details</h2>
-
-                  <div className="bg-slate-900/40 rounded-lg p-6 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-slate-400 text-sm">Username</label>
-                        <p className="text-white font-medium">{selectedUser.user.username}</p>
-                      </div>
-                      <div>
-                        <label className="text-slate-400 text-sm">Email</label>
-                        <p className="text-white font-medium">{selectedUser.user.email}</p>
-                      </div>
-                      <div>
-                        <label className="text-slate-400 text-sm">Role</label>
-                        <p className="text-white font-medium capitalize">{selectedUser.user.role}</p>
-                      </div>
-                      <div>
-                        <label className="text-slate-400 text-sm">Status</label>
-                        <p className="text-white font-medium">{selectedUser.user.is_active ? 'Active' : 'Inactive'}</p>
-                      </div>
-                      <div>
-                        <label className="text-slate-400 text-sm">Created</label>
-                        <p className="text-white font-medium">{formatDate(selectedUser.user.created_at)}</p>
-                      </div>
-                      <div>
-                        <label className="text-slate-400 text-sm">Last Login</label>
-                        <p className="text-white font-medium">{formatDate(selectedUser.user.last_login)}</p>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-slate-700/40 flex gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => startEdit(selectedUser.user)}
-                      >
-                        <Icon name="edit" size="sm" />
-                        <span className="ml-2">Edit User</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteUser(selectedUser.user.id, selectedUser.user.username)}
-                        disabled={selectedUser.user.id === currentUser?.id}
-                      >
-                        <Icon name="trash" size="sm" className="text-red-400" />
-                        <span className="ml-2">Delete User</span>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Login History */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Login History</h3>
-
-                  {selectedUser.loginHistory.length > 0 ? (
-                    <div className="bg-slate-900/40 rounded-lg overflow-hidden">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-slate-700/40">
-                            <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">Date</th>
-                            <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">Status</th>
-                            <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">IP Address</th>
-                            <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">User Agent</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedUser.loginHistory.map((entry) => (
-                            <tr key={entry.id} className="border-b border-slate-700/20">
-                              <td className="py-3 px-4 text-sm text-slate-300">{formatDate(entry.created_at)}</td>
-                              <td className="py-3 px-4">
-                                <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                                  entry.login_success ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
-                                }`}>
-                                  {entry.login_success ? 'Success' : 'Failed'}
-                                </span>
-                              </td>
-                              <td className="py-3 px-4 text-sm text-slate-400">{entry.ip_address || 'N/A'}</td>
-                              <td className="py-3 px-4 text-sm text-slate-400 truncate max-w-xs" title={entry.user_agent || 'N/A'}>
-                                {entry.user_agent || 'N/A'}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="bg-slate-900/40 rounded-lg p-6 text-center">
-                      <p className="text-slate-400">No login history available</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
+            <UserDetail
+              userDetail={selectedUser}
+              loading={loading}
+              onBack={() => setViewMode('list')}
+              onEdit={startEdit}
+              onDelete={handleDeleteUser}
+            />
           )}
 
           {/* View: Create User */}
           {viewMode === 'create' && (
-            <>
-              <div className="mb-6">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                >
-                  <Icon name="arrow-left" size="sm" />
-                  <span className="ml-2">Back to List</span>
-                </Button>
-              </div>
-
-              <div>
-                <h2 className="text-2xl font-semibold mb-6">Create New User</h2>
-
-                <div className="bg-slate-900/40 rounded-lg p-6 space-y-4 max-w-2xl">
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">Username *</label>
-                    <input
-                      type="text"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      placeholder="Enter username"
-                      className="w-full bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">Email *</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="Enter email"
-                      className="w-full bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">Password *</label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="Enter password"
-                      className="w-full bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">
-                      Must be at least 8 characters with uppercase, lowercase, and number
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">Role *</label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value as 'user' | 'admin' })}
-                      className="w-full bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="is_active"
-                      checked={formData.is_active}
-                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                      className="rounded"
-                    />
-                    <label htmlFor="is_active" className="text-slate-400 text-sm">Active</label>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-700/40 flex gap-2">
-                    <Button
-                      variant="primary"
-                      onClick={handleCreateUser}
-                      disabled={loading || !formData.username || !formData.email || !formData.password}
-                    >
-                      {loading ? <LoadingSpinner size="sm" /> : <Icon name="plus" size="sm" />}
-                      <span className="ml-2">Create User</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setViewMode('list')}
-                      disabled={loading}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
+            <CreateUser
+              formData={formData}
+              loading={loading}
+              onChange={(data) => setFormData({ ...formData, ...data })}
+              onSubmit={handleCreateUser}
+              onCancel={() => setViewMode('list')}
+            />
           )}
 
           {/* View: Edit User */}
           {viewMode === 'edit' && selectedUser && (
-            <>
-              <div className="mb-6">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                >
-                  <Icon name="arrow-left" size="sm" />
-                  <span className="ml-2">Back to List</span>
-                </Button>
-              </div>
-
-              <div>
-                <h2 className="text-2xl font-semibold mb-6">Edit User</h2>
-
-                <div className="bg-slate-900/40 rounded-lg p-6 space-y-4 max-w-2xl">
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">Username</label>
-                    <input
-                      type="text"
-                      value={formData.username}
-                      disabled
-                      className="w-full bg-slate-800/30 border border-slate-700/40 text-slate-500 rounded-lg px-4 py-2 cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      disabled
-                      className="w-full bg-slate-800/30 border border-slate-700/40 text-slate-500 rounded-lg px-4 py-2 cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">New Password (optional)</label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="Leave blank to keep current password"
-                      className="w-full bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">
-                      Must be at least 8 characters with uppercase, lowercase, and number
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-2">Role</label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value as 'user' | 'admin' })}
-                      disabled={selectedUser.user.id === currentUser?.id}
-                      className="w-full bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 disabled:bg-slate-800/30 disabled:text-slate-500 disabled:cursor-not-allowed"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                    {selectedUser.user.id === currentUser?.id && (
-                      <p className="text-xs text-slate-500 mt-1">Cannot modify your own role</p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="is_active_edit"
-                      checked={formData.is_active}
-                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                      disabled={selectedUser.user.id === currentUser?.id}
-                      className="rounded"
-                    />
-                    <label htmlFor="is_active_edit" className="text-slate-400 text-sm">Active</label>
-                    {selectedUser.user.id === currentUser?.id && (
-                      <span className="text-xs text-slate-500">(Cannot deactivate yourself)</span>
-                    )}
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-700/40 flex gap-2">
-                    <Button
-                      variant="primary"
-                      onClick={() => handleUpdateUser(selectedUser.user.id)}
-                      disabled={loading}
-                    >
-                      {loading ? <LoadingSpinner size="sm" /> : <Icon name="save" size="sm" />}
-                      <span className="ml-2">Save Changes</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setViewMode('list')}
-                      disabled={loading}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
+            <EditUser
+              user={selectedUser.user}
+              formData={formData}
+              loading={loading}
+              isEditingSelf={selectedUser.user.id === currentUser?.id}
+              isAdmin={hasAdminAccess}
+              onChange={(data) => setFormData({ ...formData, ...data })}
+              onSubmit={() => handleUpdateUser(selectedUser.user.id)}
+              onCancel={() => setViewMode('list')}
+            />
           )}
         </div>
       </div>
