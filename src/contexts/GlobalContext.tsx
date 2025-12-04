@@ -671,8 +671,9 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
         .sort((a, b) => a.priority - b.priority)
     },
 
-    getProjectsByCategory: (category: string) => {
-      return state.data.projects.filter(project => project.category === category)
+    getProjectsByCategory: (_category: string) => {
+      // Note: Project no longer has category field - returns all projects
+      return state.data.projects
     },
 
     getSkillsByCategory: (category: string) => {

@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { ProjectCard } from "../components/molecules";
 import { LoadingSpinner } from "../components/atoms";
+import { apiClient } from "../services/api";
 
 interface WorkProject {
+  id: string;
   title: string;
   description: string;
   technologies: string[];
   status: "Live" | "Demo" | "In Development" | "Archived" | "Prototype";
   image?: string;
-  liveUrl?: string;
-  githubUrl?: string;
-  demoUrl?: string;
+  live_url?: string | null;
+  github_url?: string | null;
+  demo_url?: string | null;
   featured?: boolean;
 }
 
@@ -22,14 +24,15 @@ const Work = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch("/config/work-projects.json");
-        if (!response.ok) {
-          throw new Error("Failed to load projects");
+        const { data } = await apiClient.get("/projects");
+
+        if (data.success && data.data) {
+          setProjects(data.data);
+        } else {
+          setError(data.error || "Failed to load projects");
         }
-        const data = await response.json();
-        setProjects(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load projects");
+      } catch (err: any) {
+        setError(err.response?.data?.error || err.message || "Failed to load projects");
       } finally {
         setIsLoading(false);
       }
@@ -68,22 +71,30 @@ const Work = () => {
 
         {/* Projects Display */}
         {!isLoading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {projects.map((project, index) => (
-              <ProjectCard
-                key={index}
-                title={project.title}
-                description={project.description}
-                technologies={project.technologies}
-                status={project.status}
-                image={project.image}
-                liveUrl={project.liveUrl}
-                githubUrl={project.githubUrl}
-                demoUrl={project.demoUrl}
-                featured={project.featured}
-              />
-            ))}
-          </div>
+          <>
+            {projects.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-slate-400 text-xl">No Projects Currently Available</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                {projects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    title={project.title}
+                    description={project.description}
+                    technologies={project.technologies}
+                    status={project.status}
+                    image={project.image}
+                    liveUrl={project.live_url || undefined}
+                    githubUrl={project.github_url || undefined}
+                    demoUrl={project.demo_url || undefined}
+                    featured={project.featured}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

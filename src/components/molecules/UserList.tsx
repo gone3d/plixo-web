@@ -184,9 +184,19 @@ const UserList = ({
                       </button>
                       <button
                         onClick={() => onDeleteUser(user.id, user.username)}
-                        className="text-red-400 hover:text-red-300 transition-colors"
-                        title="Delete User"
-                        disabled={user.id === currentUserId}
+                        className={`transition-colors ${
+                          user.username === 'admin' || user.id === currentUserId
+                            ? 'text-slate-600 cursor-not-allowed'
+                            : 'text-red-400 hover:text-red-300'
+                        }`}
+                        title={
+                          user.username === 'admin'
+                            ? 'Admin account cannot be deleted'
+                            : user.id === currentUserId
+                            ? 'Cannot delete your own account'
+                            : 'Delete User'
+                        }
+                        disabled={user.username === 'admin' || user.id === currentUserId}
                       >
                         <Icon name="trash" size="sm" />
                       </button>

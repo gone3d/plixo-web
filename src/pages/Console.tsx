@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { LoadingSpinner } from '../components/atoms'
-import { UserList, UserDetail, CreateUser, EditUser } from '../components/molecules'
+import { UserList, UserDetail, CreateUser, EditUser, ConfirmDialog } from '../components/molecules'
+import { ProjectsManager } from '../components/admin'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
 import { apiClient } from '../services/api'
@@ -30,9 +31,11 @@ interface UserDetailData {
 }
 
 type ViewMode = 'list' | 'detail' | 'create' | 'edit'
+type ConsoleTab = 'users' | 'projects'
 
 const Console = () => {
   const { user: currentUser, isLoading: authLoading, verifyRole } = useAuth()
+  const [activeTab, setActiveTab] = useState<ConsoleTab>('users')
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -47,6 +50,19 @@ const Console = () => {
 
   // Selected user for detail/edit
   const [selectedUser, setSelectedUser] = useState<UserDetailData | null>(null)
+
+  // Confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  })
 
   // Form state for create/edit
   const [formData, setFormData] = useState({
@@ -280,11 +296,17 @@ const Console = () => {
     }
   }
 
-  const handleDeleteUser = async (userId: string, username: string) => {
-    if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
-      return
-    }
+  const handleDeleteUser = (userId: string, username: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete User',
+      message: `Are you sure you want to delete user "${username}"? This action cannot be undone.`,
+      onConfirm: () => executeDeleteUser(userId)
+    })
+  }
 
+  const executeDeleteUser = async (userId: string) => {
+    setConfirmDialog({ ...confirmDialog, isOpen: false })
     setLoading(true)
 
     try {
@@ -293,6 +315,8 @@ const Console = () => {
       if (data.success) {
         toast.success('User deleted successfully')
         setViewMode('list')
+        // Refetch users from server to ensure consistency
+        await fetchUsers()
       } else {
         toast.error(data.error || 'Failed to delete user')
       }
@@ -373,14 +397,48 @@ const Console = () => {
             {hasAdminAccess ? 'Console' : 'Profile Settings'}
           </h1>
           <p className="text-slate-300">
-            {hasAdminAccess ? 'User Management' : 'Manage your account'}
+            {hasAdminAccess ? 'System Management' : 'Manage your account'}
           </p>
         </div>
 
+        {/* Tabs (only for admins) */}
+        {hasAdminAccess && (
+          <div className="flex gap-4 mb-6 border-b border-slate-700/40">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'users'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              Users
+            </button>
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'projects'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              Projects
+            </button>
+          </div>
+        )}
+
         {/* Main Panel */}
         <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-700/40">
-          {/* View: User List */}
-          {viewMode === 'list' && (
+          {/* Projects Tab */}
+          {activeTab === 'projects' && hasAdminAccess && (
+            <ProjectsManager />
+          )}
+
+          {/* Users Tab */}
+          {activeTab === 'users' && (
+            <>
+              {/* View: User List */}
+              {viewMode === 'list' && (
             <UserList
               users={users}
               loading={loading}
@@ -445,8 +503,22 @@ const Console = () => {
               onCancel={() => setViewMode('list')}
             />
           )}
+            </>
+          )}
         </div>
       </div>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+      />
     </div>
   )
 }

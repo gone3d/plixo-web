@@ -40,15 +40,9 @@ export function usePortfolioStats() {
       cloudSkills: skills.filter(s => s.category === 'cloud').length,
       aiMlSkills: skills.filter(s => s.category === 'ai-ml').length,
 
-      // Project Categories
-      enterpriseProjects: projects.filter(p => p.category === 'enterprise').length,
-      governmentProjects: projects.filter(p => p.category === 'government').length,
-      fintechProjects: projects.filter(p => p.category === 'fintech').length,
-
       // Engagement Metrics
-      projectsWithMetrics: projects.filter(p => p.metrics).length,
-      projectsWithLiveUrls: projects.filter(p => p.urls.live).length,
-      projectsWithGithub: projects.filter(p => p.urls.github).length
+      projectsWithLiveUrls: projects.filter(p => p.live_url).length,
+      projectsWithGithub: projects.filter(p => p.github_url).length
     }
 
     return stats
@@ -65,18 +59,13 @@ export function useProjectsFiltered() {
   return useMemo(() => {
     let filtered = [...projects]
 
-    // Apply category filter
-    if (state.ui.filters.projectCategory) {
-      filtered = filtered.filter(p => p.category === state.ui.filters.projectCategory)
-    }
-
     // Apply search query
     if (state.ui.searchQuery) {
       const query = state.ui.searchQuery.toLowerCase()
       filtered = filtered.filter(p =>
         p.title.toLowerCase().includes(query) ||
         p.description.toLowerCase().includes(query) ||
-        p.technologies.some(tech => tech.name.toLowerCase().includes(query))
+        p.technologies.some(tech => tech.toLowerCase().includes(query))
       )
     }
 
@@ -85,7 +74,9 @@ export function useProjectsFiltered() {
       if (a.featured && !b.featured) return -1
       if (!a.featured && b.featured) return 1
       if (a.featured && b.featured) return a.priority - b.priority
-      return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+      const aDate = a.updated_at || a.lastUpdated
+      const bDate = b.updated_at || b.lastUpdated
+      return new Date(bDate).getTime() - new Date(aDate).getTime()
     })
 
     return {
@@ -244,68 +235,41 @@ export function useProjectTechnologies() {
   const { projects } = useProjects()
 
   return useMemo(() => {
-    // Aggregate all technologies used across projects
+    // Aggregate all technologies used across projects (simplified - technologies are now just strings)
     const technologyUsage = new Map<string, {
       name: string
-      category: TechnologyCategory
       projectCount: number
       projects: Project[]
-      totalProficiency: number
-      averageProficiency: number
-      isPrimary: number // Count of projects where this tech was primary
     }>()
 
     projects.forEach(project => {
-      project.technologies.forEach(tech => {
-        const existing = technologyUsage.get(tech.name)
+      project.technologies.forEach(techName => {
+        const existing = technologyUsage.get(techName)
         if (existing) {
           existing.projectCount++
           existing.projects.push(project)
-          existing.totalProficiency += tech.proficiency
-          existing.averageProficiency = existing.totalProficiency / existing.projectCount
-          if (tech.primary) existing.isPrimary++
         } else {
-          technologyUsage.set(tech.name, {
-            name: tech.name,
-            category: tech.category,
+          technologyUsage.set(techName, {
+            name: techName,
             projectCount: 1,
-            projects: [project],
-            totalProficiency: tech.proficiency,
-            averageProficiency: tech.proficiency,
-            isPrimary: tech.primary ? 1 : 0
+            projects: [project]
           })
         }
       })
     })
 
-    // Convert to array and sort by usage frequency and proficiency
+    // Convert to array and sort by usage frequency
     const technologyStats = Array.from(technologyUsage.values())
       .sort((a, b) => {
-        // Primary technologies first
-        if (a.isPrimary > 0 && b.isPrimary === 0) return -1
-        if (a.isPrimary === 0 && b.isPrimary > 0) return 1
-
-        // Then by project count
+        // Sort by project count
         if (a.projectCount !== b.projectCount) return b.projectCount - a.projectCount
-
-        // Then by average proficiency
-        return b.averageProficiency - a.averageProficiency
+        // Then alphabetically
+        return a.name.localeCompare(b.name)
       })
-
-    // Group by category
-    const technologiesByCategory = technologyStats.reduce((acc, tech) => {
-      if (!acc[tech.category]) {
-        acc[tech.category] = []
-      }
-      acc[tech.category].push(tech)
-      return acc
-    }, {} as Record<TechnologyCategory, typeof technologyStats>)
 
     return {
       technologyStats,
-      technologiesByCategory,
       mostUsedTechnologies: technologyStats.slice(0, 10),
-      primaryTechnologies: technologyStats.filter(tech => tech.isPrimary > 0),
       totalUniqueTechnologies: technologyStats.length,
       averageProjectTechCount: projects.reduce((sum, p) => sum + p.technologies.length, 0) / projects.length
     }

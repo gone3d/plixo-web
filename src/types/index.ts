@@ -20,12 +20,10 @@ export type {
   // Technology and categorization
   Technology,
   TechnologyCategory,
-  ProjectCategory,
   ExperienceCategory,
 
-  // Status and metrics
+  // Status
   ProjectStatus,
-  ProjectMetrics,
 
   // Contact and social
   ContactMethod,
