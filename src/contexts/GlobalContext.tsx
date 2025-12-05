@@ -87,6 +87,7 @@ export interface GlobalState {
   api: {
     status: 'online' | 'offline' | 'checking'
     version?: string
+    db_version?: string
     lastChecked?: number
   }
 
@@ -149,7 +150,7 @@ export type GlobalAction =
 
   // API Health Actions
   | { type: 'API_HEALTH_CHECK_START' }
-  | { type: 'API_HEALTH_CHECK_SUCCESS'; payload: { version: string } }
+  | { type: 'API_HEALTH_CHECK_SUCCESS'; payload: { version: string; db_version?: string } }
   | { type: 'API_HEALTH_CHECK_ERROR' }
 
   // Background Animation Actions
@@ -214,6 +215,7 @@ const initialState: GlobalState = {
   api: {
     status: 'checking',
     version: undefined,
+    db_version: undefined,
     lastChecked: undefined
   },
 
@@ -449,6 +451,7 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
         api: {
           status: 'online',
           version: action.payload.version,
+          db_version: action.payload.db_version,
           lastChecked: Date.now()
         }
       }
@@ -459,6 +462,7 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
         api: {
           status: 'offline',
           version: undefined,
+          db_version: undefined,
           lastChecked: Date.now()
         }
       }
@@ -633,11 +637,14 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
       dispatch({ type: 'API_HEALTH_CHECK_START' })
       try {
         const response = await apiClient.get('/health')
-        // Production API returns: { status: "healthy", version: "1.1.1", timestamp: "...", database: "connected" }
+        // Production API returns: { status: "healthy", version: "1.2.4", db_version: "1.2.0", timestamp: "...", database: "connected" }
         if (response.data && response.data.version) {
           dispatch({
             type: 'API_HEALTH_CHECK_SUCCESS',
-            payload: { version: response.data.version }
+            payload: {
+              version: response.data.version,
+              db_version: response.data.db_version
+            }
           })
         } else {
           dispatch({ type: 'API_HEALTH_CHECK_ERROR' })

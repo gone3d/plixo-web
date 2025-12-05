@@ -31,8 +31,9 @@ const Work = () => {
         } else {
           setError(data.error || "Failed to load projects");
         }
-      } catch (err: any) {
-        setError(err.response?.data?.error || err.message || "Failed to load projects");
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { error?: string } }; message?: string };
+        setError(error.response?.data?.error || error.message || "Failed to load projects");
       } finally {
         setIsLoading(false);
       }

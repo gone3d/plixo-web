@@ -63,7 +63,7 @@ const Landing = () => {
               Don Anderson
             </h1>
             <h2 className="text-lg md:text-xl text-white/90 font-light text-shadow-glow">
-              Staff Frontend Engineer
+              Staff Engineer & Technical Leader
             </h2>
           </div>
 
@@ -79,6 +79,12 @@ const Landing = () => {
               )}
               {state.api.version && (
                 <span>API v{state.api.version}</span>
+              )}
+              {state.api.db_version && (
+                <span className="mx-2">•</span>
+              )}
+              {state.api.db_version && (
+                <span>DB v{state.api.db_version}</span>
               )}
             </p>
           </div>
