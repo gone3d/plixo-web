@@ -3,83 +3,72 @@
 
 /**
  * Project Data Structure
- * Comprehensive interface for portfolio projects with metrics, status, and technical details
+ * Extended interface for temp-data (legacy fields preserved)
+ * API schema will use subset of these fields
  */
 export interface Project {
+  // Identity
   id: string
+
+  // Content
   title: string
   description: string
-  longDescription?: string
+  longDescription?: string // Extended description for detail views
 
-  // Technical Details
-  technologies: Technology[]
-  category: ProjectCategory
+  // Technical
+  technologies: string[] // Array of tech names: ["React", "TypeScript", "Tailwind"]
   status: ProjectStatus
+  category?: string // "personal", "enterprise", "government", "fintech"
 
-  // Performance & Impact Metrics
-  metrics?: ProjectMetrics
+  // Metrics (legacy)
+  metrics?: {
+    performance?: string
+    technical?: string
+    impact?: string
+    growth?: string
+    users?: string
+  }
 
-  // URLs and Links
-  urls: ProjectUrls
+  // URLs (legacy structure)
+  urls?: {
+    live?: string
+    github?: string
+    demo?: string
+  }
 
-  // Visual Assets
-  images: ProjectImages
+  // Images (legacy structure)
+  images?: {
+    thumbnail?: string
+    screenshots?: string[]
+  }
 
-  // Project Metadata
+  // API-compatible links (newer structure)
+  image?: string // Relative path to image (e.g., "/assets/projects/foo.jpg")
+  live_url?: string | null
+  github_url?: string | null
+  demo_url?: string | null
+
+  // Display
   featured: boolean
-  priority: number // For sorting featured projects
-  dateCreated: string // ISO date string
-  lastUpdated: string // ISO date string
+  priority: number // Display order (lower = higher priority)
+  display_order?: number // API field (newer structure)
 
-  // Development Context
+  // Timestamps (legacy)
+  dateCreated: string
+  lastUpdated: string
+
+  // Timestamps (API - managed by API)
+  created_at?: string // ISO 8601 timestamp
+  updated_at?: string // ISO 8601 timestamp
+
+  // Project Details (legacy)
   teamSize?: number
-  role: string // "Lead Developer", "Principal Engineer", etc.
-  duration?: string // "6 months", "2 years", etc.
-
-  // Business Context
+  role?: string
+  duration?: string
   businessImpact?: string
   technicalChallenges?: string[]
   learningsAndGrowth?: string[]
 }
-
-export interface Technology {
-  name: string
-  category: TechnologyCategory
-  proficiency: ProficiencyLevel
-  primary: boolean // Whether this was a primary technology for the project
-}
-
-export interface ProjectMetrics {
-  users?: string // "100K+ active users"
-  performance?: string // "99.9% uptime"
-  impact?: string // "50% reduction in load time"
-  growth?: string // "300% user engagement increase"
-  technical?: string // "Sub-100ms API response times"
-}
-
-export interface ProjectUrls {
-  live?: string
-  demo?: string
-  github?: string
-  caseStudy?: string
-  documentation?: string
-}
-
-export interface ProjectImages {
-  thumbnail: string
-  hero?: string
-  screenshots: string[]
-  architecture?: string[] // Architecture diagrams
-}
-
-export type ProjectCategory =
-  | 'enterprise'
-  | 'fintech'
-  | 'government'
-  | 'consulting'
-  | 'research'
-  | 'open-source'
-  | 'personal'
 
 export type ProjectStatus =
   | 'Live'
@@ -87,6 +76,43 @@ export type ProjectStatus =
   | 'In Development'
   | 'Archived'
   | 'Prototype'
+
+/**
+ * Input types for creating/updating projects
+ */
+export interface CreateProjectInput {
+  title: string
+  description: string
+  technologies: string[]
+  status: ProjectStatus
+  image: string
+  live_url?: string
+  github_url?: string
+  demo_url?: string
+  featured?: boolean
+  display_order?: number
+}
+
+export interface UpdateProjectInput {
+  title?: string
+  description?: string
+  technologies?: string[]
+  status?: ProjectStatus
+  image?: string
+  live_url?: string | null
+  github_url?: string | null
+  demo_url?: string | null
+  featured?: boolean
+  display_order?: number
+}
+
+// Legacy interfaces (kept for Experience/Skills, removed from Project)
+export interface Technology {
+  name: string
+  category: TechnologyCategory
+  proficiency: ProficiencyLevel
+  primary: boolean
+}
 
 export type TechnologyCategory =
   | 'frontend'
@@ -116,7 +142,7 @@ export interface Experience {
   // Role Context
   description: string
   achievements: Achievement[]
-  technologies: Technology[]
+  technologies: string[] // Array of tech names: ["React", "TypeScript", etc.]
   teamSize?: number
   reportsTo?: string
   directReports?: number

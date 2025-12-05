@@ -62,14 +62,16 @@ const UserDetail = ({
               <Icon name="edit" size="sm" />
               <span className="ml-2">Edit</span>
             </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => onDelete(user.id, user.username)}
-            >
-              <Icon name="trash" size="sm" />
-              <span className="ml-2">Delete</span>
-            </Button>
+            {user.username !== 'admin' && (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => onDelete(user.id, user.username)}
+              >
+                <Icon name="trash" size="sm" />
+                <span className="ml-2">Delete</span>
+              </Button>
+            )}
           </div>
         </div>
 

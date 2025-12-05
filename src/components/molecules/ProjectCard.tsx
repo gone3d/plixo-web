@@ -1,4 +1,5 @@
 import { Icon, SlideInImage } from "../atoms";
+import { TechScroller } from "./TechScroller";
 import { cn } from "../../utils/cn";
 import type { IconName } from "../atoms/Icon";
 import { analyticsClient } from "../../services/analyticsClient";
@@ -102,16 +103,9 @@ const ProjectCard = ({
           <p className="text-slate-300 leading-relaxed">{description}</p>
         </div>
 
-        {/* Technologies - fixed position above footer */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {technologies.map((tech) => (
-            <span
-              key={tech}
-              className="px-3 py-1 text-sm bg-slate-700/50 text-slate-200 rounded-full border border-slate-600/30 transition-colors hover:bg-slate-600/50"
-            >
-              {tech}
-            </span>
-          ))}
+        {/* Technologies - infinite scroll ticker */}
+        <div className="mb-4">
+          <TechScroller technologies={technologies} speed="normal" />
         </div>
 
         {/* Footer with links - always at bottom */}
