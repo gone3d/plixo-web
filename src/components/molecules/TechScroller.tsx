@@ -22,7 +22,7 @@ export const TechScroller = ({
         {tech}
       </span>
       <Icon
-        name="chevron-right"
+        name="chevronRight"
         size="xs"
         className="text-slate-500 shrink-0"
       />
