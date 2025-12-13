@@ -14,6 +14,7 @@ import {
   ZoomableGroup,
 } from "react-simple-maps";
 import { getColorForCount } from "../../utils/utils";
+import { ISO_COUNTRY_CODES, getCountryName, getISOFromTopoJSONName } from "../../types/geography";
 
 // TopoJSON world map data (110m resolution for performance)
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -27,9 +28,10 @@ export interface WorldMapData {
 export interface WorldMapProps {
   data: WorldMapData[];
   className?: string;
+  onLocationClick?: (name: string, count: number) => void;
 }
 
-export function WorldMap({ data, className = "" }: WorldMapProps) {
+export function WorldMap({ data, className = "", onLocationClick }: WorldMapProps) {
   // Track hovered country for info panel
   const [hoveredCountry, setHoveredCountry] = useState<{
     name: string;
@@ -45,11 +47,17 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
     const counts = data.map((d) => d.count).filter((c) => c > 0);
     const total = data.reduce((sum, d) => sum + d.count, 0);
     const max = counts.length > 0 ? Math.max(...counts) : 0;
+
+    // Build country map using ISO codes as keys for reliable matching
     const countryMap = new Map(
-      data.map((d) => [
-        d.country.toUpperCase(),
-        { count: d.count, name: d.countryName },
-      ])
+      data.map((d) => {
+        const isoCode = d.country.toUpperCase();
+        const fullName = getCountryName(d.countryName); // Resolve abbreviations
+        return [
+          isoCode, // Use ISO code as key (e.g., "US", "CD", "MA")
+          { count: d.count, name: fullName },
+        ];
+      })
     );
 
     console.log("WorldMap countryMap:", Array.from(countryMap.entries()));
@@ -134,42 +142,26 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
                     );
                   }
 
-                  // TopoJSON only provides properties.name, no ISO codes
+                  // TopoJSON provides properties.name (full official names)
                   const geoName = geo.properties?.name;
 
-                  // Try to match by country name (with partial matching for variations)
+                  // Convert TopoJSON name to ISO code for reliable matching
                   let countryData: { count: number; name: string } | undefined;
+                  let isoCode: string | null = null;
 
                   if (geoName) {
-                    const geoNameLower = geoName.toLowerCase();
+                    // Use helper function that handles both special cases and standard names
+                    isoCode = getISOFromTopoJSONName(geoName);
 
-                    // Try exact match first
-                    for (const [, data] of countryMap.entries()) {
-                      if (data.name.toLowerCase() === geoNameLower) {
-                        countryData = data;
-                        break;
-                      }
-                    }
-
-                    // If no exact match, try partial matching
-                    // e.g., "United States" matches "United States of America"
-                    if (!countryData) {
-                      for (const [, data] of countryMap.entries()) {
-                        const dataNameLower = data.name.toLowerCase();
-                        if (
-                          geoNameLower.includes(dataNameLower) ||
-                          dataNameLower.includes(geoNameLower)
-                        ) {
-                          countryData = data;
-                          break;
-                        }
-                      }
+                    // If found, look up in countryMap using ISO code
+                    if (isoCode) {
+                      countryData = countryMap.get(isoCode);
                     }
                   }
 
                   const count = countryData?.count || 0;
-                  const countryName =
-                    countryData?.name || geo.properties?.name || "Unknown";
+                  // Use the full country name from ISO lookup, or TopoJSON name as fallback
+                  const countryName = isoCode ? (ISO_COUNTRY_CODES[isoCode] || geoName) : (geoName || "Unknown");
 
                   // Debug log when we have data
                   if (countryData) {
@@ -202,6 +194,11 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
                       }}
                       onMouseLeave={() => {
                         setHoveredCountry(null);
+                      }}
+                      onClick={() => {
+                        if (count > 0 && onLocationClick) {
+                          onLocationClick(countryName, count);
+                        }
                       }}
                       style={{
                         default: {
@@ -267,13 +264,14 @@ export function WorldMap({ data, className = "" }: WorldMapProps) {
               .sort((a, b) => b.count - a.count)
               .map((item) => {
                 const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : '0';
+                const displayName = getCountryName(item.countryName);
                 return (
                   <div
                     key={item.country}
                     className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors"
                   >
                     <span className="text-slate-300 font-medium truncate">
-                      {item.countryName}
+                      {displayName}
                     </span>
                     <div className="flex items-baseline gap-1.5 ml-2 shrink-0">
                       <span className="text-white font-semibold">

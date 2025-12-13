@@ -273,33 +273,46 @@ export const ProjectsManager = () => {
                     key={project.id}
                     className="bg-slate-700/40 rounded-lg p-4 border border-slate-600/40 hover:border-slate-500/60 transition-colors"
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-xl font-semibold text-white">{project.title}</h3>
-                          {project.featured && (
-                            <span className="bg-yellow-500/20 text-yellow-400 text-xs px-2 py-1 rounded">
-                              Featured
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex gap-4 flex-1">
+                        {/* Project Image */}
+                        {project.image && (
+                          <div className="flex-shrink-0">
+                            <img
+                              src={project.image}
+                              alt={project.title}
+                              className="w-20 h-20 rounded-lg object-cover border border-slate-600/40"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-xl font-semibold text-white">{project.title}</h3>
+                            {project.featured && (
+                              <span className="bg-yellow-500/20 text-yellow-400 text-xs px-2 py-1 rounded">
+                                Featured
+                              </span>
+                            )}
+                            <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded">
+                              {project.status}
                             </span>
-                          )}
-                          <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded">
-                            {project.status}
-                          </span>
-                        </div>
-                        <p className="text-slate-300 mb-3">{project.description}</p>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {project.technologies.map((tech) => (
-                            <span
-                              key={tech}
-                              className="bg-slate-600/40 text-slate-300 text-xs px-2 py-1 rounded"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="text-xs text-slate-400 space-y-1">
-                          <div>Display Order: {project.display_order || project.priority}</div>
-                          <div>Created: {new Date(project.created_at || project.dateCreated).toLocaleDateString()}</div>
+                          </div>
+                          <p className="text-slate-300 mb-3">{project.description}</p>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {project.technologies.map((tech) => (
+                              <span
+                                key={tech}
+                                className="bg-slate-600/40 text-slate-300 text-xs px-2 py-1 rounded"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="text-xs text-slate-400 space-y-1">
+                            <div>Display Order: {project.display_order || project.priority}</div>
+                            <div>Created: {new Date(project.created_at || project.dateCreated).toLocaleDateString()}</div>
+                          </div>
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">

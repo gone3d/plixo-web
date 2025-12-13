@@ -6,6 +6,7 @@ import {
   ChartToggle,
   BarChartComponent,
   PieChartComponent,
+  LocationDetailsModal,
   type ChartType,
   type MapView,
 } from '../components/molecules'
@@ -47,7 +48,7 @@ const Insights = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [timeRange, setTimeRange] = useState<'hour_1' | 'hour_12' | '1' | '7' | '30'>('30')
+  const [timeRange, setTimeRange] = useState<'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30'>('30')
 
   // Chart type toggles for each section
   const [eventTypeChart, setEventTypeChart] = useState<ChartType>('bar')
@@ -57,6 +58,23 @@ const Insights = () => {
 
   // Map view toggle (world vs USA)
   const [mapView, setMapView] = useState<MapView>('world')
+
+  // Location details modal state
+  const [locationModal, setLocationModal] = useState<{
+    isOpen: boolean
+    locationName: string
+    locationCode: string
+    locationType: 'country' | 'state'
+    visitCount: number
+    totalVisitors: number
+  }>({
+    isOpen: false,
+    locationName: '',
+    locationCode: '',
+    locationType: 'country',
+    visitCount: 0,
+    totalVisitors: 0,
+  })
 
   useEffect(() => {
     fetchAnalytics()
@@ -119,6 +137,49 @@ const Insights = () => {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
   }
 
+  // Handle location click from map
+  const handleLocationClick = (locationName: string, locationType: 'country' | 'state', visitCount: number) => {
+    // Find the location code from the analytics data
+    let locationCode = '';
+    if (locationType === 'country') {
+      const country = analyticsData?.customAnalytics?.eventsByCountry.find(
+        c => c.countryName === locationName || c.country === locationName
+      );
+      locationCode = country?.country || '';
+    } else {
+      const state = analyticsData?.customAnalytics?.eventsByUSState?.find(
+        s => s.stateName === locationName || s.state === locationName
+      );
+      locationCode = state?.state || '';
+    }
+
+    // Calculate total visitors from the appropriate dataset
+    const totalVisitors = locationType === 'country'
+      ? analyticsData?.customAnalytics?.eventsByCountry.reduce((sum, c) => sum + c.count, 0) || 0
+      : (analyticsData?.customAnalytics?.eventsByUSState || []).reduce((sum, s) => sum + s.count, 0) || 0;
+
+    setLocationModal({
+      isOpen: true,
+      locationName,
+      locationCode,
+      locationType,
+      visitCount,
+      totalVisitors,
+    })
+  }
+
+  // Handle modal close
+  const handleModalClose = () => {
+    setLocationModal({
+      isOpen: false,
+      locationName: '',
+      locationCode: '',
+      locationType: 'country',
+      visitCount: 0,
+      totalVisitors: 0,
+    })
+  }
+
   return (
     <div className="relative min-h-full text-white overflow-y-auto">
       <div className="relative z-10 max-w-7xl mx-auto py-20 px-4">
@@ -136,12 +197,13 @@ const Insights = () => {
             <span className="text-slate-400 text-sm">Time Range:</span>
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as 'hour_1' | 'hour_12' | '1' | '7' | '30')}
+              onChange={(e) => setTimeRange(e.target.value as 'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30')}
               className="bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 hover:bg-slate-800/80 transition-colors"
             >
               <option value="hour_1">Last 1 Hour</option>
               <option value="hour_12">Last 12 Hours</option>
-              <option value="1">Last 24 Hours</option>
+              <option value="hour_24">Last 24 Hours</option>
+              <option value="hour_48">Last 48 Hours</option>
               <option value="7">Last 7 Days</option>
               <option value="30">Last 30 Days</option>
             </select>
@@ -190,7 +252,8 @@ const Insights = () => {
                   Built-in historical data ({
                     timeRange === 'hour_1' ? 'last 1 hour' :
                     timeRange === 'hour_12' ? 'last 12 hours' :
-                    timeRange === '1' ? 'last 24 hours' :
+                    timeRange === 'hour_24' ? 'last 24 hours' :
+                    timeRange === 'hour_48' ? 'last 48 hours' :
                     timeRange === '7' ? 'last 7 days' :
                     'last 30 days'
                   })
@@ -369,6 +432,7 @@ const Insights = () => {
                       activeView={mapView}
                       worldData={analyticsData.customAnalytics.eventsByCountry}
                       usaData={analyticsData.customAnalytics.eventsByUSState || []}
+                      onLocationClick={handleLocationClick}
                     />
                   </div>
                 )}
@@ -440,6 +504,18 @@ const Insights = () => {
           </div>
         )}
       </div>
+
+      {/* Location Details Modal */}
+      <LocationDetailsModal
+        isOpen={locationModal.isOpen}
+        onClose={handleModalClose}
+        locationName={locationModal.locationName}
+        locationCode={locationModal.locationCode}
+        locationType={locationModal.locationType}
+        visitCount={locationModal.visitCount}
+        totalVisitors={locationModal.totalVisitors}
+        timeRange={timeRange}
+      />
     </div>
   )
 }

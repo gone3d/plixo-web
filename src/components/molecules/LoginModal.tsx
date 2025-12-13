@@ -72,7 +72,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleModalClose} title="Welcome" size="sm">
+    <Modal isOpen={isOpen} onClose={handleModalClose} title="Welcome" size="sm" closeOnBackdropClick={false}>
       <div className="space-y-4">
         {!showGuestLogin ? (
           <>
