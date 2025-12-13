@@ -14,6 +14,7 @@ export interface GeographicMapProps {
   worldData: WorldMapData[];
   usaData: USAMapData[];
   className?: string;
+  onLocationClick?: (locationName: string, locationType: "country" | "state", visitCount: number) => void;
 }
 
 export function GeographicMap({
@@ -21,6 +22,7 @@ export function GeographicMap({
   worldData,
   usaData,
   className = "",
+  onLocationClick,
 }: GeographicMapProps) {
   return (
     <div className={className}>
@@ -30,7 +32,10 @@ export function GeographicMap({
           id="world-map-panel"
           aria-labelledby="world-tab"
         >
-          <WorldMap data={worldData} />
+          <WorldMap
+            data={worldData}
+            onLocationClick={onLocationClick ? (name, count) => onLocationClick(name, "country", count) : undefined}
+          />
         </div>
       ) : (
         <div
@@ -38,7 +43,10 @@ export function GeographicMap({
           id="usa-map-panel"
           aria-labelledby="usa-tab"
         >
-          <USAMap data={usaData} />
+          <USAMap
+            data={usaData}
+            onLocationClick={onLocationClick ? (name, count) => onLocationClick(name, "state", count) : undefined}
+          />
         </div>
       )}
     </div>

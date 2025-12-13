@@ -27,6 +27,7 @@ export interface USAMapData {
 export interface USAMapProps {
   data: USAMapData[];
   className?: string;
+  onLocationClick?: (name: string, count: number) => void;
 }
 
 /**
@@ -64,7 +65,7 @@ function normalizeStateCode(stateInput: string): string {
   return stateNameToCode[upper] || upper;
 }
 
-export function USAMap({ data, className = "" }: USAMapProps) {
+export function USAMap({ data, className = "", onLocationClick }: USAMapProps) {
   // Track hovered state for info panel
   const [hoveredState, setHoveredState] = useState<{
     name: string;
@@ -210,6 +211,11 @@ export function USAMap({ data, className = "" }: USAMapProps) {
                       }}
                       onMouseLeave={() => {
                         setHoveredState(null);
+                      }}
+                      onClick={() => {
+                        if (count > 0 && onLocationClick) {
+                          onLocationClick(stateName, count);
+                        }
                       }}
                       style={{
                         default: {
