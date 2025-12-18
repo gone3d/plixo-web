@@ -46,14 +46,17 @@ const getEventTypeColor = (eventType: string): string => {
 export const EventsChartComponent = ({
   eventsByType,
   eventsTimeline,
-  timeRange,
   className = '',
 }: EventsChartComponentProps) => {
   const [mode, setMode] = useState<EventsChartMode>('total');
 
+  // Check if we have data
+  const hasTimelineData = eventsTimeline && eventsTimeline.length > 0;
+  const hasTotalData = eventsByType && eventsByType.length > 0;
+
   // Transform timeline data for stacked area chart (all ranges)
   const getStackedAreaData = () => {
-    if (!eventsTimeline.length) return [];
+    if (!hasTimelineData) return [];
 
     const dateMap = new Map<string, any>();
 
@@ -71,7 +74,19 @@ export const EventsChartComponent = ({
   };
 
   const stackedAreaData = getStackedAreaData();
-  const eventTypes = Array.from(new Set(eventsTimeline.map(e => e.eventType)));
+  const eventTypes = hasTimelineData ? Array.from(new Set(eventsTimeline.map(e => e.eventType))) : [];
+
+  // If no data, show empty state
+  if (!hasTotalData && !hasTimelineData) {
+    return (
+      <div className={`w-full ${className}`}>
+        <h4 className="text-xs font-semibold text-slate-300 mb-3">Events</h4>
+        <div className="flex items-center justify-center h-[250px] bg-slate-800/20 rounded-lg border border-slate-700/40">
+          <p className="text-slate-500 text-sm">No event data available</p>
+        </div>
+      </div>
+    );
+  }
 
   // Custom tooltip for temporal chart
   const TemporalTooltip = ({ active, payload }: any) => {
@@ -139,88 +154,101 @@ export const EventsChartComponent = ({
       {/* Chart Display */}
       {mode === 'total' ? (
         // Total: Bar Chart
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart
-            data={eventsByType.map(e => ({
-              name: e.eventType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              value: e.count,
-              eventType: e.eventType,
-            }))}
-            margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
-            layout="vertical"
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-            <XAxis
-              type="number"
-              stroke="#94a3b8"
-              tick={{ fill: '#94a3b8', fontSize: 11 }}
-              allowDecimals={false}
-            />
-            <YAxis
-              type="category"
-              dataKey="name"
-              stroke="#94a3b8"
-              tick={{ fill: '#94a3b8', fontSize: 11 }}
-              width={120}
-            />
-            <Tooltip content={<TotalTooltip />} cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-              {eventsByType.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getEventTypeColor(entry.eventType)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        hasTotalData ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart
+              data={eventsByType.map(e => ({
+                name: e.eventType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                value: e.count,
+                eventType: e.eventType,
+              }))}
+              margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+              layout="vertical"
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+              <XAxis
+                type="number"
+                stroke="#94a3b8"
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                allowDecimals={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                stroke="#94a3b8"
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                width={120}
+              />
+              <Tooltip content={<TotalTooltip />} cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} />
+              <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                {eventsByType.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getEventTypeColor(entry.eventType)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-[250px] bg-slate-800/20 rounded-lg border border-slate-700/40">
+            <p className="text-slate-500 text-sm">No total data available</p>
+          </div>
+        )
       ) : (
         // Temporal: Stacked area chart for all ranges
-        <ResponsiveContainer width="100%" height={250}>
-          <AreaChart
-            data={stackedAreaData}
-            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-          >
-            <defs>
-              {eventTypes.map((eventType) => (
-                <linearGradient key={eventType} id={`color-${eventType}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={getEventTypeColor(eventType)} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={getEventTypeColor(eventType)} stopOpacity={0.1} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-            <XAxis
-              dataKey="date"
-              stroke="#94a3b8"
-              tick={{ fill: '#94a3b8', fontSize: 11 }}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return `${date.getMonth() + 1}/${date.getDate()}`;
-              }}
-            />
-            <YAxis
-              stroke="#94a3b8"
-              tick={{ fill: '#94a3b8', fontSize: 11 }}
-              allowDecimals={false}
-            />
-            <Tooltip content={<TemporalTooltip />} />
-            <Legend
-              wrapperStyle={{ fontSize: '11px' }}
-              formatter={(value) => value.replace('_', ' ')}
-            />
-            {eventTypes.map((eventType) => (
-              <Area
-                key={eventType}
-                type="monotone"
-                dataKey={eventType}
-                name={eventType}
-                stackId="1"
-                stroke={getEventTypeColor(eventType)}
-                fill={`url(#color-${eventType})`}
-                fillOpacity={1}
-                connectNulls
+        hasTimelineData && stackedAreaData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <AreaChart
+              data={stackedAreaData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
+              <defs>
+                {eventTypes.map((eventType) => (
+                  <linearGradient key={eventType} id={`color-${eventType}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={getEventTypeColor(eventType)} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={getEventTypeColor(eventType)} stopOpacity={0.1} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+              <XAxis
+                dataKey="date"
+                stroke="#94a3b8"
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                tickFormatter={(value) => {
+                  const date = new Date(value);
+                  if (isNaN(date.getTime())) return value;
+                  return `${date.getMonth() + 1}/${date.getDate()}`;
+                }}
               />
-            ))}
-          </AreaChart>
-        </ResponsiveContainer>
+              <YAxis
+                stroke="#94a3b8"
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                allowDecimals={false}
+              />
+              <Tooltip content={<TemporalTooltip />} />
+              <Legend
+                wrapperStyle={{ fontSize: '11px' }}
+                formatter={(value) => value.replace('_', ' ')}
+              />
+              {eventTypes.map((eventType) => (
+                <Area
+                  key={eventType}
+                  type="monotone"
+                  dataKey={eventType}
+                  name={eventType}
+                  stackId="1"
+                  stroke={getEventTypeColor(eventType)}
+                  fill={`url(#color-${eventType})`}
+                  fillOpacity={1}
+                  connectNulls
+                />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-[250px] bg-slate-800/20 rounded-lg border border-slate-700/40">
+            <p className="text-slate-500 text-sm">No timeline data available</p>
+          </div>
+        )
       )}
     </div>
   );

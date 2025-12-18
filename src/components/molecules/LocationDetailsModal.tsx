@@ -171,15 +171,13 @@ export const LocationDetailsModal = ({
             </div>
 
             {/* Events Chart (Total/Temporal toggle) */}
-            {(analytics.eventsByType.length > 0 || analytics.eventsTimeline.length > 0) && (
-              <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700/40">
-                <EventsChartComponent
-                  eventsByType={analytics.eventsByType}
-                  eventsTimeline={analytics.eventsTimeline}
-                  timeRange={timeRange}
-                />
-              </div>
-            )}
+            <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700/40">
+              <EventsChartComponent
+                eventsByType={analytics.eventsByType}
+                eventsTimeline={analytics.eventsTimeline}
+                timeRange={timeRange}
+              />
+            </div>
 
             {/* Top Pages */}
             {analytics.eventsByPage.length > 0 && (
