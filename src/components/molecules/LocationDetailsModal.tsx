@@ -13,7 +13,6 @@ export interface LocationDetailsModalProps {
   locationType: "country" | "state";
   visitCount: number;
   totalVisitors: number;
-  timeRange: 'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30';
 }
 
 interface LocationAnalytics {
@@ -34,7 +33,6 @@ export const LocationDetailsModal = ({
   locationType,
   visitCount,
   totalVisitors,
-  timeRange,
 }: LocationDetailsModalProps) => {
   const [loading, setLoading] = useState(false);
   const [analytics, setAnalytics] = useState<LocationAnalytics | null>(null);
@@ -48,34 +46,15 @@ export const LocationDetailsModal = ({
     if (isOpen && locationCode) {
       fetchLocationAnalytics();
     }
-  }, [isOpen, locationCode, timeRange]);
+  }, [isOpen, locationCode]);
 
   const fetchLocationAnalytics = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Build API URL
-      let apiUrl = `${API_BASE_URL}/analytics/location/${locationCode}?type=${locationType}`;
-
-      // Add time range parameter
-      if (timeRange.startsWith('hour_')) {
-        const hours = timeRange.replace('hour_', '');
-        apiUrl += `&hours=${hours}`;
-      } else {
-        // Calculate date range
-        const now = new Date();
-        const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000);
-
-        const formatDate = (date: Date): string => {
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        };
-
-        apiUrl += `&since=${formatDate(daysAgo)}&until=${formatDate(now)}`;
-      }
+      // Build API URL - use default 30-day range which works reliably
+      const apiUrl = `${API_BASE_URL}/analytics/location/${locationCode}?type=${locationType}`;
 
       const response = await fetch(apiUrl);
       const data = await response.json();
@@ -170,12 +149,12 @@ export const LocationDetailsModal = ({
               </div>
             </div>
 
-            {/* Events Chart (Total/Temporal toggle) */}
+            {/* Events Chart (Total/Temporal toggle) - Last 30 Days */}
             <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700/40">
               <EventsChartComponent
                 eventsByType={analytics.eventsByType}
                 eventsTimeline={analytics.eventsTimeline}
-                timeRange={timeRange}
+                timeRange="30"
               />
             </div>
 
