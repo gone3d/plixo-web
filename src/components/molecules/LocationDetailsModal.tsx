@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { Icon, LoadingSpinner } from "../atoms";
-import { BarChartComponent } from "./BarChartComponent";
+import { EventsChartComponent } from "./EventsChartComponent";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788';
 
@@ -23,6 +23,7 @@ interface LocationAnalytics {
   eventsByPage: Array<{ page: string; count: number }>;
   eventsByDevice: Array<{ deviceType: string; count: number }>;
   eventsByBrowser: Array<{ browserFamily: string; count: number }>;
+  eventsTimeline: Array<{ date: string; eventType: string; count: number; page?: string; destination?: string }>;
 }
 
 export const LocationDetailsModal = ({
@@ -169,18 +170,13 @@ export const LocationDetailsModal = ({
               </div>
             </div>
 
-            {/* Event Types */}
-            {analytics.eventsByType.length > 0 && (
+            {/* Events Chart (Total/Temporal toggle) */}
+            {(analytics.eventsByType.length > 0 || analytics.eventsTimeline.length > 0) && (
               <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700/40">
-                <h4 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                  <Icon name="chart" size="sm" className="text-purple-400" />
-                  Event Types
-                </h4>
-                <BarChartComponent
-                  data={analytics.eventsByType.map(e => ({
-                    name: e.eventType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    value: e.count
-                  }))}
+                <EventsChartComponent
+                  eventsByType={analytics.eventsByType}
+                  eventsTimeline={analytics.eventsTimeline}
+                  timeRange={timeRange}
                 />
               </div>
             )}
