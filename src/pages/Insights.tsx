@@ -48,7 +48,7 @@ const Insights = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [timeRange, setTimeRange] = useState<'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30'>('30')
+  const [timeRange, setTimeRange] = useState<'1' | '2' | '7' | '30'>('30')
 
   // Chart type toggles for each section
   const [eventTypeChart, setEventTypeChart] = useState<ChartType>('bar')
@@ -85,30 +85,21 @@ const Insights = () => {
     setError(null)
 
     try {
-      // Build API URL based on time range type
-      let apiUrl: string
+      // Build API URL - all ranges are now day-based
+      const now = new Date()
+      const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000)
 
-      if (timeRange.startsWith('hour_')) {
-        // Hour-based range: use ?hours=X parameter
-        const hours = timeRange.replace('hour_', '')
-        apiUrl = `${API_BASE_URL}/analytics/overview?hours=${hours}`
-      } else {
-        // Day-based range: calculate date range
-        const now = new Date()
-        const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000)
-
-        const formatDate = (date: Date): string => {
-          const year = date.getFullYear()
-          const month = String(date.getMonth() + 1).padStart(2, '0')
-          const day = String(date.getDate()).padStart(2, '0')
-          return `${year}-${month}-${day}`
-        }
-
-        const since = formatDate(daysAgo)
-        const until = formatDate(now)
-
-        apiUrl = `${API_BASE_URL}/analytics/overview?since=${since}&until=${until}`
+      const formatDate = (date: Date): string => {
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
       }
+
+      const since = formatDate(daysAgo)
+      const until = formatDate(now)
+
+      const apiUrl = `${API_BASE_URL}/analytics/overview?since=${since}&until=${until}`
 
       const response = await fetch(apiUrl)
       const data = await response.json()
@@ -197,13 +188,11 @@ const Insights = () => {
             <span className="text-slate-400 text-sm">Time Range:</span>
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as 'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30')}
+              onChange={(e) => setTimeRange(e.target.value as '1' | '2' | '7' | '30')}
               className="bg-slate-800/60 border border-slate-700/40 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 hover:bg-slate-800/80 transition-colors"
             >
-              <option value="hour_1">Last 1 Hour</option>
-              <option value="hour_12">Last 12 Hours</option>
-              <option value="hour_24">Last 24 Hours</option>
-              <option value="hour_48">Last 48 Hours</option>
+              <option value="1">Last 1 Day</option>
+              <option value="2">Last 2 Days</option>
               <option value="7">Last 7 Days</option>
               <option value="30">Last 30 Days</option>
             </select>
