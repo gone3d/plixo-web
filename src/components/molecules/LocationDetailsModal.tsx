@@ -75,7 +75,7 @@ export const LocationDetailsModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`${locationName} Details`}
+      title={`${locationName} Details - Last 30 Days`}
       size="lg"
     >
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
