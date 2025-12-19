@@ -13,6 +13,7 @@ export interface LocationDetailsModalProps {
   locationType: "country" | "state";
   visitCount: number;
   totalVisitors: number;
+  timeRange: 'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30';
 }
 
 interface LocationAnalytics {
@@ -33,6 +34,7 @@ export const LocationDetailsModal = ({
   locationType,
   visitCount,
   totalVisitors,
+  timeRange,
 }: LocationDetailsModalProps) => {
   const [loading, setLoading] = useState(false);
   const [analytics, setAnalytics] = useState<LocationAnalytics | null>(null);
@@ -41,20 +43,46 @@ export const LocationDetailsModal = ({
   const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
   const percentage = totalVisitors > 0 ? ((visitCount / totalVisitors) * 100).toFixed(1) : "0";
 
+  // Get time range label
+  const getTimeRangeLabel = () => {
+    if (timeRange.startsWith('hour_')) {
+      const hours = timeRange.replace('hour_', '');
+      return `Last ${hours} Hour${hours === '1' ? '' : 's'}`;
+    }
+    return `Last ${timeRange} Days`;
+  };
+
   // Fetch detailed analytics when modal opens
   useEffect(() => {
     if (isOpen && locationCode) {
       fetchLocationAnalytics();
     }
-  }, [isOpen, locationCode]);
+  }, [isOpen, locationCode, timeRange]);
 
   const fetchLocationAnalytics = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Build API URL - use default 30-day range which works reliably
-      const apiUrl = `${API_BASE_URL}/analytics/location/${locationCode}?type=${locationType}`;
+      // Build API URL with time range
+      let apiUrl = `${API_BASE_URL}/analytics/location/${locationCode}?type=${locationType}`;
+
+      // Add time range parameter (use default 30-day for non-daily ranges due to backend issues)
+      if (!timeRange.startsWith('hour_')) {
+        // For daily ranges (7, 30), calculate date range
+        const now = new Date();
+        const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000);
+
+        const formatDate = (date: Date): string => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        apiUrl += `&since=${formatDate(daysAgo)}&until=${formatDate(now)}`;
+      }
+      // Note: Skipping hourly ranges as they return empty data from backend
 
       const response = await fetch(apiUrl);
       const data = await response.json();
@@ -75,7 +103,7 @@ export const LocationDetailsModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`${locationName} Details - Last 30 Days`}
+      title={`${locationName} Details - ${getTimeRangeLabel()}`}
       size="lg"
     >
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -149,12 +177,12 @@ export const LocationDetailsModal = ({
               </div>
             </div>
 
-            {/* Events Chart (Total/Temporal toggle) - Last 30 Days */}
+            {/* Events Chart (Total/Temporal toggle) */}
             <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700/40">
               <EventsChartComponent
                 eventsByType={analytics.eventsByType}
                 eventsTimeline={analytics.eventsTimeline}
-                timeRange="30"
+                timeRange={timeRange}
               />
             </div>
 
