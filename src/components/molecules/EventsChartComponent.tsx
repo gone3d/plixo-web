@@ -46,6 +46,7 @@ const getEventTypeColor = (eventType: string): string => {
 export const EventsChartComponent = ({
   eventsByType,
   eventsTimeline,
+  timeRange,
   className = '',
 }: EventsChartComponentProps) => {
   const [mode, setMode] = useState<EventsChartMode>('total');
