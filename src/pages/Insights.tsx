@@ -514,6 +514,7 @@ const Insights = () => {
         locationType={locationModal.locationType}
         visitCount={locationModal.visitCount}
         totalVisitors={locationModal.totalVisitors}
+        timeRange={timeRange}
       />
     </div>
   )
