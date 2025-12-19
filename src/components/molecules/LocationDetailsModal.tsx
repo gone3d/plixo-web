@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { Icon, LoadingSpinner } from "../atoms";
-import { BarChartComponent } from "./BarChartComponent";
+import { EventsChartComponent } from "./EventsChartComponent";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788';
 
@@ -13,7 +13,6 @@ export interface LocationDetailsModalProps {
   locationType: "country" | "state";
   visitCount: number;
   totalVisitors: number;
-  timeRange: 'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30';
 }
 
 interface LocationAnalytics {
@@ -23,6 +22,7 @@ interface LocationAnalytics {
   eventsByPage: Array<{ page: string; count: number }>;
   eventsByDevice: Array<{ deviceType: string; count: number }>;
   eventsByBrowser: Array<{ browserFamily: string; count: number }>;
+  eventsTimeline: Array<{ date: string; eventType: string; count: number; page?: string; destination?: string }>;
 }
 
 export const LocationDetailsModal = ({
@@ -33,7 +33,6 @@ export const LocationDetailsModal = ({
   locationType,
   visitCount,
   totalVisitors,
-  timeRange,
 }: LocationDetailsModalProps) => {
   const [loading, setLoading] = useState(false);
   const [analytics, setAnalytics] = useState<LocationAnalytics | null>(null);
@@ -47,34 +46,15 @@ export const LocationDetailsModal = ({
     if (isOpen && locationCode) {
       fetchLocationAnalytics();
     }
-  }, [isOpen, locationCode, timeRange]);
+  }, [isOpen, locationCode]);
 
   const fetchLocationAnalytics = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Build API URL
-      let apiUrl = `${API_BASE_URL}/analytics/location/${locationCode}?type=${locationType}`;
-
-      // Add time range parameter
-      if (timeRange.startsWith('hour_')) {
-        const hours = timeRange.replace('hour_', '');
-        apiUrl += `&hours=${hours}`;
-      } else {
-        // Calculate date range
-        const now = new Date();
-        const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000);
-
-        const formatDate = (date: Date): string => {
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        };
-
-        apiUrl += `&since=${formatDate(daysAgo)}&until=${formatDate(now)}`;
-      }
+      // Build API URL - use default 30-day range which works reliably
+      const apiUrl = `${API_BASE_URL}/analytics/location/${locationCode}?type=${locationType}`;
 
       const response = await fetch(apiUrl);
       const data = await response.json();
@@ -95,7 +75,7 @@ export const LocationDetailsModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`${locationName} Details`}
+      title={`${locationName} Details - Last 30 Days`}
       size="lg"
     >
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -169,21 +149,14 @@ export const LocationDetailsModal = ({
               </div>
             </div>
 
-            {/* Event Types */}
-            {analytics.eventsByType.length > 0 && (
-              <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700/40">
-                <h4 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                  <Icon name="chart" size="sm" className="text-purple-400" />
-                  Event Types
-                </h4>
-                <BarChartComponent
-                  data={analytics.eventsByType.map(e => ({
-                    name: e.eventType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    value: e.count
-                  }))}
-                />
-              </div>
-            )}
+            {/* Events Chart (Total/Temporal toggle) - Last 30 Days */}
+            <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700/40">
+              <EventsChartComponent
+                eventsByType={analytics.eventsByType}
+                eventsTimeline={analytics.eventsTimeline}
+                timeRange="30"
+              />
+            </div>
 
             {/* Top Pages */}
             {analytics.eventsByPage.length > 0 && (

@@ -100,9 +100,6 @@ export function USAMap({ data, className = "", onLocationClick }: USAMapProps) {
       }
     }
 
-    console.log("USAMap stateMap (normalized):", Array.from(stateMap.entries()));
-    console.log("USAMap total:", total, "max:", max);
-
     return {
       max,
       total,
@@ -284,7 +281,12 @@ export function USAMap({ data, className = "", onLocationClick }: USAMapProps) {
                 return (
                   <div
                     key={item.state}
-                    className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors"
+                    className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors cursor-pointer"
+                    onClick={() => {
+                      if (onLocationClick) {
+                        onLocationClick(item.stateName, item.count);
+                      }
+                    }}
                   >
                     <span className="text-slate-300 font-medium truncate">
                       {item.stateName}

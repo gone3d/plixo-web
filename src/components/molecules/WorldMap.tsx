@@ -60,9 +60,6 @@ export function WorldMap({ data, className = "", onLocationClick }: WorldMapProp
       })
     );
 
-    console.log("WorldMap countryMap:", Array.from(countryMap.entries()));
-    console.log("WorldMap total:", total, "max:", max);
-
     return {
       max,
       total,
@@ -126,22 +123,7 @@ export function WorldMap({ data, className = "", onLocationClick }: WorldMapProp
           >
             <Geographies geography={geoUrl}>
               {({ geographies }) =>
-                geographies.map((geo, index) => {
-                  // Debug logging for USA specifically (id 840 is USA)
-                  if (geo.id === "840" || index < 3) {
-                    console.log(
-                      `Geography ${index}:`,
-                      JSON.stringify(
-                        {
-                          id: geo.id,
-                          properties: geo.properties,
-                        },
-                        null,
-                        2
-                      )
-                    );
-                  }
-
+                geographies.map((geo) => {
                   // TopoJSON provides properties.name (full official names)
                   const geoName = geo.properties?.name;
 
@@ -162,13 +144,6 @@ export function WorldMap({ data, className = "", onLocationClick }: WorldMapProp
                   const count = countryData?.count || 0;
                   // Use the full country name from ISO lookup, or TopoJSON name as fallback
                   const countryName = isoCode ? (ISO_COUNTRY_CODES[isoCode] || geoName) : (geoName || "Unknown");
-
-                  // Debug log when we have data
-                  if (countryData) {
-                    console.log(
-                      `✓ Matched: ${countryName} - ${count} visitors`
-                    );
-                  }
 
                   // Calculate percentage of total
                   const percentage =
@@ -268,7 +243,12 @@ export function WorldMap({ data, className = "", onLocationClick }: WorldMapProp
                 return (
                   <div
                     key={item.country}
-                    className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors"
+                    className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors cursor-pointer"
+                    onClick={() => {
+                      if (onLocationClick) {
+                        onLocationClick(displayName, item.count);
+                      }
+                    }}
                   >
                     <span className="text-slate-300 font-medium truncate">
                       {displayName}
