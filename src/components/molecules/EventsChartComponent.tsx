@@ -26,7 +26,6 @@ export type EventsChartMode = 'total' | 'temporal';
 export interface EventsChartComponentProps {
   eventsByType: Array<{ eventType: string; count: number }>;
   eventsTimeline: Array<{ date: string; eventType: string; count: number; page?: string; destination?: string }>;
-  timeRange: '1' | '2' | '7' | '30';
   className?: string;
 }
 
@@ -46,7 +45,6 @@ const getEventTypeColor = (eventType: string): string => {
 export const EventsChartComponent = ({
   eventsByType,
   eventsTimeline,
-  timeRange,
   className = '',
 }: EventsChartComponentProps) => {
   const [mode, setMode] = useState<EventsChartMode>('total');

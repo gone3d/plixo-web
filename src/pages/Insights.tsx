@@ -239,10 +239,8 @@ const Insights = () => {
                 </div>
                 <p className="text-slate-400 text-sm mb-6">
                   Built-in historical data ({
-                    timeRange === 'hour_1' ? 'last 1 hour' :
-                    timeRange === 'hour_12' ? 'last 12 hours' :
-                    timeRange === 'hour_24' ? 'last 24 hours' :
-                    timeRange === 'hour_48' ? 'last 48 hours' :
+                    timeRange === '1' ? 'last 1 day' :
+                    timeRange === '2' ? 'last 2 days' :
                     timeRange === '7' ? 'last 7 days' :
                     'last 30 days'
                   })
