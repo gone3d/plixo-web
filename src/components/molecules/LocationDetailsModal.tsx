@@ -174,7 +174,6 @@ export const LocationDetailsModal = ({
               <EventsChartComponent
                 eventsByType={analytics.eventsByType}
                 eventsTimeline={analytics.eventsTimeline}
-                timeRange={timeRange}
               />
             </div>
 
