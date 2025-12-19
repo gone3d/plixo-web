@@ -26,7 +26,7 @@ export type EventsChartMode = 'total' | 'temporal';
 export interface EventsChartComponentProps {
   eventsByType: Array<{ eventType: string; count: number }>;
   eventsTimeline: Array<{ date: string; eventType: string; count: number; page?: string; destination?: string }>;
-  timeRange: 'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30';
+  timeRange: '1' | '2' | '7' | '30';
   className?: string;
 }
 

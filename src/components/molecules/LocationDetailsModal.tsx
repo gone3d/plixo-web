@@ -13,7 +13,7 @@ export interface LocationDetailsModalProps {
   locationType: "country" | "state";
   visitCount: number;
   totalVisitors: number;
-  timeRange: 'hour_1' | 'hour_12' | 'hour_24' | 'hour_48' | '7' | '30';
+  timeRange: '1' | '2' | '7' | '30';
 }
 
 interface LocationAnalytics {
@@ -45,11 +45,7 @@ export const LocationDetailsModal = ({
 
   // Get time range label
   const getTimeRangeLabel = () => {
-    if (timeRange.startsWith('hour_')) {
-      const hours = timeRange.replace('hour_', '');
-      return `Last ${hours} Hour${hours === '1' ? '' : 's'}`;
-    }
-    return `Last ${timeRange} Days`;
+    return `Last ${timeRange} Day${timeRange === '1' ? '' : 's'}`;
   };
 
   // Fetch detailed analytics when modal opens
@@ -64,25 +60,21 @@ export const LocationDetailsModal = ({
     setError(null);
 
     try {
-      // Build API URL with time range
+      // Build API URL with time range (all ranges are now day-based)
       let apiUrl = `${API_BASE_URL}/analytics/location/${locationCode}?type=${locationType}`;
 
-      // Add time range parameter (use default 30-day for non-daily ranges due to backend issues)
-      if (!timeRange.startsWith('hour_')) {
-        // For daily ranges (7, 30), calculate date range
-        const now = new Date();
-        const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000);
+      // Calculate date range for all time ranges (1, 2, 7, 30 days)
+      const now = new Date();
+      const daysAgo = new Date(now.getTime() - parseInt(timeRange) * 24 * 60 * 60 * 1000);
 
-        const formatDate = (date: Date): string => {
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        };
+      const formatDate = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
 
-        apiUrl += `&since=${formatDate(daysAgo)}&until=${formatDate(now)}`;
-      }
-      // Note: Skipping hourly ranges as they return empty data from backend
+      apiUrl += `&since=${formatDate(daysAgo)}&until=${formatDate(now)}`;
 
       const response = await fetch(apiUrl);
       const data = await response.json();
