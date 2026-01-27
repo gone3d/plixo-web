@@ -239,8 +239,8 @@ export const LocationDetailsModal = ({
               )}
             </div>
 
-            {/* City Breakdown - Authenticated Users Only, US States Only */}
-            {isNotGuest && locationType === 'state' && (
+            {/* City Breakdown - Authenticated Users Only */}
+            {isNotGuest && (
               <div className="mt-6">
                 <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-700/40">
                   <div className="flex items-center justify-between mb-4">
@@ -263,6 +263,7 @@ export const LocationDetailsModal = ({
                   {showCities && (
                     <CitiesList
                       locationCode={locationCode}
+                      locationType={locationType}
                       timeRange={timeRange}
                     />
                   )}
