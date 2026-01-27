@@ -13,17 +13,18 @@ interface City {
 
 interface CitiesListProps {
   locationCode: string
+  locationType: 'country' | 'state'
   timeRange: string
 }
 
-export const CitiesList = ({ locationCode, timeRange }: CitiesListProps) => {
+export const CitiesList = ({ locationCode, locationType, timeRange }: CitiesListProps) => {
   const [cities, setCities] = useState<City[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchCities()
-  }, [locationCode, timeRange])
+  }, [locationCode, locationType, timeRange])
 
   const fetchCities = async () => {
     setLoading(true)
@@ -51,8 +52,17 @@ export const CitiesList = ({ locationCode, timeRange }: CitiesListProps) => {
         return
       }
 
+      // Build query params based on location type
+      let queryParams = `since=${since}&until=${until}`
+      if (locationType === 'country') {
+        queryParams += `&country=${locationCode}`
+      } else {
+        // US state
+        queryParams += `&country=US&state=${locationCode}`
+      }
+
       const response = await fetch(
-        `${API_BASE_URL}/admin/analytics/cities?country=US&state=${locationCode}&since=${since}&until=${until}`,
+        `${API_BASE_URL}/admin/analytics/cities?${queryParams}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
