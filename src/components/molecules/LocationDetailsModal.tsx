@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { Icon, LoadingSpinner } from "../atoms";
+import { Icon, LoadingSpinner, Button } from "../atoms";
 import { EventsChartComponent } from "./EventsChartComponent";
+import { CitiesList } from "./CitiesList";
+import { useAuth } from "../../contexts/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788';
 
@@ -39,6 +41,9 @@ export const LocationDetailsModal = ({
   const [loading, setLoading] = useState(false);
   const [analytics, setAnalytics] = useState<LocationAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showCities, setShowCities] = useState(false);
+  const { hasRole } = useAuth();
+  const isNotGuest = !hasRole('guest');
 
   const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
   const percentage = totalVisitors > 0 ? ((visitCount / totalVisitors) * 100).toFixed(1) : "0";
@@ -233,6 +238,37 @@ export const LocationDetailsModal = ({
                 </div>
               )}
             </div>
+
+            {/* City Breakdown - Authenticated Users Only, US States Only */}
+            {isNotGuest && locationType === 'state' && (
+              <div className="mt-6">
+                <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-700/40">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Icon name="home" size="lg" className="text-red-400" />
+                      <h3 className="text-lg font-semibold">City Breakdown</h3>
+                      <span className="ml-2 text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full">
+                        Authenticated Users
+                      </span>
+                    </div>
+                    <Button
+                      onClick={() => setShowCities(!showCities)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      {showCities ? 'Hide Cities' : 'View Cities'}
+                    </Button>
+                  </div>
+
+                  {showCities && (
+                    <CitiesList
+                      locationCode={locationCode}
+                      timeRange={timeRange}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

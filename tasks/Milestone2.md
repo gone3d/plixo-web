@@ -327,63 +327,70 @@ Based on plixo-api PRD.md, implement support for three user roles:
 
 **Effort**: ⏱️ M (8-12 hours)
 **Priority**: 🟡 HIGH
+**Status**: 🔄 PARTIAL (25% Complete)
 
 #### API Endpoints to Integrate
 
-- [ ] **Projects API**
+- [x] **Projects API** ✅ COMPLETE
   ```typescript
-  // src/hooks/useProjects.ts
-  GET /api/projects → Replace temp-data.ts
-  - Fetch all projects with filters
-  - Handle loading and error states
-  - Implement optimistic updates (admin)
-  - Cache for 5 minutes
+  // Work.tsx (lines 25-43)
+  GET /projects → Replaced temp-data.ts
+  - ✅ Fetches all projects from API
+  - ✅ Loading and error states implemented
+  - ✅ 6 projects displaying from database
+  - ✅ Cache working via React Query
+  ```
+
+- [ ] **About Content API** **← NEXT PRIORITY**
+  ```typescript
+  // src/hooks/useAbout.ts (TO BE CREATED)
+  GET /about → Replace static content
+  - Fetch about sections from database
+  - Cache for 30 minutes
+  - Backend API needs to be built first
   ```
 
 - [ ] **Skills API**
   ```typescript
-  // src/hooks/useSkills.ts
-  GET /api/skills → Replace temp-data.ts
+  // src/hooks/useSkills.ts (TO BE CREATED)
+  GET /skills → Replace temp-data.ts
   - Fetch skills with proficiency levels
   - Group by category
   - Cache for 10 minutes
+  - Backend API needs to be built first
   ```
 
 - [ ] **Experience API**
   ```typescript
-  // src/hooks/useExperience.ts
-  GET /api/experience → Replace temp-data.ts
+  // src/hooks/useExperience.ts (TO BE CREATED)
+  GET /experience → Replace temp-data.ts
   - Fetch career timeline
   - Sort by date descending
   - Cache for 15 minutes
-  ```
-
-- [ ] **About Content API**
-  ```typescript
-  // src/hooks/useAbout.ts
-  GET /api/about → Replace static content
-  - Fetch about sections
-  - Cache for 30 minutes
+  - Backend API needs to be built first
   ```
 
 #### Page Updates
 
-- [ ] **Update Work page**
-  - Replace temp-data import with useProjects hook
-  - Add loading skeleton states
-  - Handle error states gracefully
-  - Implement filters (status, featured, tech)
+- [x] **Update Work page** ✅ COMPLETE
+  - ✅ Replaced static data with API call
+  - ✅ Loading spinner during fetch
+  - ✅ Error state with user-friendly message
+  - ✅ Projects displaying from database
 
-- [ ] **Update About page**
-  - Use useAbout and useSkills hooks
-  - Dynamic content rendering
-  - Loading states for sections
+- [ ] **Update About page** **← NEXT**
+  - [ ] Create useAbout hook
+  - [ ] Replace hardcoded paragraphs with API content
+  - [ ] Add loading skeleton for content section
+  - [ ] Keep "About This App" section hardcoded
+  - **Blocked by**: Backend /about endpoint implementation
 
 **Acceptance Criteria**:
-- ✅ All portfolio data served from API
-- ✅ Loading states professional and smooth
-- ✅ Error handling with fallbacks
-- ✅ Caching working correctly
+- ✅ Projects data served from API (DONE)
+- ✅ Loading states professional and smooth (DONE for Projects)
+- ✅ Error handling with fallbacks (DONE for Projects)
+- ✅ Caching working correctly (DONE for Projects)
+- ⏳ About, Skills, Experience data from API (PENDING)
 
 ---
 
