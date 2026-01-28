@@ -129,21 +129,7 @@ const Insights = () => {
   }
 
   // Handle location click from map
-  const handleLocationClick = (locationName: string, locationType: 'country' | 'state', visitCount: number) => {
-    // Find the location code from the analytics data
-    let locationCode = '';
-    if (locationType === 'country') {
-      const country = analyticsData?.customAnalytics?.eventsByCountry.find(
-        c => c.countryName === locationName || c.country === locationName
-      );
-      locationCode = country?.country || '';
-    } else {
-      const state = analyticsData?.customAnalytics?.eventsByUSState?.find(
-        s => s.stateName === locationName || s.state === locationName
-      );
-      locationCode = state?.state || '';
-    }
-
+  const handleLocationClick = (locationCode: string, locationName: string, locationType: 'country' | 'state', visitCount: number) => {
     // Calculate total visitors from the appropriate dataset
     const totalVisitors = locationType === 'country'
       ? analyticsData?.customAnalytics?.eventsByCountry.reduce((sum, c) => sum + c.count, 0) || 0

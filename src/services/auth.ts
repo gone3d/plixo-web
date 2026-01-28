@@ -1,7 +1,6 @@
 import { apiClient } from './api'
 import type { User } from '../contexts/AuthContext'
-
-const TOKEN_KEY = 'auth_token'
+import { tokenStorage } from './tokenStorage'
 
 interface LoginResponse {
   success: boolean
@@ -30,6 +29,7 @@ interface VerifyRoleResponse {
 }
 
 class AuthService {
+
   /**
    * Login with username and password
    */
@@ -141,24 +141,24 @@ class AuthService {
   }
 
   /**
-   * Store token in sessionStorage (cleared when browser/tab closes)
+   * Store token in memory (cleared on page reload)
    */
   setToken(token: string): void {
-    sessionStorage.setItem(TOKEN_KEY, token)
+    tokenStorage.setToken(token)
   }
 
   /**
-   * Get token from sessionStorage
+   * Get token from memory
    */
   getToken(): string | null {
-    return sessionStorage.getItem(TOKEN_KEY)
+    return tokenStorage.getToken()
   }
 
   /**
-   * Remove token from sessionStorage
+   * Remove token from memory
    */
   removeToken(): void {
-    sessionStorage.removeItem(TOKEN_KEY)
+    tokenStorage.removeToken()
   }
 
   /**

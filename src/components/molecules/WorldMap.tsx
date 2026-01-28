@@ -28,7 +28,7 @@ export interface WorldMapData {
 export interface WorldMapProps {
   data: WorldMapData[];
   className?: string;
-  onLocationClick?: (name: string, count: number) => void;
+  onLocationClick?: (isoCode: string, name: string, count: number) => void;
 }
 
 export function WorldMap({ data, className = "", onLocationClick }: WorldMapProps) {
@@ -171,8 +171,8 @@ export function WorldMap({ data, className = "", onLocationClick }: WorldMapProp
                         setHoveredCountry(null);
                       }}
                       onClick={() => {
-                        if (count > 0 && onLocationClick) {
-                          onLocationClick(countryName, count);
+                        if (count > 0 && onLocationClick && isoCode) {
+                          onLocationClick(isoCode, countryName, count);
                         }
                       }}
                       style={{
@@ -246,7 +246,7 @@ export function WorldMap({ data, className = "", onLocationClick }: WorldMapProp
                     className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors cursor-pointer"
                     onClick={() => {
                       if (onLocationClick) {
-                        onLocationClick(displayName, item.count);
+                        onLocationClick(item.country, displayName, item.count);
                       }
                     }}
                   >
