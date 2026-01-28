@@ -14,7 +14,7 @@ export interface GeographicMapProps {
   worldData: WorldMapData[];
   usaData: USAMapData[];
   className?: string;
-  onLocationClick?: (locationName: string, locationType: "country" | "state", visitCount: number) => void;
+  onLocationClick?: (locationCode: string, locationName: string, locationType: "country" | "state", visitCount: number) => void;
 }
 
 export function GeographicMap({
@@ -34,7 +34,7 @@ export function GeographicMap({
         >
           <WorldMap
             data={worldData}
-            onLocationClick={onLocationClick ? (name, count) => onLocationClick(name, "country", count) : undefined}
+            onLocationClick={onLocationClick ? (code, name, count) => onLocationClick(code, name, "country", count) : undefined}
           />
         </div>
       ) : (
@@ -45,7 +45,7 @@ export function GeographicMap({
         >
           <USAMap
             data={usaData}
-            onLocationClick={onLocationClick ? (name, count) => onLocationClick(name, "state", count) : undefined}
+            onLocationClick={onLocationClick ? (code, name, count) => onLocationClick(code, name, "state", count) : undefined}
           />
         </div>
       )}

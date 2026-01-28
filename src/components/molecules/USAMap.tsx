@@ -27,8 +27,22 @@ export interface USAMapData {
 export interface USAMapProps {
   data: USAMapData[];
   className?: string;
-  onLocationClick?: (name: string, count: number) => void;
+  onLocationClick?: (stateCode: string, name: string, count: number) => void;
 }
+
+/**
+ * Map FIPS codes to 2-letter state codes
+ * FIPS codes are used in TopoJSON geo.id properties
+ */
+const FIPS_TO_STATE_CODE: Record<string, string> = {
+  '01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '06': 'CA', '08': 'CO', '09': 'CT', '10': 'DE',
+  '11': 'DC', '12': 'FL', '13': 'GA', '15': 'HI', '16': 'ID', '17': 'IL', '18': 'IN', '19': 'IA',
+  '20': 'KS', '21': 'KY', '22': 'LA', '23': 'ME', '24': 'MD', '25': 'MA', '26': 'MI', '27': 'MN',
+  '28': 'MS', '29': 'MO', '30': 'MT', '31': 'NE', '32': 'NV', '33': 'NH', '34': 'NJ', '35': 'NM',
+  '36': 'NY', '37': 'NC', '38': 'ND', '39': 'OH', '40': 'OK', '41': 'OR', '42': 'PA', '44': 'RI',
+  '45': 'SC', '46': 'SD', '47': 'TN', '48': 'TX', '49': 'UT', '50': 'VT', '51': 'VA', '53': 'WA',
+  '54': 'WV', '55': 'WI', '56': 'WY', '72': 'PR', '78': 'VI', '66': 'GU', '60': 'AS', '69': 'MP',
+};
 
 /**
  * Normalize state name/code to standard 2-letter abbreviation
@@ -164,16 +178,24 @@ export function USAMap({ data, className = "", onLocationClick }: USAMapProps) {
             <Geographies geography={geoUrl}>
               {({ geographies }) =>
                 geographies.map((geo) => {
-                  // Try to match by state ID or name
-                  const geoId = geo.id?.toUpperCase();
+                  // Get FIPS code from TopoJSON and convert to state code
+                  const fipsCode = geo.id?.toString();
                   const geoName = geo.properties?.name;
 
-                  // Try to find matching state data
-                  let stateData = geoId ? stateMap.get(geoId) : undefined;
+                  // Convert FIPS code to 2-letter state code
+                  const stateCode = fipsCode ? FIPS_TO_STATE_CODE[fipsCode] : undefined;
 
-                  // If not found by ID, try by name
+                  // Try to find matching state data
+                  let stateData: { count: number; name: string } | undefined;
+
+                  // First try by state code (most reliable)
+                  if (stateCode) {
+                    stateData = stateMap.get(stateCode);
+                  }
+
+                  // If not found by code, try by name as fallback
                   if (!stateData && geoName) {
-                    for (const [, data] of stateMap.entries()) {
+                    for (const [code, data] of stateMap.entries()) {
                       if (data.name.toLowerCase() === geoName.toLowerCase()) {
                         stateData = data;
                         break;
@@ -210,8 +232,8 @@ export function USAMap({ data, className = "", onLocationClick }: USAMapProps) {
                         setHoveredState(null);
                       }}
                       onClick={() => {
-                        if (count > 0 && onLocationClick) {
-                          onLocationClick(stateName, count);
+                        if (count > 0 && onLocationClick && stateCode) {
+                          onLocationClick(stateCode, stateName, count);
                         }
                       }}
                       style={{
@@ -284,7 +306,7 @@ export function USAMap({ data, className = "", onLocationClick }: USAMapProps) {
                     className="flex items-center justify-between p-2 bg-slate-900/40 rounded text-xs hover:bg-slate-900/60 transition-colors cursor-pointer"
                     onClick={() => {
                       if (onLocationClick) {
-                        onLocationClick(item.stateName, item.count);
+                        onLocationClick(item.state, item.stateName, item.count);
                       }
                     }}
                   >

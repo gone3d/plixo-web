@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Icon } from '../atoms'
 import { cn } from '../../utils/cn'
 
@@ -6,11 +7,12 @@ export interface ModalProps {
   isOpen: boolean
   onClose: () => void
   title?: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'half'
   children: ReactNode
   showCloseButton?: boolean
   closeOnBackdropClick?: boolean
   closeOnEscape?: boolean
+  zIndex?: number
 }
 
 const Modal = ({
@@ -22,6 +24,7 @@ const Modal = ({
   showCloseButton = true,
   closeOnBackdropClick = true,
   closeOnEscape = true,
+  zIndex = 50,
 }: ModalProps) => {
   // Handle ESC key press
   useEffect(() => {
@@ -56,6 +59,8 @@ const Modal = ({
     sm: 'max-w-md',
     md: 'max-w-lg',
     lg: 'max-w-2xl',
+    xl: 'max-w-6xl',
+    half: 'w-[50vw] max-w-none',
   }
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -64,9 +69,10 @@ const Modal = ({
     }
   }
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ zIndex }}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -78,8 +84,8 @@ const Modal = ({
       {/* Modal Content */}
       <div
         className={cn(
-          'relative w-full bg-slate-900/40 backdrop-blur-xl rounded-lg shadow-2xl border border-white/20 animate-scaleIn',
-          sizes[size]
+          'relative bg-slate-900/40 backdrop-blur-xl rounded-lg shadow-2xl border border-white/20 animate-scaleIn',
+          size === 'half' ? sizes[size] : `w-full ${sizes[size]}`
         )}
       >
         {/* Header */}
@@ -110,6 +116,8 @@ const Modal = ({
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }
 
 export default Modal

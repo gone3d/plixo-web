@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { Icon, LoadingSpinner, Button } from "../atoms";
-import { EventsChartComponent } from "./EventsChartComponent";
+import { EventsChartComponent } from "./charts/EventsChartComponent";
 import { CitiesList } from "./CitiesList";
+import { CityTemporalChart } from "./charts/CityTemporalChart";
 import { useAuth } from "../../contexts/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788';
@@ -42,6 +43,7 @@ export const LocationDetailsModal = ({
   const [analytics, setAnalytics] = useState<LocationAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCities, setShowCities] = useState(false);
+  const [showTemporalChart, setShowTemporalChart] = useState(false);
   const { hasRole } = useAuth();
   const isNotGuest = !hasRole('guest');
 
@@ -57,6 +59,10 @@ export const LocationDetailsModal = ({
   useEffect(() => {
     if (isOpen && locationCode) {
       fetchLocationAnalytics();
+    } else if (!isOpen) {
+      // Reset states when modal closes
+      setShowCities(false);
+      setShowTemporalChart(false);
     }
   }, [isOpen, locationCode, timeRange]);
 
@@ -247,17 +253,23 @@ export const LocationDetailsModal = ({
                     <div className="flex items-center gap-3">
                       <Icon name="home" size="lg" className="text-red-400" />
                       <h3 className="text-lg font-semibold">City Breakdown</h3>
-                      <span className="ml-2 text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full">
-                        Authenticated Users
-                      </span>
                     </div>
-                    <Button
-                      onClick={() => setShowCities(!showCities)}
-                      variant="secondary"
-                      size="sm"
-                    >
-                      {showCities ? 'Hide Cities' : 'View Cities'}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => setShowTemporalChart(true)}
+                        variant="primary"
+                        size="sm"
+                      >
+                        Temporal Chart
+                      </Button>
+                      <Button
+                        onClick={() => setShowCities(!showCities)}
+                        variant="secondary"
+                        size="sm"
+                      >
+                        {showCities ? 'Hide Cities' : 'View Cities'}
+                      </Button>
+                    </div>
                   </div>
 
                   {showCities && (
@@ -273,6 +285,18 @@ export const LocationDetailsModal = ({
           </div>
         )}
       </div>
+
+      {/* Temporal Chart Modal */}
+      {showTemporalChart && (
+        <CityTemporalChart
+          isOpen={showTemporalChart}
+          onClose={() => setShowTemporalChart(false)}
+          locationCode={locationCode}
+          locationType={locationType}
+          locationName={locationName}
+          timeRange={timeRange}
+        />
+      )}
     </Modal>
   );
 };

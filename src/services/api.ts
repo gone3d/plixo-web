@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type AxiosResponse } from 'axios'
+import { tokenStorage } from './tokenStorage'
 
 // Get API URL from environment variables
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788'
@@ -15,8 +16,8 @@ export const apiClient = axios.create({
 // Request interceptor - adds authentication token if available
 apiClient.interceptors.request.use(
   (config) => {
-    // Get auth token from sessionStorage
-    const token = sessionStorage.getItem('auth_token')
+    // Get auth token from tokenStorage (memory only)
+    const token = tokenStorage.getToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -43,8 +44,8 @@ apiClient.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // Unauthorized - clear token and redirect to login
-          sessionStorage.removeItem('auth_token')
+          // Unauthorized - clear token
+          tokenStorage.removeToken()
           console.error('Unauthorized - token cleared')
           break
         case 403:
