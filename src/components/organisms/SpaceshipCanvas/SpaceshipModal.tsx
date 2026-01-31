@@ -65,7 +65,7 @@ export function SpaceshipModal({ isOpen, onClose }: SpaceshipModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={onClose}
     >
       <div
