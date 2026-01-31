@@ -1,15 +1,20 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import { Toaster } from "sonner";
 import { Navigation, BackgroundSlideshow, BackgroundController } from "./components/molecules";
 import { Landing, Work, About, Insights, Console, Connect } from "./pages";
-import { GlobalProvider } from "./contexts/GlobalContext";
+import { GlobalProvider, useGlobal } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { usePageViewTracking } from "./hooks/usePageViewTracking";
+import { SpaceshipCanvas, SpaceshipModal } from "./components/organisms/SpaceshipCanvas";
 import "./App.css";
 
 // AppContent component to use tracking hook inside Router
 function AppContent() {
+  const [isSpaceshipModalOpen, setIsSpaceshipModalOpen] = useState(false);
+  const { state } = useGlobal();
+
   // Enable automatic page view tracking
   usePageViewTracking();
 
@@ -39,8 +44,11 @@ function AppContent() {
           maxSpeedPxPerSec={30}
         />
 
-        {/* Background Controller */}
-        <BackgroundController />
+        {/* Three.js Spaceship Canvas - Overlays on background */}
+        <SpaceshipCanvas />
+
+        {/* Background Controller with Spaceship button */}
+        <BackgroundController onSpaceshipClick={() => setIsSpaceshipModalOpen(true)} />
 
         <Navigation />
 
@@ -125,6 +133,14 @@ function AppContent() {
           </Routes>
         </main>
       </div>
+
+      {/* Spaceship Detail Modal - Desktop only */}
+      {!state.ui.isMobile && (
+        <SpaceshipModal
+          isOpen={isSpaceshipModalOpen}
+          onClose={() => setIsSpaceshipModalOpen(false)}
+        />
+      )}
     </>
   );
 }

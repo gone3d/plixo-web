@@ -195,7 +195,7 @@ export function USAMap({ data, className = "", onLocationClick }: USAMapProps) {
 
                   // If not found by code, try by name as fallback
                   if (!stateData && geoName) {
-                    for (const [code, data] of stateMap.entries()) {
+                    for (const [, data] of stateMap.entries()) {
                       if (data.name.toLowerCase() === geoName.toLowerCase()) {
                         stateData = data;
                         break;

@@ -1,7 +1,7 @@
 {
   "name": "plixo-web",
   "private": true,
-  "version": "1.2.17",
+  "version": "1.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,10 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@marsidev/react-turnstile": "^1.3.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@tanstack/react-query": "^5.90.6",
+    "@types/three": "^0.182.0",
     "axios": "^1.13.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.552.0",
@@ -25,6 +28,7 @@
     "recharts": "^3.3.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
+    "three": "^0.182.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

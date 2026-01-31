@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Rocket } from "lucide-react";
 import { useGlobal } from "../../contexts/GlobalContext";
 
 interface BackgroundControllerProps {
   className?: string;
+  onSpaceshipClick?: () => void;
 }
 
 const BackgroundController = ({
   className = "",
+  onSpaceshipClick,
 }: BackgroundControllerProps) => {
   const { state, actions } = useGlobal();
   const [showInfo, setShowInfo] = useState(false);
@@ -117,6 +119,21 @@ const BackgroundController = ({
         >
           <Info size={20} />
         </button>
+
+        {/* Spaceship Modal Button - Desktop only */}
+        {onSpaceshipClick && !state.ui.isMobile && (
+          <>
+            <div className="w-px h-6 bg-slate-700/50" />
+            <button
+              onClick={onSpaceshipClick}
+              className="text-white/70 hover:text-white transition-colors p-1 hover:bg-slate-800/50 rounded"
+              aria-label="View spaceship model"
+              title="View 3D Spaceship"
+            >
+              <Rocket size={20} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
