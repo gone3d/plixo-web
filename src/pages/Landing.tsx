@@ -13,6 +13,7 @@ const Landing = () => {
   const [showTurnstile, setShowTurnstile] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  const [showVersionInfo, setShowVersionInfo] = useState(false);
 
   // Check maintenance status on mount
   useEffect(() => {
@@ -69,10 +70,18 @@ const Landing = () => {
 
           {/* Work in Progress Notice */}
           <div className="mt-8">
-            <p className="text-white/60 text-sm italic text-shadow-glow">
+            <p
+              className="text-white/60 text-sm italic text-shadow-glow cursor-help"
+              onMouseEnter={() => setShowVersionInfo(true)}
+              onMouseLeave={() => setShowVersionInfo(false)}
+            >
               A Continuously Evolving Work in Progress
             </p>
-            <p className="text-white/40 text-xs mt-1 text-shadow-glow">
+            <p
+              className={`text-white/40 text-xs mt-1 text-shadow-glow transition-opacity duration-300 ${
+                showVersionInfo ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
               App v{packageJson.version}
               {state.api.version && (
                 <span className="mx-2">•</span>

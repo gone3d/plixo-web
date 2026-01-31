@@ -6,16 +6,22 @@
  * Z-index: 0
  */
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Spaceship } from './Spaceship';
+import { PathFollower } from './PathFollower';
+import { SpaceshipObject } from './SpaceshipObject';
 import { StarField } from './StarField';
+import { TargetingCircle } from './TargetingCircle';
 
 interface SpaceshipCanvasProps {
   className?: string;
 }
 
 export function SpaceshipCanvas({ className = '' }: SpaceshipCanvasProps) {
+  // Track spaceship position for HUD overlay
+  const [spaceshipPosition, setSpaceshipPosition] = useState({ x: 0, y: 0, z: 0, screenX: 0, screenY: 0 });
+  const [spaceshipVisible, setSpaceshipVisible] = useState(true);
+
   // Check for reduced motion preference
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
@@ -26,12 +32,17 @@ export function SpaceshipCanvas({ className = '' }: SpaceshipCanvasProps) {
   }
 
   return (
-    <div
-      className={`fixed inset-0 pointer-events-none ${className}`}
-      style={{
-        zIndex: 0, // Above background (-10), below content (10+)
-      }}
-    >
+    <>
+      {/* 2D HUD Overlay */}
+      <TargetingCircle position={spaceshipPosition} isVisible={spaceshipVisible} />
+
+      {/* 3D Canvas */}
+      <div
+        className={`fixed inset-0 pointer-events-none ${className}`}
+        style={{
+          zIndex: 0, // Above background (-10), below content (10+)
+        }}
+      >
       <Canvas
         camera={{
           position: [0, 0, 20],
@@ -62,10 +73,16 @@ export function SpaceshipCanvas({ className = '' }: SpaceshipCanvasProps) {
           {/* Star field background */}
           <StarField count={1500} />
 
-          {/* Spaceship with flight animation */}
-          <Spaceship duration={12} />
+          {/* PathFollower with Spaceship - 15s flight, 10s delay */}
+          <PathFollower
+            onPositionUpdate={setSpaceshipPosition}
+            onVisibilityChange={setSpaceshipVisible}
+          >
+            {(state) => <SpaceshipObject state={state} />}
+          </PathFollower>
         </Suspense>
       </Canvas>
-    </div>
+      </div>
+    </>
   );
 }
