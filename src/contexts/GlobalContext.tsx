@@ -52,6 +52,7 @@ export interface GlobalState {
     sidebarOpen: boolean
     currentPage: string
     searchQuery: string
+    isMobile: boolean
     filters: {
       projectCategory?: string
       skillCategory?: string
@@ -135,6 +136,7 @@ export type GlobalAction =
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_CURRENT_PAGE'; payload: string }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
+  | { type: 'SET_IS_MOBILE'; payload: boolean }
   | { type: 'SET_FILTERS'; payload: Partial<GlobalState['ui']['filters']> }
 
   // Analytics Actions
@@ -189,6 +191,7 @@ const initialState: GlobalState = {
     sidebarOpen: false,
     currentPage: '/',
     searchQuery: '',
+    isMobile: false, // Will be set on mount
     filters: {}
   },
 
@@ -383,6 +386,12 @@ function globalReducer(state: GlobalState, action: GlobalAction): GlobalState {
       return {
         ...state,
         ui: { ...state.ui, searchQuery: action.payload }
+      }
+
+    case 'SET_IS_MOBILE':
+      return {
+        ...state,
+        ui: { ...state.ui, isMobile: action.payload }
       }
 
     case 'SET_FILTERS':
@@ -699,6 +708,16 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
       return Object.values(state.errors).some(error => error !== undefined)
     }
   }
+
+  // Detect mobile device on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      dispatch({ type: 'SET_IS_MOBILE', payload: isMobileDevice })
+    }
+
+    checkMobile()
+  }, [])
 
   // Initialize from temp config on mount
   useEffect(() => {

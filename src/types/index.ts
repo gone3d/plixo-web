@@ -7,6 +7,9 @@ export * from './portfolio'
 // Analytics and tracking types
 export * from './analytics'
 
+// Three.js canvas and 3D animation types
+export * from './threeCanvas'
+
 // Re-export commonly used types for convenience
 export type {
   // Core portfolio entities

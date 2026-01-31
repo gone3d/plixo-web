@@ -129,7 +129,23 @@ const About = () => {
                     </div>
                     <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
                       <Icon name="check" size="sm" className="text-green-400" />
-                      <span className="text-sm">React Query</span>
+                      <span className="text-sm">TanStack React Query</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
+                      <Icon name="check" size="sm" className="text-emerald-400" />
+                      <span className="text-sm">Three.js / React Three Fiber</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
+                      <Icon name="check" size="sm" className="text-pink-400" />
+                      <span className="text-sm">React Hook Form + Zod</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
+                      <Icon name="check" size="sm" className="text-yellow-400" />
+                      <span className="text-sm">Cloudflare Turnstile</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
+                      <Icon name="check" size="sm" className="text-indigo-400" />
+                      <span className="text-sm">Recharts + React Simple Maps</span>
                     </div>
                   </div>
                 </div>
@@ -143,15 +159,23 @@ const About = () => {
                       <span className="text-sm">CloudFlare Pages Functions</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
+                      <Icon name="check" size="sm" className="text-orange-400" />
+                      <span className="text-sm">Hono Web Framework</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
                       <Icon name="check" size="sm" className="text-cyan-400" />
                       <span className="text-sm">D1 Database (SQLite)</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
                       <Icon name="check" size="sm" className="text-yellow-400" />
-                      <span className="text-sm">JWT Authentication</span>
+                      <span className="text-sm">Jose (JWT Authentication)</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
                       <Icon name="check" size="sm" className="text-red-400" />
+                      <span className="text-sm">bcrypt Password Hashing</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">
+                      <Icon name="check" size="sm" className="text-pink-400" />
                       <span className="text-sm">AES-256 Encryption</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded">

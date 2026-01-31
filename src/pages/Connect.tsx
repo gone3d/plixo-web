@@ -17,9 +17,9 @@ const Connect = () => {
             Let's Connect
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Looking for a Staff/Principal Engineer who combines deep technical
-            expertise with leadership experience? Let's discuss how I can help
-            your team succeed.
+            Looking for an engineering leader who combines hands-on technical
+            expertise with proven team leadership? Let's discuss how I can drive
+            your modernization initiatives forward.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ const Connect = () => {
                 <p className="text-base">
                   Contact form will be available once{" "}
                   <span className="text-white font-mono">api.plixo.com</span>{" "}
-                  adds messaging (~v1.3.0).
+                  adds messaging (~v1.4.0).
                 </p>
                 <p className="text-sm text-slate-400">
                   Version {packageJson.version}
@@ -114,7 +114,7 @@ const Connect = () => {
                 <div className="flex items-center justify-between">
                   <span>Focus</span>
                   <span className="text-slate-300">
-                    Staff/Principal Engineer roles
+                    Engineering Leadership roles
                   </span>
                 </div>
               </div>
@@ -169,39 +169,39 @@ const Connect = () => {
                     size="sm"
                     className="text-green-400 mt-0.5"
                   />
+                  <span>Hands-on engineering leadership roles</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon
+                    name="check"
+                    size="sm"
+                    className="text-green-400 mt-0.5"
+                  />
+                  <span>Modernization and transformation initiatives</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon
+                    name="check"
+                    size="sm"
+                    className="text-green-400 mt-0.5"
+                  />
+                  <span>Architecture and system design ownership</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon
+                    name="check"
+                    size="sm"
+                    className="text-green-400 mt-0.5"
+                  />
+                  <span>Team building and mentorship opportunities</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon
+                    name="check"
+                    size="sm"
+                    className="text-green-400 mt-0.5"
+                  />
                   <span>Staff/Principal Engineer positions</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon
-                    name="check"
-                    size="sm"
-                    className="text-green-400 mt-0.5"
-                  />
-                  <span>Technical leadership opportunities</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon
-                    name="check"
-                    size="sm"
-                    className="text-green-400 mt-0.5"
-                  />
-                  <span>Architecture and system design roles</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon
-                    name="check"
-                    size="sm"
-                    className="text-green-400 mt-0.5"
-                  />
-                  <span>Mentorship and team development</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon
-                    name="check"
-                    size="sm"
-                    className="text-green-400 mt-0.5"
-                  />
-                  <span>Modern tech stack environments</span>
                 </li>
               </ul>
             </div>
