@@ -6,6 +6,7 @@ export { StarField } from './StarField';
 export { SpaceshipModal } from './SpaceshipModal';
 export { TargetingCircle } from './TargetingCircle';
 export { TriangleTrail } from './TriangleTrail';
+export { WarpFlash } from './WarpFlash';
 
 // Export types
 export type { PathFollowerState } from './PathFollower';

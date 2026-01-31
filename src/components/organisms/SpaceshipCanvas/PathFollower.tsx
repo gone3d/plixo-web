@@ -6,7 +6,7 @@
  * Allows different objects (spaceship, UFO, astronaut, etc.) to follow the same path logic.
  */
 
-import { useRef, useState, ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Vector3, Box3, Quaternion, Group } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { PathConfig } from "../../../types";
@@ -26,7 +26,7 @@ interface PathFollowerProps {
 }
 
 export interface PathFollowerState {
-  groupRef: React.RefObject<Group>;
+  groupRef: React.RefObject<Group | null>;
   position: Vector3;
   velocity: Vector3;
   quaternion: Quaternion;
@@ -143,7 +143,7 @@ export function PathFollower({
 }: PathFollowerProps) {
   const groupRef = useRef<Group>(null);
   const time = useRef(0);
-  const [opacity, setOpacity] = useState(1);
+  const [, setOpacity] = useState(1);
   const { camera, size } = useThree();
 
   // Store current path config (generate new one each cycle)
@@ -152,7 +152,7 @@ export function PathFollower({
   const wasVisible = useRef(true);
 
   // Warp flash effect
-  const [warpFlashIntensity, setWarpFlashIntensity] = useState(0);
+  const [, setWarpFlashIntensity] = useState(0);
   const warpFlashTimer = useRef(0);
   const [flashPosition, setFlashPosition] = useState(new Vector3());
 
@@ -203,15 +203,15 @@ export function PathFollower({
         setFlashPosition(groupRef.current.position.clone());
       } else {
         // Reset flash timer when becoming visible again
-        warpFlashTimer.current = 1; // Set to value > 0.3 to disable flash
+        warpFlashTimer.current = 10; // Set to value > 2.0 to disable flash
       }
     }
 
-    // Calculate current warp flash intensity
+    // Calculate current warp flash intensity (2 second duration)
     let currentFlashIntensity = 0;
-    if (warpFlashTimer.current < 0.3) {
+    if (warpFlashTimer.current < 2.0) {
       warpFlashTimer.current += delta;
-      const fadeProgress = Math.min(warpFlashTimer.current / 0.3, 1); // 0.3 second fade
+      const fadeProgress = Math.min(warpFlashTimer.current / 2.0, 1); // 2 second fade
       currentFlashIntensity = 1 - fadeProgress;
     }
     setWarpFlashIntensity(currentFlashIntensity);

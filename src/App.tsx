@@ -176,15 +176,16 @@ function AppContent() {
         </main>
       </div>
 
-      {/* Spaceship Detail Modal - Desktop only, lazy loaded */}
-      {!state.ui.isMobile && (
+      {/* Spaceship Detail Modal - lazy loaded */}
+      {/* Mobile enabled with preloading */}
+      {/* {!state.ui.isMobile && ( */}
         <Suspense fallback={null}>
           <SpaceshipModal
             isOpen={isSpaceshipModalOpen}
             onClose={() => setIsSpaceshipModalOpen(false)}
           />
         </Suspense>
-      )}
+      {/* )} */}
     </>
   );
 }

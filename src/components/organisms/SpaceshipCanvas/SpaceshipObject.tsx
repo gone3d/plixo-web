@@ -10,6 +10,7 @@ import { Vector3, BufferGeometry, Float32BufferAttribute, Points } from "three";
 import { useFrame } from "@react-three/fiber";
 import { SpaceshipModel } from "./models";
 import { TriangleTrail } from "./TriangleTrail";
+import { WarpFlash } from "./WarpFlash";
 import type { PathFollowerState } from "./PathFollower";
 
 interface SpaceshipObjectProps {
@@ -133,17 +134,8 @@ export function SpaceshipObject({ state }: SpaceshipObjectProps) {
         </points>
       </group>
 
-      {/* Warp flash effect - outside the group so it's not affected by opacity */}
-      {/* DEBUG: Always show bright light when not visible */}
-      {!isVisible && (
-        <pointLight
-          position={flashPosition}
-          intensity={100}
-          distance={50}
-          color="#00ff00"
-          decay={2}
-        />
-      )}
+      {/* Warp flash effect - separate component with grow/fade animation */}
+      <WarpFlash position={flashPosition} intensity={warpFlashIntensity} />
 
       {/* Trail effect for triangle points */}
       <TriangleTrail
