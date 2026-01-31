@@ -1,26 +1,17 @@
 /**
- * Spaceship Component
+ * PathFollower Component
  *
- * Simple cylinder that arcs from offscreen, toward camera, then back away
- * Fades out when bounding box reaches ~5x5 pixels
+ * Manages trajectory calculations and animation timing for objects following a curved path.
+ * Provides position, rotation, opacity, and other state to child render function.
+ * Allows different objects (spaceship, UFO, astronaut, etc.) to follow the same path logic.
  */
 
-import { useRef, useState, useMemo } from "react";
-import {
-  Group,
-  Vector3,
-  Box3,
-  Quaternion,
-  BufferGeometry,
-  Float32BufferAttribute,
-  Points,
-} from "three";
+import { useRef, useState, ReactNode } from "react";
+import { Vector3, Box3, Quaternion, Group } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { PathConfig } from "../../../types";
-import { SpaceshipModel } from "./models";
-import { TriangleTrail } from "./TriangleTrail";
 
-interface SpaceshipProps {
+interface PathFollowerProps {
   duration?: number; // Animation cycle duration in seconds
   delayBetweenCycles?: number; // Delay in seconds between animation cycles
   onPositionUpdate?: (position: {
@@ -31,6 +22,19 @@ interface SpaceshipProps {
     screenY: number;
   }) => void;
   onVisibilityChange?: (isVisible: boolean) => void;
+  children: (state: PathFollowerState) => ReactNode;
+}
+
+export interface PathFollowerState {
+  groupRef: React.RefObject<Group>;
+  position: Vector3;
+  velocity: Vector3;
+  quaternion: Quaternion;
+  opacity: number;
+  isVisible: boolean;
+  progress: number; // 0 to 1 through the animation
+  warpFlashIntensity: number;
+  flashPosition: Vector3;
 }
 
 /**
@@ -120,22 +124,23 @@ function calculateVelocity(
 }
 
 /**
- * Align group to direction vector
- * Rotates group so its Y-axis (length) points along the direction
+ * Align quaternion to direction vector
+ * Rotates so Y-axis (length) points along the direction
  */
-function alignGroupToDirection(group: Group, direction: Vector3): void {
+function calculateQuaternion(direction: Vector3): Quaternion {
   const up = new Vector3(0, 1, 0);
   const quaternion = new Quaternion();
   quaternion.setFromUnitVectors(up, direction);
-  group.quaternion.copy(quaternion);
+  return quaternion;
 }
 
-export function Spaceship({
+export function PathFollower({
   duration = 15,
   delayBetweenCycles = 10,
   onPositionUpdate,
   onVisibilityChange,
-}: SpaceshipProps) {
+  children,
+}: PathFollowerProps) {
   const groupRef = useRef<Group>(null);
   const time = useRef(0);
   const [opacity, setOpacity] = useState(1);
@@ -146,46 +151,23 @@ export function Spaceship({
   const lastCycleTime = useRef(0);
   const wasVisible = useRef(true);
 
-  // Triangle world positions for trail tracking
-  const [triangleWorldPositions, setTriangleWorldPositions] = useState<
-    Vector3[]
-  >([new Vector3(), new Vector3(), new Vector3()]);
-  const [triangleColors] = useState([
-    new Vector3(0.1, 0.4, 0.8), // Blue
-    new Vector3(0.1, 0.7, 0.6), // Greenish blue (cyan)
-    new Vector3(0.5, 0.2, 0.8), // Purplish blue
-  ]);
-  const [isEmitting, setIsEmitting] = useState(true);
-
   // Warp flash effect
   const [warpFlashIntensity, setWarpFlashIntensity] = useState(0);
   const warpFlashTimer = useRef(0);
   const [flashPosition, setFlashPosition] = useState(new Vector3());
 
-  // Triangle rotation for spinning effect
-  const triangleRotation = useRef(0);
-
-  // Create triangle geometry for exhaust trail (smaller triangle) - will be updated each frame
-  const triangleGeometry = useMemo(() => {
-    const geo = new BufferGeometry();
-    const positions = new Float32Array(9); // 3 points * 3 coords
-    const colors = new Float32Array([
-      0.1,
-      0.4,
-      0.8, // Blue
-      0.1,
-      0.7,
-      0.6, // Greenish blue
-      0.4,
-      0.2,
-      0.8, // Purplish blue
-    ]);
-    geo.setAttribute("position", new Float32BufferAttribute(positions, 3));
-    geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
-    return geo;
-  }, []);
-
-  const trianglePointsRef = useRef<Points>(null);
+  // Current state to pass to children
+  const [currentState, setCurrentState] = useState<PathFollowerState>({
+    groupRef,
+    position: new Vector3(),
+    velocity: new Vector3(0, 1, 0),
+    quaternion: new Quaternion(),
+    opacity: 1,
+    isVisible: true,
+    progress: 0,
+    warpFlashIntensity: 0,
+    flashPosition: new Vector3(),
+  });
 
   useFrame((_state, delta) => {
     if (!groupRef.current) return;
@@ -214,28 +196,43 @@ export function Spaceship({
         onVisibilityChange(isVisible);
       }
 
-      // Trigger warp flash when transitioning to invisible
       if (!isVisible) {
+        // Trigger warp flash when transitioning to invisible
         warpFlashTimer.current = 0;
-        setWarpFlashIntensity(1);
+        // Store position for warp flash effect at the moment of disappearing
+        setFlashPosition(groupRef.current.position.clone());
+      } else {
+        // Reset flash timer when becoming visible again
+        warpFlashTimer.current = 1; // Set to value > 0.3 to disable flash
       }
     }
 
-    // Update warp flash fade out
+    // Calculate current warp flash intensity
+    let currentFlashIntensity = 0;
     if (warpFlashTimer.current < 0.3) {
       warpFlashTimer.current += delta;
-      const fadeProgress = warpFlashTimer.current / 0.3; // 0.3 second fade
-      setWarpFlashIntensity(1 - fadeProgress);
-    } else if (warpFlashIntensity > 0) {
-      setWarpFlashIntensity(0);
+      const fadeProgress = Math.min(warpFlashTimer.current / 0.3, 1); // 0.3 second fade
+      currentFlashIntensity = 1 - fadeProgress;
     }
+    setWarpFlashIntensity(currentFlashIntensity);
 
     if (!isVisible) {
-      // During delay: hide spaceship and don't update position
+      // During delay: hide object and don't update position
       setOpacity(0);
-      setIsEmitting(false);
-      // Store position for warp flash effect
-      setFlashPosition(groupRef.current.position.clone());
+
+      // Update state for children - continue to update flash intensity during fade
+      setCurrentState({
+        groupRef,
+        position: groupRef.current.position.clone(),
+        velocity: new Vector3(0, 1, 0),
+        quaternion: groupRef.current.quaternion.clone(),
+        opacity: 0,
+        isVisible: false,
+        progress: 1,
+        warpFlashIntensity: currentFlashIntensity,
+        flashPosition: flashPosition,
+      });
+
       return;
     }
 
@@ -262,73 +259,14 @@ export function Spaceship({
       });
     }
 
-    // Calculate velocity direction and align group
+    // Calculate velocity direction and quaternion
     const velocity = calculateVelocity(position, progress, pathConfig.current);
-    alignGroupToDirection(groupRef.current, velocity);
+    const quaternion = calculateQuaternion(velocity);
+    groupRef.current.quaternion.copy(quaternion);
 
-    // Update triangle rotation (spin around center)
-    triangleRotation.current += delta * 3; // 3 radians per second
-
-    // Calculate world positions of the 3 triangle points at the nozzle with rotation
-    const nozzlePosition = new Vector3(0, -2, 0); // Triangle is at nozzle
-    const triangleRadius = 0.25; // Smaller triangle
-
-    // Create triangle points in a circle, rotating over time
-    const angle1 = triangleRotation.current;
-    const angle2 = triangleRotation.current + (Math.PI * 2) / 3;
-    const angle3 = triangleRotation.current + (Math.PI * 4) / 3;
-
-    const triangleLocalPositions = [
-      new Vector3(
-        Math.cos(angle1) * triangleRadius,
-        Math.sin(angle1) * triangleRadius,
-        0,
-      ),
-      new Vector3(
-        Math.cos(angle2) * triangleRadius,
-        Math.sin(angle2) * triangleRadius,
-        0,
-      ),
-      new Vector3(
-        Math.cos(angle3) * triangleRadius,
-        Math.sin(angle3) * triangleRadius,
-        0,
-      ),
-    ];
-
-    const worldPositions = triangleLocalPositions.map((localPos) => {
-      // First apply nozzle offset, then apply ship rotation, then add ship position
-      const pos = localPos.clone().add(nozzlePosition);
-      pos.applyQuaternion(groupRef.current!.quaternion);
-      pos.add(position);
-      return pos;
-    });
-
-    setTriangleWorldPositions(worldPositions);
-    setIsEmitting(true);
-
-    // Update visible triangle points geometry to spin
-    if (trianglePointsRef.current) {
-      const posAttr = triangleGeometry.attributes.position;
-      const positions = posAttr.array as Float32Array;
-
-      positions[0] = Math.cos(angle1) * triangleRadius;
-      positions[1] = Math.sin(angle1) * triangleRadius;
-      positions[2] = 0;
-
-      positions[3] = Math.cos(angle2) * triangleRadius;
-      positions[4] = Math.sin(angle2) * triangleRadius;
-      positions[5] = 0;
-
-      positions[6] = Math.cos(angle3) * triangleRadius;
-      positions[7] = Math.sin(angle3) * triangleRadius;
-      positions[8] = 0;
-
-      posAttr.needsUpdate = true;
-    }
-
-    // Only apply distance-based fading after the ship is fully visible
+    // Only apply distance-based fading after the object is fully visible
     // Skip at the very start of the cycle (first 2% of progress) to avoid bounding box issues with scale
+    let currentOpacity = 1;
     if (progress > 0.02) {
       // Calculate screen-space bounding box size
       const box = new Box3().setFromObject(groupRef.current);
@@ -342,52 +280,25 @@ export function Spaceship({
 
       // Fade out when bounding box is <= 5 pixels
       if (boundingBoxSize <= 5) {
-        const newOpacity = boundingBoxSize / 5; // Linear fade from 1 to 0
-        setOpacity(Math.max(0, newOpacity));
-      } else {
-        setOpacity(1);
+        currentOpacity = Math.max(0, boundingBoxSize / 5); // Linear fade from 1 to 0
       }
-    } else {
-      // At the start of each cycle, ensure ship is fully visible
-      setOpacity(1);
     }
+
+    setOpacity(currentOpacity);
+
+    // Update state for children
+    setCurrentState({
+      groupRef,
+      position: position.clone(),
+      velocity: velocity.clone(),
+      quaternion: quaternion.clone(),
+      opacity: currentOpacity,
+      isVisible: true,
+      progress,
+      warpFlashIntensity: currentFlashIntensity,
+      flashPosition,
+    });
   });
 
-  return (
-    <>
-      <group ref={groupRef}>
-        {/* Retro rocket model with opacity control */}
-        <group scale={[opacity, opacity, opacity]}>
-          <SpaceshipModel />
-        </group>
-
-        {/* Triangle at nozzle for exhaust trail */}
-        <points
-          ref={trianglePointsRef}
-          position={[0, -3, 0]}
-          geometry={triangleGeometry}
-        >
-          <pointsMaterial size={0.3} vertexColors={true} />
-        </points>
-      </group>
-
-      {/* Warp flash effect - outside the group so it's not affected by opacity */}
-      {warpFlashIntensity > 0 && (
-        <pointLight
-          position={flashPosition}
-          intensity={warpFlashIntensity * 50}
-          distance={30}
-          color="#ffffff"
-          decay={2}
-        />
-      )}
-
-      {/* Trail effect for triangle points */}
-      <TriangleTrail
-        trianglePositions={triangleWorldPositions}
-        triangleColors={triangleColors}
-        isActive={isEmitting}
-      />
-    </>
-  );
+  return <>{children(currentState)}</>;
 }

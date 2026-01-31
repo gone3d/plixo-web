@@ -5,9 +5,114 @@
     <link rel="icon" type="image/svg+xml" href="/g3dlogo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plixo</title>
+
+    <!-- Inline critical CSS for splash screen (instant rendering, no HTTP delay) -->
+    <style>
+      /* Splash screen styles */
+      #splash-screen {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+
+      #splash-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .splash-content {
+        text-align: center;
+        color: #94a3b8;
+      }
+
+      .splash-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 24px;
+        opacity: 0.9;
+      }
+
+      .splash-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 14px;
+        margin-bottom: 16px;
+        color: #94a3b8;
+      }
+
+      .splash-progress {
+        width: 200px;
+        height: 3px;
+        background: rgba(148, 163, 184, 0.2);
+        margin: 0 auto;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .splash-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        animation: progress 2s ease-in-out infinite;
+      }
+
+      @keyframes progress {
+        0% { width: 0%; transform: translateX(0); }
+        50% { width: 70%; transform: translateX(0); }
+        100% { width: 70%; transform: translateX(200px); }
+      }
+
+      /* Hide splash when React takes over */
+      body.app-loaded #splash-screen {
+        display: none;
+      }
+    </style>
   </head>
   <body>
+    <!-- React mount point -->
     <div id="root"></div>
+
+    <!-- Splash screen - shows immediately while bundle loads -->
+    <div id="splash-screen">
+      <div class="splash-content">
+        <!-- SVG Logo (inline for instant display) -->
+        <svg class="splash-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" stroke="url(#grad1)" stroke-width="3"/>
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <text x="50" y="58" font-family="Arial, sans-serif" font-size="24" font-weight="bold"
+                fill="#94a3b8" text-anchor="middle">P</text>
+        </svg>
+
+        <div class="splash-text">Loading Portfolio...</div>
+
+        <div class="splash-progress">
+          <div class="splash-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remove splash when React loads -->
+    <script type="module">
+      // Hide splash when React mounts
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.classList.add('fade-out');
+            setTimeout(() => splash.remove(), 500);
+          }
+        }, 100);
+      });
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
