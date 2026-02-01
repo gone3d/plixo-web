@@ -82,8 +82,9 @@ export function SpaceshipCanvas({ className = "" }: SpaceshipCanvasProps) {
             {/* Star field background */}
             <StarField count={1500} />
 
-            {/* PathFollower with Spaceship - 15s flight, 10s delay */}
+            {/* PathFollower with Spaceship - 10s flight, 10s delay */}
             <PathFollower
+              duration={10}
               onPositionUpdate={setSpaceshipPosition}
               onVisibilityChange={setSpaceshipVisible}
             >
