@@ -39,29 +39,116 @@ export interface PathFollowerState {
 
 /**
  * Generate a random path configuration
- * Ensures object enters from offscreen, comes close to camera, exits far away
+ * Ships can enter from any direction (including behind camera)
+ * and exit on the opposite side, always leaving into the distance
  */
 function generateRandomPath(): PathConfig {
-  // Random side entry (left or right)
-  const enterFromLeft = Math.random() > 0.5;
+  // Choose random entry direction (8 possibilities + behind camera)
+  // 0=left, 1=right, 2=top, 3=bottom, 4=top-left, 5=top-right, 6=bottom-left, 7=bottom-right, 8=behind
+  const entryDirection = Math.floor(Math.random() * 9);
 
-  // Start: Offscreen at medium distance
-  const startX = enterFromLeft
-    ? -60 - Math.random() * 40
-    : 60 + Math.random() * 40;
-  const startY = -5 + Math.random() * 10; // Vary vertical entry
-  const startZ = -30 - Math.random() * 20; // Medium to far
+  let startX = 0;
+  let startY = 0;
+  let startZ = 0;
 
-  // Apex: Near center, close to camera, elevated
+  // Entry positions based on direction
+  switch (entryDirection) {
+    case 0: // Left
+      startX = -60 - Math.random() * 40;
+      startY = -10 + Math.random() * 20;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 1: // Right
+      startX = 60 + Math.random() * 40;
+      startY = -10 + Math.random() * 20;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 2: // Top
+      startX = -20 + Math.random() * 40;
+      startY = 40 + Math.random() * 30;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 3: // Bottom
+      startX = -20 + Math.random() * 40;
+      startY = -40 - Math.random() * 30;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 4: // Top-left
+      startX = -60 - Math.random() * 40;
+      startY = 40 + Math.random() * 30;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 5: // Top-right
+      startX = 60 + Math.random() * 40;
+      startY = 40 + Math.random() * 30;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 6: // Bottom-left
+      startX = -60 - Math.random() * 40;
+      startY = -40 - Math.random() * 30;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 7: // Bottom-right
+      startX = 60 + Math.random() * 40;
+      startY = -40 - Math.random() * 30;
+      startZ = -30 - Math.random() * 30;
+      break;
+    case 8: // Behind camera (positive Z)
+      startX = -30 + Math.random() * 60;
+      startY = -20 + Math.random() * 40;
+      startZ = 20 + Math.random() * 40; // Behind camera (positive Z)
+      break;
+  }
+
+  // Apex: Near center, close to camera, slightly elevated
   const apexX = -20 + Math.random() * 40; // Near center with variance
-  const apexY = 3 + Math.random() * 7; // Elevated (3 to 10 units)
-  const apexZ = -3 - Math.random() * 5; // Close to camera (-3 to -8)
+  const apexY = 0 + Math.random() * 10; // Slightly elevated (0 to 10 units)
+  const apexZ = -5 - Math.random() * 5; // Close to camera (-5 to -10)
 
-  // End: Exit opposite side or continue same direction, much farther
-  // If entered left, usually exit right (but not always)
-  const exitRight = enterFromLeft ? Math.random() > 0.2 : Math.random() > 0.8;
-  const endX = exitRight ? 80 + Math.random() * 80 : -80 - Math.random() * 80;
-  const endY = -5 + Math.random() * 10; // Vary vertical exit
+  // Exit: Opposite side from entry, always far away (negative Z)
+  let endX = 0;
+  let endY = 0;
+
+  switch (entryDirection) {
+    case 0: // Entered left → exit right
+      endX = 80 + Math.random() * 80;
+      endY = -10 + Math.random() * 20;
+      break;
+    case 1: // Entered right → exit left
+      endX = -80 - Math.random() * 80;
+      endY = -10 + Math.random() * 20;
+      break;
+    case 2: // Entered top → exit bottom
+      endX = -20 + Math.random() * 40;
+      endY = -80 - Math.random() * 80;
+      break;
+    case 3: // Entered bottom → exit top
+      endX = -20 + Math.random() * 40;
+      endY = 80 + Math.random() * 80;
+      break;
+    case 4: // Entered top-left → exit bottom-right
+      endX = 80 + Math.random() * 80;
+      endY = -80 - Math.random() * 80;
+      break;
+    case 5: // Entered top-right → exit bottom-left
+      endX = -80 - Math.random() * 80;
+      endY = -80 - Math.random() * 80;
+      break;
+    case 6: // Entered bottom-left → exit top-right
+      endX = 80 + Math.random() * 80;
+      endY = 80 + Math.random() * 80;
+      break;
+    case 7: // Entered bottom-right → exit top-left
+      endX = -80 - Math.random() * 80;
+      endY = 80 + Math.random() * 80;
+      break;
+    case 8: // Entered from behind → exit forward into distance
+      endX = -40 + Math.random() * 80;
+      endY = -20 + Math.random() * 40;
+      break;
+  }
+
+  // Always exit far away into the distance (negative Z)
   const endZ = -100 - Math.random() * 100; // Very far (-100 to -200)
 
   return {
@@ -153,7 +240,7 @@ export function PathFollower({
 
   // Warp flash effect
   const [, setWarpFlashIntensity] = useState(0);
-  const warpFlashTimer = useRef(0);
+  const warpFlashTimer = useRef(10); // Start disabled (> 2.0)
   const [flashPosition, setFlashPosition] = useState(new Vector3());
 
   // Current state to pass to children
