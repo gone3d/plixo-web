@@ -61,31 +61,33 @@ export function calculateAzimuth(x: number, z: number): number {
     degrees += 360;
   }
 
-  return Math.round(degrees);
+  return Math.floor(degrees);
 }
 
 /**
- * Calculate vertical elevation (ε - epsilon)
+ * Calculate vertical elevation (θ - theta)
  *
- * Angle from the horizontal plane (XZ plane)
- * Returns 0-180° range (0° = down, 90° = horizontal, 180° = up)
+ * Angle from horizontal XZ plane (camera level)
+ * Returns -90 to 90° range:
+ * - 0° = horizontal at camera level
+ * - 90° = straight up (+Y)
+ * - -90° = straight down (-Y)
  *
  * @param x - X position
  * @param y - Y position
  * @param z - Z position
- * @returns Elevation angle in degrees (0 to 180)
+ * @returns Elevation angle in degrees (-90 to 90)
  */
 export function calculateElevation(x: number, y: number, z: number): number {
-  // Distance in the horizontal plane (XZ)
+  // Calculate distance in the horizontal XZ plane
   const horizontalDistance = Math.sqrt(x * x + z * z);
 
-  // atan2(y, horizontalDistance) gives angle from horizontal (-90 to 90)
-  // Convert to degrees
-  const radians = Math.atan2(y, horizontalDistance);
-  let degrees = radians * (180 / Math.PI);
+  // Calculate angle from horizontal plane
+  // atan2(-y, horizontalDistance) gives elevation angle
+  // Negative y because positive y is up in 3D space
+  const radians = Math.atan2(-y, horizontalDistance);
+  const degrees = radians * (180 / Math.PI);
 
-  // Convert from -90/90 range to 0-180 range
-  degrees += 90;
-
-  return Math.round(degrees);
+  // Use floor for all values
+  return Math.floor(degrees);
 }
