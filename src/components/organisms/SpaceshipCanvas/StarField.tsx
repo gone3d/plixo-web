@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useRef } from "react";
-import { Points } from "three";
+import { Points, CanvasTexture, AdditiveBlending } from "three";
 import { useFrame } from "@react-three/fiber";
 
 interface StarFieldProps {
@@ -14,6 +14,27 @@ interface StarFieldProps {
 
 export function StarField({ count = 2000 }: StarFieldProps) {
   const pointsRef = useRef<Points>(null);
+
+  // Create circular sprite texture for rounded particles
+  const starTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+
+    if (ctx) {
+      const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.8)');
+      gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.2)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 32, 32);
+    }
+
+    return new CanvasTexture(canvas);
+  }, []);
 
   // Generate random star positions
   const particles = useMemo(() => {
@@ -49,11 +70,14 @@ export function StarField({ count = 2000 }: StarFieldProps) {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.5}
+        map={starTexture}
+        size={0.8}
         color="#ffffff"
         transparent
-        opacity={0.6}
+        opacity={0.7}
         sizeAttenuation
+        blending={AdditiveBlending}
+        depthWrite={false}
       />
     </points>
   );

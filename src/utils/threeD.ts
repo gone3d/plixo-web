@@ -91,3 +91,68 @@ export function calculateElevation(x: number, y: number, z: number): number {
   // Use floor for all values
   return Math.floor(degrees);
 }
+
+/**
+ * Tick mark coordinate data
+ */
+export interface TickMarkData {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+/**
+ * Generate tick marks for arc displays
+ *
+ * Creates evenly distributed tick marks along an arc segment
+ * Used for azimuth and elevation angle displays
+ *
+ * @param centerX - Center X coordinate
+ * @param centerY - Center Y coordinate
+ * @param radius - Arc radius
+ * @param numTicks - Number of tick marks to generate
+ * @param tickLength - Length of each tick mark
+ * @param arcSpan - Arc span in degrees (e.g., 90 or 180)
+ * @param rotationOffset - Rotation offset in degrees (default 0)
+ * @param direction - Direction of ticks: 'outward' or 'inward' (default 'outward')
+ * @returns Array of tick mark coordinates
+ */
+export function generateArcTickMarks(
+  centerX: number,
+  centerY: number,
+  radius: number,
+  numTicks: number,
+  tickLength: number,
+  arcSpan: number,
+  rotationOffset: number = 0,
+  direction: 'inward' | 'outward' = 'outward'
+): TickMarkData[] {
+  const tickMarks: TickMarkData[] = [];
+  const toRadians = (deg: number) => (deg * Math.PI) / 180;
+
+  for (let i = 0; i < numTicks; i++) {
+    // Distribute along the arc
+    const tickAngle = (i / (numTicks - 1)) * arcSpan;
+    const rotatedAngle = tickAngle + rotationOffset;
+    const tickRad = toRadians(rotatedAngle);
+
+    // Calculate base position on the arc
+    const arcX = centerX + radius * Math.cos(tickRad);
+    const arcY = centerY + radius * Math.sin(tickRad);
+
+    // Calculate tick end position based on direction
+    const tickEndRadius = direction === 'outward' ? radius + tickLength : radius - tickLength;
+    const tickEndX = centerX + tickEndRadius * Math.cos(tickRad);
+    const tickEndY = centerY + tickEndRadius * Math.sin(tickRad);
+
+    tickMarks.push({
+      x1: arcX,
+      y1: arcY,
+      x2: tickEndX,
+      y2: tickEndY,
+    });
+  }
+
+  return tickMarks;
+}
