@@ -79,12 +79,10 @@ function AppContent() {
           maxSpeedPxPerSec={30}
         />
 
-        {/* Three.js Spaceship Canvas - Lazy loaded (desktop only) */}
-        {!state.ui.isMobile && (
-          <Suspense fallback={<SpaceshipLoader />}>
-            <SpaceshipCanvas />
-          </Suspense>
-        )}
+        {/* Three.js Spaceship Canvas - Lazy loaded */}
+        <Suspense fallback={<SpaceshipLoader />}>
+          <SpaceshipCanvas />
+        </Suspense>
 
         {/* Background Controller with Spaceship button */}
         <BackgroundController onSpaceshipClick={() => setIsSpaceshipModalOpen(true)} />
