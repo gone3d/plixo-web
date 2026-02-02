@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { lazy, Suspense, useState } from "react";
 import { Toaster } from "sonner";
 import { Navigation, BackgroundSlideshow, BackgroundController } from "./components/molecules";
-import { GlobalProvider, useGlobal } from "./contexts/GlobalContext";
+import { GlobalProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { usePageViewTracking } from "./hooks/usePageViewTracking";
@@ -48,7 +48,6 @@ function SpaceshipLoader() {
 // AppContent component to use tracking hook inside Router
 function AppContent() {
   const [isSpaceshipModalOpen, setIsSpaceshipModalOpen] = useState(false);
-  const { state } = useGlobal();
 
   // Enable automatic page view tracking
   usePageViewTracking();
