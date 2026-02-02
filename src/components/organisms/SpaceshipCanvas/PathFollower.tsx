@@ -240,7 +240,7 @@ export function PathFollower({
 
   // Warp flash effect
   const [, setWarpFlashIntensity] = useState(0);
-  const warpFlashTimer = useRef(10); // Start disabled (> 2.0)
+  const warpFlashTimer = useRef(10); // Start disabled (> 1.0)
   const [flashPosition, setFlashPosition] = useState(new Vector3());
 
   // Current state to pass to children
@@ -290,15 +290,15 @@ export function PathFollower({
         setFlashPosition(groupRef.current.position.clone());
       } else {
         // Reset flash timer when becoming visible again
-        warpFlashTimer.current = 10; // Set to value > 2.0 to disable flash
+        warpFlashTimer.current = 10; // Set to value > 1.0 to disable flash
       }
     }
 
-    // Calculate current warp flash intensity (2 second duration)
+    // Calculate current warp flash intensity (1 second duration)
     let currentFlashIntensity = 0;
-    if (warpFlashTimer.current < 2.0) {
+    if (warpFlashTimer.current < 1.0) {
       warpFlashTimer.current += delta;
-      const fadeProgress = Math.min(warpFlashTimer.current / 2.0, 1); // 2 second fade
+      const fadeProgress = Math.min(warpFlashTimer.current / 1.0, 1); // 1 second fade
       currentFlashIntensity = 1 - fadeProgress;
     }
     setWarpFlashIntensity(currentFlashIntensity);
