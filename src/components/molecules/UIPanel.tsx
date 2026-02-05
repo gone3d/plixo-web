@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Icon } from '../atoms'
 import type { IconName } from '../atoms/Icon'
 

@@ -1,7 +1,8 @@
-# Milestone 11.5: About Page Markdown Support
+# Milestone 11.5: About Page Markdown Support + Custom JSX Components
 
-> **Status**: ⏳ PENDING
-> **Duration**: 1-2 hours
+> **Status**: ✅ COMPLETE
+> **Completed**: 2026-02-05
+> **Duration**: 4 hours (exceeded estimate due to custom JSX components)
 > **Priority**: MEDIUM
 > **Dependencies**: Milestone 11.4 (About Page API Integration) ✅ COMPLETE
 
@@ -9,7 +10,7 @@
 
 ## Goal
 
-Replace custom content rendering logic with markdown support, making About content easier to write and more flexible. Remove special-case handling for Tech Stack, Repositories, and [TODO] sections in favor of standard markdown formatting.
+Replace custom content rendering logic with markdown support, making About content easier to write and more flexible. **Extended** to include custom JSX-like components for advanced layouts (UIPanel, MDListItem, ExternalLinkPanel).
 
 **Current State**:
 - About content uses plain text with custom rendering logic
@@ -402,3 +403,95 @@ After markdown implementation, remove these unused functions from About.tsx:
 - Content formatting determined entirely by markdown in `content` field
 - Icon selection can remain title-based or be simplified
 - This makes the About editor much more intuitive for admins
+
+---
+
+## Completion Summary
+
+### What Was Accomplished
+
+#### 1. Markdown Support with Custom JSX Components
+- ✅ Installed and integrated `react-markdown` (10.1.0)
+- ✅ Created custom markdown parser supporting JSX-like components
+- ✅ Implemented component preprocessing to extract custom components before markdown processing
+- ✅ Added range-based extraction to prevent duplicate rendering
+
+#### 2. Custom Components Created
+- ✅ **UIPanel** - Container component for grouping content with icons and titles
+- ✅ **MDListItem** - Styled list item component with dark background and proper spacing
+- ✅ **ExternalLinkPanel** - Clickable panel component for external links (GitHub repos)
+  - Icon on left (customizable)
+  - Title and description in middle
+  - External link button on right
+  - Entire panel clickable with hover effects
+- ✅ **IconButton** (Atom Component) - Reusable button with icon and three variants (default, blue, red)
+
+#### 3. MarkdownRenderer Implementation
+- ✅ Created `/src/utils/MarkdownRenderer.tsx` with full JSX parsing support
+- ✅ Implemented regex-based extraction for all custom components
+- ✅ Added proper attribute parsing for component props
+- ✅ Integrated with ReactMarkdown with custom component overrides
+- ✅ Fixed duplicate content bug by adding range checking for nested components
+
+#### 4. Visual Improvements
+- ✅ Updated font sizes from `text-xs` (12px) to `text-base` (16px) for better readability
+- ✅ Enhanced MDListItem styling with darker background (`bg-slate-900/40`)
+- ✅ Increased padding and spacing for better visual differentiation
+- ✅ Added `leading-relaxed` for improved text flow
+
+#### 5. AboutManager UI Reorganization
+- ✅ Moved reorder chevrons to left side, stacked vertically
+- ✅ Added vertical separator line between controls and content
+- ✅ Changed content preview to single line (`line-clamp-1`)
+- ✅ Moved edit/delete buttons to right side, stacked vertically
+- ✅ Replaced manual buttons with reusable IconButton components
+- ✅ Added faded backgrounds to all action buttons
+- ✅ Removed tip text from header (will add to edit modal later)
+
+#### 6. Content Updates
+- ✅ Completed comprehensive tech stack content covering:
+  - Architecture (Cloudflare Workers, D1 Database, Pages Functions)
+  - Frontend Technologies (4 panels covering React, TypeScript, Vite, Tailwind, etc.)
+  - Backend Technologies (2 panels covering Hono, Auth, APIs, etc.)
+  - Security & Performance features
+- ✅ Updated "About Me" section:
+  - Removed "directed energy platforms"
+  - Added "3D robotic systems"
+  - Added DARPA projects mention
+  - Added State Department training applications
+- ✅ Added Repositories section with ExternalLinkPanel components for both repos
+
+### Bug Fixes
+1. ✅ Fixed duplicate content rendering in MDListItem (spans being extracted twice)
+2. ✅ Fixed Icon import error in IconButton (default vs named export)
+
+### Code Quality Improvements
+- ✅ Removed ~80-100 lines of custom rendering logic from About.tsx
+- ✅ Simplified section rendering to use ReactMarkdown
+- ✅ Created reusable components following atomic design pattern
+- ✅ Improved maintainability with component-based architecture
+
+### Files Created/Modified
+- Created: `/src/utils/MarkdownRenderer.tsx`
+- Created: `/src/components/atoms/IconButton.tsx`
+- Created: `/src/components/molecules/UIPanel.tsx`
+- Created: `/src/components/molecules/MDListItem.tsx`
+- Created: `/src/components/molecules/ExternalLinkPanel.tsx`
+- Modified: `/src/components/admin/AboutManager.tsx` (major UI reorganization)
+- Modified: `/src/components/atoms/index.ts` (added IconButton export)
+- Modified: `/src/components/molecules/index.ts` (added new component exports)
+- Modified: Database About content (comprehensive tech stack, updated About Me, added Repositories)
+
+### Exceeded Scope
+This milestone exceeded the original 1-2 hour estimate (took 4 hours) due to:
+- Implementation of custom JSX parser (not originally planned)
+- Creation of 4 custom components (UIPanel, MDListItem, ExternalLinkPanel, IconButton)
+- Multiple UI refinements based on visual comparison with original design
+- Comprehensive tech stack content creation
+- AboutManager UI reorganization
+
+### Next Steps
+- [ ] Add markdown tips/preview to edit modal
+- [ ] Consider adding markdown toolbar for easier editing
+- [ ] Deploy to production
+- [ ] Monitor user feedback on new markdown system

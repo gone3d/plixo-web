@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Icon, LoadingSpinner } from '../components/atoms'
+import type { IconName } from '../components/atoms/Icon'
 import { useGlobal } from '../contexts/GlobalContext'
 import packageJson from '../../package.json'
-import { analyticsClient } from '../services/analyticsClient'
 import { apiClient } from '../services/api'
 import { MarkdownRenderer } from '../utils/MarkdownRenderer'
 
@@ -42,7 +42,7 @@ const About = () => {
   }
 
   // Get icon for section based on title
-  const getSectionIcon = (title: string): string => {
+  const getSectionIcon = (title: string): IconName => {
     if (title.toLowerCase().includes('about me')) return 'user'
     if (title.toLowerCase().includes('tech stack')) return 'check'
     if (title.toLowerCase().includes('repositories')) return 'github'
@@ -57,11 +57,6 @@ const About = () => {
     if (title.toLowerCase().includes('repositories')) return 'text-slate-300'
     if (title.toLowerCase().includes('[todo]')) return 'text-yellow-400'
     return 'text-purple-400'
-  }
-
-  // Track external link clicks
-  const handleExternalLinkClick = (destination: string, linkText: string) => {
-    analyticsClient.trackExternalLink(destination, linkText)
   }
 
   return (
@@ -105,7 +100,6 @@ const About = () => {
               <div className="prose prose-invert prose-slate max-w-none text-slate-300">
                 <MarkdownRenderer
                   content={section.content}
-                  onLinkClick={handleExternalLinkClick}
                 />
               </div>
             </div>

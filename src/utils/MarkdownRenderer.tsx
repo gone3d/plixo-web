@@ -1,12 +1,9 @@
-import React, { ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { Icon } from '../components/atoms'
 import { UIPanel, UITablePanel, MDListItem, ExternalLinkPanel } from '../components/molecules'
 
 interface MarkdownRendererProps {
   content: string
-  components?: any
-  onLinkClick?: (href: string, text: string) => void
 }
 
 // Color mapping for span tags
@@ -28,9 +25,7 @@ const colorClassMap: Record<string, string> = {
  * Supports <UIPanel>, <UITablePanel>, and <span color="..."> custom components
  */
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
-  content,
-  components = {},
-  onLinkClick
+  content
 }) => {
   // Parse and render custom JSX-like components
   const renderContent = () => {
@@ -42,8 +37,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     const tablePanelRegex = /<UITablePanel(\s+[^>]*)?>[\s\S]*?<\/UITablePanel>/g
     // Regex to match <UIPanel ... > ... </UIPanel>
     const panelRegex = /<UIPanel(\s+[^>]*)?>[\s\S]*?<\/UIPanel>/g
-    // Regex to match <MDListItem> ... </MDListItem>
-    const listItemRegex = /<MDListItem>[\s\S]*?<\/MDListItem>/g
 
     // Process UITablePanel blocks
     while (remainingContent.length > 0) {
@@ -161,24 +154,33 @@ function preprocessSpans(content: string): ReactNode {
   // Now process colored spans (with optional size attribute)
   const spanRegex = /<span\s+([^>]+)>([^<]+)<\/span>/g
   const parts: ReactNode[] = []
-  let lastIndex = 0
   let match: RegExpExecArray | null
   let key = 0
 
   // Process list items, link panels, and spans in order
-  const allComponents = [
-    ...listItems.map(item => ({ type: 'listItem', ...item })),
-    ...linkPanels.map(panel => ({ type: 'linkPanel', ...panel })),
+  type ComponentItem = {
+    type: 'listItem' | 'linkPanel' | 'span'
+    start: number
+    end: number
+    content?: string
+    color?: string
+    size?: string | null
+    attrs?: string
+  }
+
+  const allComponents: ComponentItem[] = [
+    ...listItems.map(item => ({ type: 'listItem' as const, ...item })),
+    ...linkPanels.map(panel => ({ type: 'linkPanel' as const, ...panel })),
   ].sort((a, b) => a.start - b.start)
 
   spanRegex.lastIndex = 0
   while ((match = spanRegex.exec(content)) !== null) {
     // Skip spans that are inside MDListItem components
     const isInsideListItem = listItems.some(item =>
-      match.index >= item.start && match.index < item.end
+      match && match.index >= item.start && match.index < item.end
     )
 
-    if (!isInsideListItem) {
+    if (!isInsideListItem && match) {
       const attrs = match[1]
       const color = parseAttribute(attrs, 'color') || 'slate'
       const size = parseAttribute(attrs, 'size')
@@ -206,7 +208,7 @@ function preprocessSpans(content: string): ReactNode {
   cleanContent = cleanContent.replace(/<span\s+[^>]+>[^<]+<\/span>/g, '')
 
   for (const component of allComponents) {
-    if (component.type === 'listItem') {
+    if (component.type === 'listItem' && component.content) {
       // Process MDListItem content (which may contain colored spans)
       const itemContent = processListItemContent(component.content, key++)
       parts.push(
@@ -214,13 +216,12 @@ function preprocessSpans(content: string): ReactNode {
           {itemContent}
         </MDListItem>
       )
-    } else if (component.type === 'linkPanel') {
+    } else if (component.type === 'linkPanel' && component.attrs) {
       // Add ExternalLinkPanel
-      const comp = component as any
-      const icon = parseAttribute(comp.attrs, 'icon') || 'github'
-      const title = parseAttribute(comp.attrs, 'title') || ''
-      const description = parseAttribute(comp.attrs, 'description') || ''
-      const href = parseAttribute(comp.attrs, 'href') || ''
+      const icon = parseAttribute(component.attrs, 'icon') || 'github'
+      const title = parseAttribute(component.attrs, 'title') || ''
+      const description = parseAttribute(component.attrs, 'description') || ''
+      const href = parseAttribute(component.attrs, 'href') || ''
 
       parts.push(
         <ExternalLinkPanel
@@ -231,17 +232,16 @@ function preprocessSpans(content: string): ReactNode {
           href={href}
         />
       )
-    } else if (component.type === 'span') {
+    } else if (component.type === 'span' && component.content && component.color) {
       // Add the colored span with optional size
-      const comp = component as any
-      const colorClass = colorClassMap[comp.color] || 'text-slate-300'
-      const sizeClass = comp.size === 'lg' ? 'text-sm font-semibold mb-2 mt-4' :
-                        comp.size === 'xl' ? 'text-base font-bold mb-3 mt-4' :
+      const colorClass = colorClassMap[component.color] || 'text-slate-300'
+      const sizeClass = component.size === 'lg' ? 'text-sm font-semibold mb-2 mt-4' :
+                        component.size === 'xl' ? 'text-base font-bold mb-3 mt-4' :
                         'text-xs mb-2'
 
       parts.push(
         <span key={`span-${key++}`} className={`${colorClass} block ${sizeClass}`}>
-          {comp.content}
+          {component.content}
         </span>
       )
     }
@@ -292,7 +292,12 @@ function processListItemContent(content: string, baseKey: number): ReactNode {
     if (match.index > lastIndex) {
       const beforeText = content.substring(lastIndex, match.index)
       if (beforeText.trim()) {
-        parts.push(beforeText)
+        // Process markdown in text segments
+        parts.push(
+          <ReactMarkdown key={`text-${baseKey}-${spanKey++}`}>
+            {beforeText}
+          </ReactMarkdown>
+        )
       }
     }
 
@@ -300,7 +305,6 @@ function processListItemContent(content: string, baseKey: number): ReactNode {
     const attrs = match[1]
     const spanText = match[2]
     const color = parseAttribute(attrs, 'color') || 'slate'
-    const size = parseAttribute(attrs, 'size')
 
     const colorClass = colorClassMap[color] || 'text-slate-300'
 
@@ -317,125 +321,14 @@ function processListItemContent(content: string, baseKey: number): ReactNode {
   if (lastIndex < content.length) {
     const remainingText = content.substring(lastIndex)
     if (remainingText.trim()) {
-      parts.push(remainingText)
+      // Process markdown in remaining text
+      parts.push(
+        <ReactMarkdown key={`text-${baseKey}-${spanKey++}`}>
+          {remainingText}
+        </ReactMarkdown>
+      )
     }
   }
 
   return parts.length > 0 ? <>{parts}</> : content
-}
-
-// Helper to process inline colored spans in text
-function processInlineSpans(children: React.ReactNode): React.ReactNode {
-  // If it's not a string or array, return as-is
-  if (typeof children !== 'string' && !Array.isArray(children)) {
-    return children
-  }
-
-  // If it's an array, process each element separately and preserve React elements
-  if (Array.isArray(children)) {
-    return children.map((child, idx) => {
-      if (typeof child === 'string') {
-        // Process string content for colored spans
-        return processStringForSpans(child, idx)
-      } else {
-        // Preserve React elements (like <em>, <strong>, etc.)
-        return <React.Fragment key={idx}>{child}</React.Fragment>
-      }
-    })
-  }
-
-  // Single string - process it
-  return processStringForSpans(children, 0)
-}
-
-// Helper to process a single string for colored spans
-function processStringForSpans(text: string, baseKey: number): React.ReactNode {
-  const spanRegex = /<span\s+color=["']([^"']+)["']>([^<]+)<\/span>/g
-  const parts: React.ReactNode[] = []
-  let lastIndex = 0
-  let match: RegExpExecArray | null
-  let spanKey = 0
-
-  while ((match = spanRegex.exec(text)) !== null) {
-    // Add text before the span
-    if (match.index > lastIndex) {
-      parts.push(text.substring(lastIndex, match.index))
-    }
-
-    // Add the colored span
-    const color = match[1]
-    const spanText = match[2]
-    const colorClass = colorClassMap[color] || 'text-slate-300'
-
-    parts.push(
-      <span key={`span-${baseKey}-${spanKey++}`} className={colorClass}>
-        {spanText}
-      </span>
-    )
-
-    lastIndex = match.index + match[0].length
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex))
-  }
-
-  return parts.length > 0 ? <React.Fragment key={baseKey}>{parts}</React.Fragment> : text
-}
-
-// Standard markdown component overrides
-function getMarkdownComponents(
-  onLinkClick?: (href: string, text: string) => void,
-  customComponents: any = {}
-) {
-  return {
-    a: ({ node, ...props }: any) => (
-      <a
-        {...props}
-        onClick={(e) => {
-          e.preventDefault()
-          if (props.href && onLinkClick) {
-            onLinkClick(props.href, props.children?.toString() || '')
-            window.open(props.href, '_blank', 'noopener,noreferrer')
-          } else if (props.href) {
-            window.open(props.href, '_blank', 'noopener,noreferrer')
-          }
-        }}
-        className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
-        target="_blank"
-        rel="noopener noreferrer"
-      />
-    ),
-    p: ({ node, children, ...props }: any) => (
-      <p {...props} className="mb-4 leading-relaxed">
-        {processInlineSpans(children)}
-      </p>
-    ),
-    ul: ({ node, ...props }: any) => (
-      <ul {...props} className="list-disc list-inside space-y-2 mb-4" />
-    ),
-    ol: ({ node, ...props }: any) => (
-      <ol {...props} className="list-decimal list-inside space-y-2 mb-4" />
-    ),
-    li: ({ node, children, ...props }: any) => (
-      <li {...props} className="leading-relaxed">
-        {processInlineSpans(children)}
-      </li>
-    ),
-    strong: ({ node, children, ...props }: any) => (
-      <strong {...props} className="font-semibold text-white">
-        {processInlineSpans(children)}
-      </strong>
-    ),
-    em: ({ node, children, ...props }: any) => (
-      <em {...props} className="italic">
-        {processInlineSpans(children)}
-      </em>
-    ),
-    code: ({ node, ...props }: any) => (
-      <code {...props} className="bg-slate-800/50 px-1.5 py-0.5 rounded text-sm font-mono text-blue-300" />
-    ),
-    ...customComponents
-  }
 }
