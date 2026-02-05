@@ -40,6 +40,23 @@ export function TriangleTrail({ trianglePositions, triangleColors, isActive }: T
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 4)); // 4 components for RGBA
 
+    // Create circular gradient texture for soft particles
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d')!;
+
+    // Draw radial gradient from white center to transparent edges
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.8)');
+    gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+
+    const texture = new THREE.CanvasTexture(canvas);
+
     const mat = new THREE.PointsMaterial({
       size: POINT_SIZE,
       vertexColors: true,
@@ -47,6 +64,7 @@ export function TriangleTrail({ trianglePositions, triangleColors, isActive }: T
       opacity: 1.0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      alphaMap: texture, // Use texture for particle shape (alpha channel)
     });
 
     return { geometry: geo, material: mat };
