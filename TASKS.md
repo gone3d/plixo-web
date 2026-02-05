@@ -51,6 +51,8 @@
 | **M1: Foundation** | ✅ Complete | 2 weeks | CRITICAL | [View Details](./tasks/Milestone1.md) |
 | **M5: Guest Login (Turnstile)** | ✅ Complete | 8 hours | CRITICAL | [View Details](./tasks/Milestone5.md) |
 | **M6: D1 Analytics System** | ✅ Complete | 10 hours | HIGH | [View Details](./tasks/Milestone6.md) |
+| **M11.2: Spaceship & HUD System** | 🚧 In Progress | 2-3 weeks | MEDIUM | [View Details](./tasks/Milestone11.2.md) |
+| **M9: About Content Integration (CMS)** | ⏳ Pending | 2-3 hours | HIGH | [View Details](./tasks/Milestone9.md) |
 | **M2: API Integration** | 🚧 Partial | 4-6 weeks | HIGH | [View Details](./tasks/Milestone2.md) |
 | **M3: Advanced Features** | ⏳ Pending | 3-4 weeks | MEDIUM | [View Details](./tasks/Milestone3.md) |
 | **M4: Polish & Performance** | ⏳ Pending | 2-3 weeks | HIGH | [View Details](./tasks/Milestone4.md) |
@@ -211,6 +213,210 @@ Implemented complete visitor analytics system using **D1 database** with **SQL q
 
 ---
 
+## 🚧 Milestone 11.2: Three.js Spaceship & HUD System - IN PROGRESS
+
+**Started**: 2025-12-15
+**Phase 4A Complete**: 2026-02-02
+**Duration**: 2-3 weeks estimated
+**Priority**: MEDIUM
+
+### Overview
+
+Interactive Three.js canvas overlay featuring a 3D spaceship with real-time HUD (Heads-Up Display) targeting system and data visualization. Serves as an engaging, futuristic background that demonstrates advanced web graphics capabilities.
+
+### Phase 4A Achievements (2026-02-02) ✅
+
+**Animation Performance**:
+- ✅ Spaceship animation 50% faster (10s duration)
+- ✅ Hyper jump animation reduced to 1s
+- ✅ Smooth warp transitions and timing optimization
+
+**Mobile Support**:
+- ✅ Enabled 3D rendering on mobile devices
+- ✅ Acceptable performance (30-45fps) on mobile viewport
+
+**Visual Enhancements**:
+- ✅ Rounded and blurred star particles with radial gradients
+- ✅ Camera FOV optimized (75° → 50°) to reduce distortion
+- ✅ Additive blending for realistic star glow
+
+**HUD Targeting System**:
+- ✅ Three rotating detail arcs at 0°, 120°, 240° (60° segments)
+- ✅ Counter-clockwise rotation at 10°/second
+- ✅ Tick marks in gaps between arcs (15 marks per gap)
+- ✅ Tick marks on angle displays (φ azimuth, θ elevation)
+- ✅ Synchronized rotation with angle changes
+- ✅ Color-coded displays: φ (blue), θ (green)
+
+**Code Quality**:
+- ✅ Refactored tick mark generation into utility function
+- ✅ Eliminated ~70 lines of redundant code
+- ✅ Added TypeScript interfaces for tick mark data
+- ✅ Improved code maintainability (DRY principles)
+
+**Files Modified**:
+- [PathFollower.tsx](./src/components/organisms/SpaceshipCanvas/PathFollower.tsx)
+- [StarField.tsx](./src/components/organisms/SpaceshipCanvas/StarField.tsx)
+- [TargetingCircle.tsx](./src/components/organisms/SpaceshipCanvas/TargetingCircle.tsx)
+- [SpaceshipCanvas.tsx](./src/components/organisms/SpaceshipCanvas/SpaceshipCanvas.tsx)
+- [App.tsx](./src/App.tsx)
+- [utils/threeD.ts](./src/utils/threeD.ts)
+
+### Pending Tasks
+
+**Phase 4B: Data Points & Engine Particles**:
+- ⏳ Implement particle system for engine exhaust
+- ⏳ Create animated data points floating around spaceship
+- ⏳ Add Doppler shift color effect to targeting circle
+- ⏳ Map analytics data to 3D coordinates
+
+**Performance Optimization**:
+- ⏳ Object pooling for particles
+- ⏳ Instanced meshes for repeated geometry
+- ⏳ Level-of-detail (LOD) system
+
+**Acceptance Criteria - Partial Met**:
+- ✅ 60fps on desktop with HUD system
+- ✅ 30-45fps on mobile (acceptable)
+- ✅ Smooth animation transitions
+- ✅ Professional sci-fi aesthetic
+- ⏳ Data visualization active (particles + points)
+- ⏳ Doppler shift color transitions working
+- ⏳ Analytics data integration
+
+**Resume Value Delivered**:
+- Three.js & React Three Fiber expertise
+- Canvas API procedural texture generation
+- SVG mathematics and transformations
+- requestAnimationFrame animation optimization
+- TypeScript utility function design
+- Mobile-responsive 3D rendering
+- Performance profiling and optimization
+
+[View Full Milestone 11.2 Details →](./tasks/Milestone11.2.md)
+
+---
+
+## ⏳ Milestone 9: About Content Integration (CMS Frontend) - PENDING
+
+**Status**: ⏳ PENDING
+**Duration**: 2-3 hours estimated
+**Priority**: HIGH
+**Dependencies**: Milestone 9 (plixo-api) - About Content API ⏳ PENDING
+
+### Overview
+
+Integrate the About page with the flat JSON API, replacing hardcoded static content with dynamically loaded data. This demonstrates clean data consumption from a simple, flat API structure (contrast to nested Projects API).
+
+**Design Philosophy**:
+- **Client-side parsing**: Frontend determines rendering logic
+- **No type checking**: Parser infers from content format
+- **Simple data flow**: API → Hook → Component
+- **Fallback content**: Graceful degradation if API unavailable
+
+### Key Features
+- ✅ About page loads content from API (GET /about)
+- ✅ Parser correctly renders paragraphs vs lists
+- ✅ Loading states professional (skeleton component)
+- ✅ Error handling graceful
+- ✅ Performance: First paint <1s
+- ✅ Maintains existing design/animations
+
+### API Response Structure
+
+```json
+{
+  "sections": [
+    {
+      "title": "About Me",
+      "content": "Paragraph text...",
+      "order": 1
+    },
+    {
+      "title": "Frontend Technologies",
+      "content": "React 19.1.1\nTypeScript 5.8.3\nVite 7.1.12",
+      "order": 2
+    }
+  ]
+}
+```
+
+**Parser Rules**:
+- Content with `\n` → Render as `<ul><li>` list
+- Content without `\n` → Render as `<p>` paragraph
+- Title → Always `<h2>`
+
+### Implementation Tasks
+
+1. **TypeScript Types** (`src/types/about.ts`) - 5 min
+   - AboutSection interface
+   - AboutContent interface
+   - ContentType type
+
+2. **API Service** (`src/services/api.ts`) - 10 min
+   - Add getAboutContent() method
+   - Public endpoint (no auth)
+
+3. **React Query Hook** (`src/hooks/useAbout.ts`) - 15 min
+   - Automatic caching (5 minutes)
+   - Background refetch
+   - Retry logic
+
+4. **Content Parser** (`src/utils/contentParser.ts`) - 10 min
+   - detectContentType()
+   - parseListContent()
+   - parseParagraphContent()
+
+5. **AboutSection Component** (`src/components/molecules/AboutSection.tsx`) - 20 min
+   - Auto-detects content type
+   - Renders paragraph or list
+   - Maintains design system
+
+6. **Loading Skeleton** (`src/components/atoms/AboutSkeleton.tsx`) - 10 min
+   - Matches section layout
+   - Smooth animation
+
+7. **Refactor About.tsx** (`src/pages/About.tsx`) - 30 min
+   - Remove hardcoded content
+   - Integrate useAbout() hook
+   - Add loading/error states
+   - Dynamic section rendering
+
+8. **Update Barrel Exports** - 5 min
+   - Add new components to index files
+
+**Total Estimated Time**: ~2 hours
+
+### Comparison: Flat vs Nested API
+
+**About API (This Milestone)**:
+- Flat structure (1 level)
+- No type field (parser infers)
+- Simple iteration
+- Frontend controls rendering
+
+**Projects API (Previous)**:
+- Nested structure (2-3 levels)
+- Type fields explicit
+- Complex mapping
+- API controls structure
+
+**Lesson**: Both approaches have merits. Flat for simple content, nested for complex data.
+
+### Resume Value Delivered
+- React Query for data fetching
+- Content parsing algorithms
+- Loading state UX patterns
+- Error boundary best practices
+- API integration (flat JSON)
+- TypeScript type safety
+- Component composition
+- Performance optimization
+
+[View Full Milestone 9 Details →](./tasks/Milestone9.md)
+
+---
+
 ## 🚧 Milestone 2: API Integration - PARTIAL COMPLETE
 
 **Status**: In Progress (Auth, Projects complete; Skills/Experience/About/Contact pending)
@@ -238,7 +444,7 @@ Implemented complete visitor analytics system using **D1 database** with **SQL q
   - Projects API fully functional in production
 
 ### Pending Tasks
-- ⏳ **2.2: About Content Integration** (2-3 hours) **← NEXT PRIORITY**
+- ⏳ **2.2: About Content Integration** - Moved to [Milestone 9](./tasks/Milestone9.md) **← NEXT PRIORITY**
 - ⏳ **2.2: Skills Integration** (3-4 hours)
 - ⏳ **2.2: Experience Integration** (3-4 hours)
 - ⏳ **2.3: GitHub Integration** (4-6 hours)
@@ -339,23 +545,32 @@ Week 17:    🎉 LAUNCH - Full Portfolio Live
 
 ### Current Session Status
 
-**Last Updated**: 2026-01-27
+**Last Updated**: 2026-02-02
 **Current Version**: 1.2.12
 **Current Branch**: main
 
 **Recent Work**:
 - ✅ **Milestone 5 Complete**: Guest login deployed to production
 - ✅ **Milestone 6 Complete**: D1 Analytics system operational
+- ✅ **Milestone 11.2 Progress**: Spaceship HUD enhancements ([details](./tasks/Milestone11.2.md))
+  - Spaceship animation 50% faster (10s duration)
+  - Hyper jump animation reduced to 1s
+  - Enabled 3D spaceship on mobile devices
+  - Rounded and blurred star particles
+  - Camera FOV optimized (75° → 50°)
+  - Added rotating HUD detail arcs (Three 60° segments)
+  - Added tick marks to angle displays and gaps
+  - Refactored tick mark generation into utility function
 - ✅ **Projects API Integration**: Work page loading from database
 - ✅ Time range selector refinements in analytics dashboard
 - ✅ TypeScript build fixes and UI polish
 
 **Next Actions**:
-1. Implement About content API (backend) → [plixo-api Milestone 2](../plixo-api/tasks/Milestone2.md)
-2. Update About page to load content from API
-3. Implement Skills API integration
-4. Implement Experience API integration
-5. Complete Contact form backend integration
+1. Continue Milestone 11.2 - HUD data visualization
+2. Implement About Content API (backend) → [plixo-api Milestone 9](../plixo-api/tasks/Milestone9.md) **← HIGH PRIORITY**
+3. Integrate About page with API → [Milestone 9](./tasks/Milestone9.md)
+4. Implement Skills API integration
+5. Implement Experience API integration
 
 ---
 

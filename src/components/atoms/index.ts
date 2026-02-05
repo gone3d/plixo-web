@@ -8,6 +8,8 @@ export type { InputProps } from './Input'
 export { default as Icon } from './Icon'
 export type { IconProps, IconName } from './Icon'
 
+export { IconButton } from './IconButton'
+
 export { default as LoadingSpinner, PulsingDots, Skeleton } from './LoadingSpinner'
 export type { LoadingSpinnerProps } from './LoadingSpinner'
 
