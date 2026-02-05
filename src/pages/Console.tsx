@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { LoadingSpinner } from '../components/atoms'
 import { UserList, UserDetail, CreateUser, EditUser, ConfirmDialog } from '../components/molecules'
-import { ProjectsManager } from '../components/admin'
+import { ProjectsManager, AboutManager } from '../components/admin'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
 import { apiClient } from '../services/api'
@@ -31,7 +31,7 @@ interface UserDetailData {
 }
 
 type ViewMode = 'list' | 'detail' | 'create' | 'edit'
-type ConsoleTab = 'users' | 'projects'
+type ConsoleTab = 'users' | 'projects' | 'about'
 
 const Console = () => {
   const { user: currentUser, isLoading: authLoading, verifyRole } = useAuth()
@@ -424,6 +424,16 @@ const Console = () => {
             >
               Projects
             </button>
+            <button
+              onClick={() => setActiveTab('about')}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'about'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              About
+            </button>
           </div>
         )}
 
@@ -432,6 +442,11 @@ const Console = () => {
           {/* Projects Tab */}
           {activeTab === 'projects' && hasAdminAccess && (
             <ProjectsManager />
+          )}
+
+          {/* About Tab */}
+          {activeTab === 'about' && hasAdminAccess && (
+            <AboutManager />
           )}
 
           {/* Users Tab */}
