@@ -64,7 +64,7 @@ const Landing = () => {
               Don Anderson
             </h1>
             <h2 className="text-lg md:text-xl text-white/90 font-light text-shadow-glow">
-              Staff Engineer & Technical Leader
+              Hands-on Engineering Leader
             </h2>
           </div>
 
@@ -79,22 +79,14 @@ const Landing = () => {
             </p>
             <p
               className={`text-white/40 text-xs mt-1 text-shadow-glow transition-opacity duration-300 ${
-                showVersionInfo ? 'opacity-100' : 'opacity-0'
+                showVersionInfo ? "opacity-100" : "opacity-0"
               }`}
             >
               App v{packageJson.version}
-              {state.api.version && (
-                <span className="mx-2">•</span>
-              )}
-              {state.api.version && (
-                <span>API v{state.api.version}</span>
-              )}
-              {state.api.db_version && (
-                <span className="mx-2">•</span>
-              )}
-              {state.api.db_version && (
-                <span>DB v{state.api.db_version}</span>
-              )}
+              {state.api.version && <span className="mx-2">•</span>}
+              {state.api.version && <span>API v{state.api.version}</span>}
+              {state.api.db_version && <span className="mx-2">•</span>}
+              {state.api.db_version && <span>DB v{state.api.db_version}</span>}
             </p>
           </div>
 
